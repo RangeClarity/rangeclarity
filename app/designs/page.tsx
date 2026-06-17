@@ -40,11 +40,20 @@ const designs: Design[] = [
   {
     href: "/",
     status: "current",
-    title: "Range Command V2 — live homepage",
-    desc: "The approved design, now served at the homepage (/). Bloomberg-terminal energy, mock TradingView chart, module cards, mascot, pricing and FAQ.",
+    title: "Codex Premium Hero — live homepage",
+    desc: "The RangeBot full-bleed hero from the previous Codex project: premium TradingView indicator suite, meme-fintech command-center energy, and early-access CTA.",
     path: "/",
     preview:
-      "linear-gradient(135deg, #060a12, #111a2d), radial-gradient(circle at 25% 30%, rgba(52,245,176,0.32), transparent 45%), radial-gradient(circle at 82% 65%, rgba(255,207,92,0.3), transparent 45%)",
+      "linear-gradient(135deg, #05070d, #07111f), radial-gradient(circle at 72% 38%, rgba(159,211,255,0.28), transparent 36%), radial-gradient(circle at 88% 74%, rgba(217,180,108,0.22), transparent 38%)",
+  },
+  {
+    href: "/designs/codex-premium-hero",
+    status: "candidate",
+    title: "Codex Premium Hero (source route)",
+    desc: "The full-bleed RangeBot hero served by the homepage, kept as a source route for easy comparison and rollback.",
+    path: "/designs/codex-premium-hero",
+    preview:
+      "linear-gradient(135deg, #05070d, #07111f), radial-gradient(circle at 72% 38%, rgba(159,211,255,0.28), transparent 36%), radial-gradient(circle at 88% 74%, rgba(217,180,108,0.22), transparent 38%)",
   },
   {
     href: "/designs/meme-fintech",
@@ -68,7 +77,7 @@ const designs: Design[] = [
     href: "/designs/range-command-v2",
     status: "candidate",
     title: "Range Command V2 (source route)",
-    desc: "The approved design's own route — identical to the live homepage, which re-exports it. Kept so the design is viewable in isolation.",
+    desc: "The previous approved homepage candidate. Preserved as its own route for comparison and rollback.",
     path: "/designs/range-command-v2",
     preview:
       "linear-gradient(135deg, #060a12, #111a2d), radial-gradient(circle at 25% 30%, rgba(52,245,176,0.32), transparent 45%), radial-gradient(circle at 82% 65%, rgba(255,207,92,0.3), transparent 45%)",
