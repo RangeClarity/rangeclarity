@@ -1,9 +1,7 @@
 /* ============================================================
-   Homepage (/) — RangeClarity production landing page.
+   Homepage (/) - RangeClarity production landing page.
 
-   The current public homepage uses the Codex premium RangeBot hero:
-   /designs/codex-premium-hero
-
-   Range Command V2 is still preserved at /designs/range-command-v2.
+   The public homepage uses Range Command V2 with the Codex
+   premium RangeBot hero merged into the top section only.
    ============================================================ */
-export { default } from "./designs/codex-premium-hero/page";
+export { default } from "./designs/range-command-v2/page";

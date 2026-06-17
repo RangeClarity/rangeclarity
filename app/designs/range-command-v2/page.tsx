@@ -1,9 +1,9 @@
+import Image from "next/image";
 import Link from "next/link";
 import s from "./v2.module.css";
 import { MODULES, STEPS, NOTS } from "./data";
 import ModuleCardV2 from "./_components/ModuleCardV2";
 import MockTradingViewChartV2 from "./_components/MockTradingViewChartV2";
-import MascotV2 from "./_components/MascotV2";
 import PricingSectionV2 from "./_components/PricingSectionV2";
 import FAQSectionV2 from "./_components/FAQSectionV2";
 
@@ -37,41 +37,59 @@ export default function RangeCommandV2Page() {
 
       {/* hero */}
       <section id="top" className={s.hero}>
+        <Image
+          className={s.heroImage}
+          src="/assets/rangeclarity-hero.png"
+          alt=""
+          aria-hidden="true"
+          fill
+          priority
+          sizes="100vw"
+        />
+        <div className={s.heroVeil} aria-hidden="true" />
+        <div className={s.heroScan} aria-hidden="true" />
         <div className={`${s.wrap} ${s.heroGrid}`}>
-          <div>
-            <span className={s.badge}>
-              <span className={s.pulse} style={{ width: 6, height: 6, borderRadius: 999, background: "#34f5b0" }} />
-              TRADINGVIEW INDICATOR SUITE · EARLY ACCESS
+          <div className={s.heroCopy}>
+            <span className={s.heroBadge}>
+              Premium TradingView indicator suite <span aria-hidden="true">-</span> Range reading mode
             </span>
             <h1 className={s.h1}>
-              TradingView indicators that show the{" "}
-              <span className={s.grad}>range before you make the move.</span>
+              TradingView indicators that show the range before you make the{" "}
+              <span className={s.gradGold}>move.</span>
             </h1>
             <p className={s.sub}>
               RangeClarity overlays support, resistance, momentum, entry quality, and risk zones
-              directly on your TradingView chart — so you can stop chasing candles and start reading
+              directly on your TradingView chart - so you can stop chasing candles and start reading
               structure.
             </p>
             <div className={s.btnRow} style={{ marginTop: "2rem" }}>
-              <a href="#join" className={s.btnPrimary}>Join Early Access <span aria-hidden="true">→</span></a>
-              <a href="#chart" className={s.btnGhost}>See a sample read</a>
+              <a href="#join" className={s.btnPrimary}>Join Early Access</a>
+              <a href="#modules" className={s.btnGhost}>View Indicator Modules</a>
             </div>
-            <p className={s.trustLine}>No signal-bot hype. No candle-chasing. Just cleaner chart structure.</p>
+            <p className={s.trustLine}>No repaint hype. No guaranteed signals. Just cleaner chart context.</p>
             <div className={s.heroStickers}>
-              <span className={`${s.sticker} ${s.stickerGreen}`}>Range &gt; hype</span>
-              <span className={s.sticker}>Built for chart nerds</span>
-              <span className={`${s.sticker} ${s.stickerGold}`}>For people who hate buying late</span>
+              <span className={`${s.sticker} ${s.stickerGreen}`}>TradingView-first</span>
+              <span className={s.sticker}>Three named modules</span>
+              <span className={`${s.sticker} ${s.stickerGold}`}>No black-box signals</span>
+              <span className={s.sticker}>Mock preview only</span>
             </div>
-            <div className={s.heroChips}>
-              <span className={s.chip}>● Support / Resistance</span>
-              <span className={s.chip}>● Momentum lifecycle</span>
-              <span className={s.chip}>● Risk / Reward</span>
+            <div className={s.heroProof}>
+              <div>
+                <span>Suite packaging</span>
+                <strong>Range Map + Momentum Engine + Risk Radar</strong>
+              </div>
+              <div>
+                <span>Decision posture</span>
+                <strong>Buy / wait / avoid context, never guaranteed calls</strong>
+              </div>
+              <div>
+                <span>Launch posture</span>
+                <strong>Early access, setup notes, and honest mock previews</strong>
+              </div>
             </div>
           </div>
-          <MascotV2 />
         </div>
       </section>
-
       {/* indicator modules */}
       <section id="modules" className={s.section}>
         <div className={s.wrap}>
