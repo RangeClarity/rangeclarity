@@ -1,0 +1,273 @@
+You are working on my Hermes / RangeClarity Telegram agent.
+
+Problem:
+Hermes is already connected to Linear, but it is connected to the wrong Linear project/workspace/team. It created a new channel/project/area inside a different project of mine.
+
+Goal:
+Fix the Linear synchronization so Hermes creates and manages tickets only inside the correct new Linear project:
+
+RangeClarity
+
+Important:
+Do NOT create real Linear tickets until I approve.
+Do NOT delete anything from Linear.
+Do NOT modify or archive the wrong project.
+Do NOT move tickets automatically unless I explicitly approve.
+Do NOT expose secrets.
+Do NOT print LINEAR_API_KEY or any `.env` secret values.
+Do NOT commit `.env`.
+Do NOT deploy.
+Do NOT run the live Telegram agent loop unless I approve.
+
+Start with audit and dry-run only.
+
+Step 1 — Inspect current Hermes project
+Inspect:
+
+* project structure
+* Telegram bot entrypoint
+* Linear integration files
+* config/env loading
+* `.env.example`
+* README/docs
+* current planner/ticket creation logic
+* any stored Linear team/project/channel IDs
+* any hardcoded Linear IDs
+
+Search for:
+
+* LINEAR_API_KEY
+* LINEAR_TEAM_ID
+* LINEAR_PROJECT_ID
+* LINEAR_WORKSPACE
+* Linear
+* project_id
+* team_id
+* channel
+* RangeClarity
+* old project names
+* ticket creation logic
+
+Do not print real secret values.
+If `.env` exists, report only variable names and whether values are present.
+
+Step 2 — Summarize current Linear configuration
+Before editing, tell me:
+
+1. Where Linear config is loaded from
+2. Which env vars are currently used
+3. Whether any Linear team/project IDs are hardcoded
+4. Which project/team Hermes appears to be using now
+5. Why it may be creating tickets in the wrong place
+6. What needs to change to target RangeClarity correctly
+7. Your implementation plan
+
+Do not edit until you summarize.
+
+Step 3 — Add Linear discovery helper
+Create a safe helper script to list available Linear teams/projects so I can identify the correct RangeClarity target.
+
+Create something like:
+
+`scripts/linear_discover.py`
+
+or equivalent based on project language.
+
+The script should:
+
+* load LINEAR_API_KEY from `.env`
+* query Linear safely
+* list workspaces/teams/projects available to this API key
+* show names and IDs
+* clearly highlight any project/team containing “RangeClarity”
+* not create tickets
+* not modify anything
+* not print the API key
+
+Output should look like:
+
+Available Linear teams/projects:
+
+Team:
+
+* name:
+* id:
+
+Projects:
+
+* name:
+* id:
+* team:
+* status:
+* recommended: yes/no
+
+Important:
+If Linear API returns “RangeClarity”, mark it as the recommended target.
+
+Step 4 — Update configuration model
+Hermes should use explicit Linear env vars:
+
+LINEAR_API_KEY=replace_with_linear_api_key
+LINEAR_TEAM_ID=replace_with_rangeclarity_team_id
+LINEAR_PROJECT_ID=replace_with_rangeclarity_project_id
+LINEAR_DEFAULT_LABEL=RangeClarity
+LINEAR_DRY_RUN=true
+
+If the project needs channel/workspace naming, also support:
+
+LINEAR_WORKSPACE_NAME=replace_with_workspace_name
+LINEAR_PROJECT_NAME=RangeClarity
+
+Update `.env.example` with placeholders only.
+Do not update real `.env` values unless I do it manually.
+
+Step 5 — Prevent wrong-project ticket creation
+Add validation before creating Linear tickets.
+
+Before Hermes creates any ticket, it must verify:
+
+* LINEAR_TEAM_ID exists
+* LINEAR_PROJECT_ID exists
+* target project name is RangeClarity or matches configured LINEAR_PROJECT_NAME
+* DRY_RUN mode is respected
+* user approval was given
+
+If project mismatch is detected:
+
+* stop
+* send a Telegram warning
+* do not create the ticket
+
+Warning message:
+“Linear target mismatch. Hermes is not pointed at RangeClarity. Ticket creation stopped.”
+
+Step 6 — Add dry-run preview
+Before creating real tickets, Hermes should send a preview:
+
+Target Linear project:
+RangeClarity
+
+Team ID: <masked or partial id>
+
+Project ID: <masked or partial id>
+
+Tickets that would be created:
+
+1. ...
+2. ...
+3. ...
+
+Reply `/approve` to create these in RangeClarity.
+
+When LINEAR_DRY_RUN=true:
+
+* never create real tickets
+* only show preview
+
+When LINEAR_DRY_RUN=false:
+
+* still require `/approve`
+
+Step 7 — Add command to test Linear sync
+Add a Telegram command or local test command:
+
+`/linear-target`
+
+It should show:
+
+* current configured Linear team name
+* current configured Linear project name
+* whether it matches RangeClarity
+* dry-run status
+* whether ticket creation is safe
+
+Do not show API keys.
+
+Optional local command:
+`scripts/test_linear_target.py`
+
+It should validate the target without creating tickets.
+
+Step 8 — Update docs
+Create or update:
+
+`RANGECLARITY_LINEAR_SYNC.md`
+
+Include:
+
+1. Current issue:
+   Hermes was connected to the wrong Linear project.
+
+2. Correct target:
+   RangeClarity
+
+3. Required env vars:
+   LINEAR_API_KEY
+   LINEAR_TEAM_ID
+   LINEAR_PROJECT_ID
+   LINEAR_PROJECT_NAME=RangeClarity
+   LINEAR_DRY_RUN=true
+
+4. How to discover the correct Linear IDs:
+
+* run the discovery helper
+* copy the RangeClarity project/team IDs
+* update `.env`
+
+5. How to test:
+
+* run target validation
+* use `/linear-target`
+* create a dry-run ticket plan
+* approve only after confirming target
+
+6. Safety rules:
+
+* never create tickets if project mismatch
+* never expose API keys
+* never commit `.env`
+* keep dry-run on until verified
+
+7. How to migrate old wrong tickets:
+   Do not move automatically.
+   Manually review first.
+   If needed later, create a separate migration script only after approval.
+
+Step 9 — Optional wrong-project cleanup plan
+Do NOT delete or move anything from the wrong Linear project.
+
+Instead, create a section in the docs:
+“Wrong Project Cleanup Plan”
+
+Include:
+
+* identify tickets created by Hermes in the wrong project
+* tag/export/list them
+* decide whether to manually move or recreate them in RangeClarity
+* do not delete without backup
+
+Step 10 — Testing
+Run safe tests only:
+
+* run discovery helper if API key exists
+* run target validation
+* run dry-run ticket creation preview
+* do not create real tickets
+
+Step 11 — Final report
+After finishing, tell me:
+
+1. Files changed
+2. Files created
+3. Current Linear config source
+4. Whether hardcoded wrong project IDs were found
+5. How to find the correct RangeClarity Linear IDs
+6. Exact env vars I need to update manually
+7. Exact command to run Linear discovery
+8. Exact command to validate target
+9. How to test from Telegram
+10. Whether Hermes is still in dry-run mode
+11. What I need to approve before real ticket creation
+
+Final rule:
+Hermes must only create Linear tickets inside the RangeClarity project after explicit target validation and user approval.

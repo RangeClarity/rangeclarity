@@ -1,0 +1,465 @@
+//@version=6
+// =============================================================================
+// RangeClarity Core - Market Map
+// A simple-looking, deep market-reading dashboard for swing traders and
+// long-term investors.
+//
+// WHAT THIS IS:   A chart-structure and decision-support tool. It reads the
+//                 market's regime, structure, support/resistance, momentum and
+//                 confidence, and tells you - honestly - when there is NO EDGE
+//                 and the best action is to wait.
+//
+// WHAT THIS IS NOT: It is NOT a buy/sell signal bot. It does NOT predict price.
+//                 It does NOT promise profits. It is NOT financial advice.
+//
+// DESIGN RULES:   Simple surface, complex engine. One dashboard table + at most
+//                 four drawn objects. Everything that drives the verdict is
+//                 computed on CONFIRMED bars to avoid repainting (see the
+//                 "REPAINTING NOTES" section near the bottom).
+// =============================================================================
+
+indicator("RangeClarity Core - Market Map", shorttitle="RangeClarity",
+     overlay=true, max_boxes_count=20, max_lines_count=20, max_labels_count=20)
+
+// =============================================================================
+// 1. INPUTS  (minimal by design - strong defaults, advanced hidden in a group)
+// =============================================================================
+gBasic = "RangeClarity - Basics"
+sensitivity   = input.int(10, "Sensitivity (structure lookback)", minval=3, maxval=30, group=gBasic,
+     tooltip="Higher = fewer, larger swings (slower, cleaner). Lower = more, smaller swings.")
+zoneStrict    = input.float(0.6, "Zone width (x ATR)", minval=0.2, maxval=2.0, step=0.1, group=gBasic,
+     tooltip="Thickness of support/resistance zones, in ATR multiples.")
+showZones     = input.bool(true, "Show support/resistance zones", group=gBasic)
+showRange     = input.bool(true, "Show current range bounds", group=gBasic)
+useMomentum   = input.bool(true, "Use momentum in confidence", group=gBasic)
+theme         = input.string("Dark", "Theme", options=["Dark", "Light"], group=gBasic)
+dashPos       = input.string("Top Right", "Dashboard position",
+     options=["Top Right", "Top Left", "Bottom Right", "Bottom Left", "Middle Right"], group=gBasic)
+
+gAdv = "Advanced (strong defaults - change only if you know why)"
+atrLen        = input.int(14,  "ATR length", minval=5, group=gAdv)
+atrPctWin     = input.int(100, "ATR percentile window", minval=30, group=gAdv)
+adxLen        = input.int(14,  "ADX / DMI length", minval=5, group=gAdv)
+rsiLen        = input.int(14,  "RSI length", minval=5, group=gAdv)
+emaLen        = input.int(20,  "EMA (slope) length", minval=5, group=gAdv)
+maxPivots     = input.int(8,   "Pivots remembered per side", minval=3, maxval=20, group=gAdv)
+hiConf        = input.int(70,  "High-confidence threshold", minval=55, maxval=90, group=gAdv)
+medConf       = input.int(45,  "Medium-confidence threshold", minval=30, maxval=65, group=gAdv)
+wRegime       = input.float(0.25, "Weight: regime clarity",   minval=0, maxval=1, step=0.05, group=gAdv)
+wStruct       = input.float(0.30, "Weight: structure",        minval=0, maxval=1, step=0.05, group=gAdv)
+wMomo         = input.float(0.25, "Weight: momentum confirm", minval=0, maxval=1, step=0.05, group=gAdv)
+wZone         = input.float(0.20, "Weight: zone quality",     minval=0, maxval=1, step=0.05, group=gAdv)
+
+// =============================================================================
+// 2. UTILITY FUNCTIONS
+// =============================================================================
+clamp(x, lo, hi) => math.max(lo, math.min(hi, x))
+
+// Nearest array value strictly above a reference price (na if none)
+nearestAbove(arr, price) =>
+    float best = na
+    if array.size(arr) > 0
+        for i = 0 to array.size(arr) - 1
+            v = array.get(arr, i)
+            if v > price and (na(best) or v < best)
+                best := v
+    best
+
+// Nearest array value strictly below a reference price (na if none)
+nearestBelow(arr, price) =>
+    float best = na
+    if array.size(arr) > 0
+        for i = 0 to array.size(arr) - 1
+            v = array.get(arr, i)
+            if v < price and (na(best) or v > best)
+                best := v
+    best
+
+// Count how many array values sit within `tol` of `level` (zone strength proxy)
+touchesNear(arr, level, tol) =>
+    int c = 0
+    if array.size(arr) > 0 and not na(level)
+        for i = 0 to array.size(arr) - 1
+            if math.abs(array.get(arr, i) - level) <= tol
+                c += 1
+    c
+
+// Push with a bounded rolling buffer
+pushCapped(arr, v, cap) =>
+    array.push(arr, v)
+    if array.size(arr) > cap
+        array.shift(arr)
+
+// =============================================================================
+// 3. SHARED MEASUREMENTS
+// =============================================================================
+atr        = ta.atr(atrLen)
+atrPct     = ta.percentrank(atr, atrPctWin)          // 0..100 volatility percentile
+[diPlus, diMinus, adxVal] = ta.dmi(adxLen, adxLen)   // directional + trend strength
+rsi        = ta.rsi(close, rsiLen)
+ema        = ta.ema(close, emaLen)
+emaSlope   = (ema - ema[5]) / (atr == 0 ? syminfo.mintick : atr)   // ATR-normalized slope
+
+// =============================================================================
+// 4. REGIME LOGIC
+//    Trend / Range / Compression / Expansion / Chop
+// =============================================================================
+compression = atrPct < 25
+expansion   = atrPct > 75
+shock       = atrPct > 92
+trending    = adxVal >= 22
+ranging     = adxVal < 18
+
+string regime = "Chop"
+if compression and not trending
+    regime := "Compression"
+else if expansion and trending
+    regime := "Expansion"
+else if trending
+    regime := "Trend"
+else if ranging
+    regime := "Range"
+else
+    regime := "Chop"
+
+// Regime clarity score (0..100) - how readable the environment is
+regimeScore = switch regime
+    "Trend"       => 82
+    "Expansion"   => 78
+    "Compression" => 62   // clear, but a "coiled / wait" state
+    "Range"       => 52
+    => 22                 // Chop
+
+// =============================================================================
+// 5. STRUCTURE LOGIC  (confirmed swing pivots → bias + BOS/CHoCH)
+// =============================================================================
+ph = ta.pivothigh(high, sensitivity, sensitivity)   // confirms `sensitivity` bars back
+pl = ta.pivotlow(low,  sensitivity, sensitivity)
+
+var array<float> phArr = array.new_float()
+var array<float> plArr = array.new_float()
+var float lastPH = na
+var float prevPH = na
+var float lastPL = na
+var float prevPL = na
+
+if not na(ph)
+    prevPH := lastPH
+    lastPH := ph
+    pushCapped(phArr, ph, maxPivots)
+if not na(pl)
+    prevPL := lastPL
+    lastPL := pl
+    pushCapped(plArr, pl, maxPivots)
+
+hh = not na(lastPH) and not na(prevPH) and lastPH > prevPH
+lh = not na(lastPH) and not na(prevPH) and lastPH < prevPH
+hl = not na(lastPL) and not na(prevPL) and lastPL > prevPL
+ll = not na(lastPL) and not na(prevPL) and lastPL < prevPL
+
+// Break of structure (confirmed close beyond the last confirmed swing)
+bosUp   = not na(lastPH) and close > lastPH
+bosDown = not na(lastPL) and close < lastPL
+// Failed breakout: broke a level last bar, closed back inside this bar
+failUp   = not na(lastPH) and close < lastPH and high[1] > lastPH
+failDown = not na(lastPL) and close > lastPL and low[1]  < lastPL
+
+string bias = "Neutral"
+if hh and hl
+    bias := "Up"
+else if lh and ll
+    bias := "Down"
+else
+    bias := "Neutral"
+
+string structure = "Neutral"
+if failUp or failDown
+    structure := "Failed breakout"
+else if bosUp or bosDown
+    structure := "Breakout attempt"
+else if bias == "Up"
+    structure := "Bullish"
+else if bias == "Down"
+    structure := "Bearish"
+else if not na(lastPH) and not na(lastPL) and not hh and not ll
+    structure := "Range-bound"
+else
+    structure := "Neutral"
+
+structScore = switch structure
+    "Bullish"          => 80
+    "Bearish"          => 80
+    "Breakout attempt" => 60
+    "Range-bound"      => 46
+    "Failed breakout"  => 34
+    => 30   // Neutral
+
+// =============================================================================
+// 6. SUPPORT / RESISTANCE  (smart zones, draw nearest only)
+// =============================================================================
+resLevel = nearestAbove(phArr, close)   // nearest resistance above price
+supLevel = nearestBelow(plArr, close)   // nearest support below price
+zoneTol  = atr * zoneStrict
+resTouch = touchesNear(phArr, resLevel, zoneTol)   // strength proxy
+supTouch = touchesNear(plArr, supLevel, zoneTol)
+
+// Current range bounds (fall back to recent extremes if no pivots yet)
+rangeHi = na(resLevel) ? ta.highest(high, atrPctWin > 50 ? 50 : atrPctWin) : resLevel
+rangeLo = na(supLevel) ? ta.lowest(low,  atrPctWin > 50 ? 50 : atrPctWin) : supLevel
+
+// Range position 0..100 (where price sits between support and resistance)
+rangePos = (not na(rangeHi) and not na(rangeLo) and rangeHi > rangeLo) ?
+     clamp((close - rangeLo) / (rangeHi - rangeLo) * 100.0, 0, 100) : 50.0
+
+string rangeZone = rangePos >= 66 ? "Upper Range" : rangePos <= 34 ? "Lower Range" : "Mid Range"
+nearRes  = rangePos >= 75
+nearSup  = rangePos <= 25
+midRange = rangePos > 40 and rangePos < 60
+
+// Zone quality: actionable when price is near a multi-touch zone
+zoneScore = clamp(
+     (nearRes ? 55 : nearSup ? 55 : midRange ? 25 : 40)
+     + math.min(math.max(resTouch, supTouch) * 8, 30), 0, 100)
+
+// =============================================================================
+// 7. MOMENTUM LOGIC  (confirm-only: never an entry trigger by itself)
+//    Strong / Improving / Fading / Extended / Weak / Neutral
+// =============================================================================
+slopeNorm  = clamp(emaSlope, -3, 3)
+momScore0  = clamp(50 + (rsi - 50) * 0.6 + slopeNorm * 12 + (adxVal - 20) * 0.5, 0, 100)
+momRising  = momScore0 > momScore0[3]
+extended   = rsi > 72 or rsi < 28
+
+string momentum = "Neutral"
+if extended
+    momentum := "Extended"
+else if momScore0 >= 65 and adxVal >= 22
+    momentum := "Strong"
+else if momScore0 >= 52 and momRising
+    momentum := "Improving"
+else if momScore0 < 50 and not momRising
+    momentum := "Fading"
+else if adxVal < 18 and math.abs(rsi - 50) < 8
+    momentum := "Weak"
+else
+    momentum := "Neutral"
+
+// Direction of momentum, for conflict detection (up / down / flat)
+string momoDir = (rsi > 52 and slopeNorm > 0) ? "Up" : (rsi < 48 and slopeNorm < 0) ? "Down" : "Flat"
+momentumScore = useMomentum ? momScore0 : 50.0
+
+// =============================================================================
+// 8. CONFIDENCE SCORING  (weighted blend → explicit downgrades)
+// =============================================================================
+// Momentum-confirms-structure score: high when momentum agrees with bias
+momoConfirm = 50.0
+if bias == "Up"
+    momoConfirm := momoDir == "Up" ? 85 : momoDir == "Down" ? 20 : 50
+else if bias == "Down"
+    momoConfirm := momoDir == "Down" ? 85 : momoDir == "Up" ? 20 : 50
+else
+    momoConfirm := 45
+
+wSum = wRegime + wStruct + wMomo + wZone
+wSum := wSum == 0 ? 1 : wSum
+baseConf = (regimeScore * wRegime + structScore * wStruct
+     + (useMomentum ? momoConfirm : 50) * wMomo + zoneScore * wZone) / wSum
+
+// Explicit, explainable downgrades (the heart of "no fake precision")
+conflict = (bias == "Up" and momoDir == "Down") or (bias == "Down" and momoDir == "Up")
+penalty = 0.0
+penalty += regime == "Chop"            ? 25 : 0
+penalty += conflict                    ? 20 : 0
+penalty += (midRange and not bosUp and not bosDown) ? 15 : 0
+penalty += shock                       ? 15 : 0
+penalty += (momentum == "Extended")    ? 10 : 0
+penalty += (structure == "Failed breakout") ? 10 : 0
+
+confidence = clamp(baseConf - penalty, 0, 100)
+string confLabel = conflict ? "Conflicting" : confidence >= hiConf ? "High" :
+     confidence >= medConf ? "Medium" : "Low"
+
+// =============================================================================
+// 9. NO-EDGE / VERDICT LOGIC  (tell the user when NOT to act)
+//    Allowed: Watch | Wait | No Edge | Avoid Chase | Breakout Watch |
+//             Pullback Zone | Strong Context
+// =============================================================================
+nearBoundary = nearRes or nearSup
+bigMove      = math.abs(close - ema) > atr * 2.0
+
+string verdict = "Watch"
+string verdictReason = ""
+
+if conflict or regime == "Chop" or confidence < 35
+    verdict := "No Edge"
+    verdictReason := conflict ? "Signals conflict" : regime == "Chop" ? "Messy / no structure" : "Low confidence"
+else if momentum == "Extended" and bigMove
+    verdict := "Avoid Chase"
+    verdictReason := "Move is extended"
+else if regime == "Compression" and nearBoundary
+    verdict := "Breakout Watch"
+    verdictReason := "Coiled near boundary"
+else if regime == "Compression"
+    verdict := "Wait"
+    verdictReason := "Compressed - let it resolve"
+else if bias == "Up" and nearSup and (momentum == "Fading" or momentum == "Improving")
+    verdict := "Pullback Zone"
+    verdictReason := "Uptrend pulling into support"
+else if bias == "Down" and nearRes and (momentum == "Fading" or momentum == "Improving")
+    verdict := "Pullback Zone"
+    verdictReason := "Downtrend rallying into resistance"
+else if confidence >= hiConf and not conflict
+    verdict := "Strong Context"
+    verdictReason := "Modules aligned"
+else if midRange
+    verdict := "Wait"
+    verdictReason := "Mid-range - poor R/R"
+else
+    verdict := "Watch"
+    verdictReason := "Developing"
+
+// =============================================================================
+// 10. DRAWING - at most: 2 zones + 2 range lines (reused objects, no spam)
+// =============================================================================
+// Theme palette
+bgDash   = theme == "Dark" ? color.new(#0e1117, 8) : color.new(#ffffff, 8)
+txtMain  = theme == "Dark" ? color.new(#e6edf3, 0) : color.new(#1b2330, 0)
+txtDim   = theme == "Dark" ? color.new(#9aa7b4, 0) : color.new(#5b6573, 0)
+cGreen   = #2e9e6b
+cBlue    = #2e75b6
+cTeal    = #14a3a3
+cAmber   = #c9921f
+cRed     = #c0504d
+cGrey    = #6b7785
+supCol   = color.new(cGreen, 80)
+resCol   = color.new(cRed, 80)
+
+var box supBox = na
+var box resBox = na
+var line hiLine = na
+var line loLine = na
+
+// Draw on the last bar only; reuse objects to respect drawing limits
+if barstate.islast
+    // Support zone
+    if showZones and not na(supLevel)
+        if na(supBox)
+            supBox := box.new(bar_index - 30, supLevel + zoneTol, bar_index, supLevel - zoneTol,
+                 border_color=color.new(cGreen, 40), bgcolor=supCol)
+        else
+            box.set_lefttop(supBox, bar_index - 30, supLevel + zoneTol)
+            box.set_rightbottom(supBox, bar_index, supLevel - zoneTol)
+    // Resistance zone
+    if showZones and not na(resLevel)
+        if na(resBox)
+            resBox := box.new(bar_index - 30, resLevel + zoneTol, bar_index, resLevel - zoneTol,
+                 border_color=color.new(cRed, 40), bgcolor=resCol)
+        else
+            box.set_lefttop(resBox, bar_index - 30, resLevel + zoneTol)
+            box.set_rightbottom(resBox, bar_index, resLevel - zoneTol)
+    // Range bounds
+    if showRange and not na(rangeHi)
+        if na(hiLine)
+            hiLine := line.new(bar_index - 30, rangeHi, bar_index, rangeHi,
+                 color=color.new(cGrey, 30), style=line.style_dashed)
+        else
+            line.set_xy1(hiLine, bar_index - 30, rangeHi)
+            line.set_xy2(hiLine, bar_index, rangeHi)
+    if showRange and not na(rangeLo)
+        if na(loLine)
+            loLine := line.new(bar_index - 30, rangeLo, bar_index, rangeLo,
+                 color=color.new(cGrey, 30), style=line.style_dashed)
+        else
+            line.set_xy1(loLine, bar_index - 30, rangeLo)
+            line.set_xy2(loLine, bar_index, rangeLo)
+
+// =============================================================================
+// 11. DASHBOARD RENDERING  (one clean table - the whole UI)
+// =============================================================================
+tblPos = switch dashPos
+    "Top Left"      => position.top_left
+    "Bottom Right"  => position.bottom_right
+    "Bottom Left"   => position.bottom_left
+    "Middle Right"  => position.middle_right
+    => position.top_right
+
+colorFor(label) =>
+    switch label
+        "High"           => cGreen
+        "Strong"         => cGreen
+        "Strong Context" => cGreen
+        "Breakout Watch" => cBlue
+        "Improving"      => cBlue
+        "Pullback Zone"  => cTeal
+        "Medium"         => cAmber
+        "Watch"          => cAmber
+        "Extended"       => cAmber
+        "Avoid Chase"    => cRed
+        "Conflicting"    => cRed
+        "No Edge"        => cGrey
+        "Wait"           => cGrey
+        "Low"            => cGrey
+        => txtMain
+
+var table dash = table.new(tblPos, 2, 9, bgcolor=bgDash,
+     border_color=color.new(cGrey, 60), border_width=1, frame_color=color.new(cGrey, 50), frame_width=1)
+
+stateTxt = barstate.isconfirmed ? "confirmed" : "forming"
+
+if barstate.islast
+    table.cell(dash, 0, 0, "RangeClarity", text_color=txtMain, text_size=size.normal,
+         text_halign=text.align_left, bgcolor=color.new(cBlue, 70))
+    table.cell(dash, 1, 0, syminfo.ticker + " | " + timeframe.period, text_color=txtDim,
+         text_size=size.small, text_halign=text.align_right, bgcolor=color.new(cBlue, 70))
+
+    table.cell(dash, 0, 1, "Regime",      text_color=txtDim, text_halign=text.align_left, text_size=size.small)
+    table.cell(dash, 1, 1, regime,        text_color=txtMain, text_halign=text.align_right, text_size=size.small)
+
+    table.cell(dash, 0, 2, "Structure",   text_color=txtDim, text_halign=text.align_left, text_size=size.small)
+    table.cell(dash, 1, 2, structure + (bias != "Neutral" ? " (" + bias + ")" : ""),
+         text_color=txtMain, text_halign=text.align_right, text_size=size.small)
+
+    table.cell(dash, 0, 3, "Range Pos.",  text_color=txtDim, text_halign=text.align_left, text_size=size.small)
+    table.cell(dash, 1, 3, rangeZone + " | " + str.tostring(rangePos, "#") + "%",
+         text_color=txtMain, text_halign=text.align_right, text_size=size.small)
+
+    table.cell(dash, 0, 4, "Momentum",    text_color=txtDim, text_halign=text.align_left, text_size=size.small)
+    table.cell(dash, 1, 4, momentum,      text_color=colorFor(momentum), text_halign=text.align_right, text_size=size.small)
+
+    table.cell(dash, 0, 5, "Confidence",  text_color=txtDim, text_halign=text.align_left, text_size=size.small)
+    table.cell(dash, 1, 5, confLabel + " | " + str.tostring(confidence, "#"),
+         text_color=colorFor(confLabel), text_halign=text.align_right, text_size=size.small)
+
+    table.cell(dash, 0, 6, "Context",     text_color=txtDim, text_halign=text.align_left, text_size=size.small)
+    table.cell(dash, 1, 6, verdict,       text_color=colorFor(verdict), text_halign=text.align_right, text_size=size.normal)
+
+    table.cell(dash, 0, 7, "Why",         text_color=txtDim, text_halign=text.align_left, text_size=size.tiny)
+    table.cell(dash, 1, 7, verdictReason, text_color=txtDim, text_halign=text.align_right, text_size=size.tiny)
+
+    table.cell(dash, 0, 8, "State",       text_color=txtDim, text_halign=text.align_left, text_size=size.tiny)
+    table.cell(dash, 1, 8, stateTxt + " | not advice", text_color=txtDim, text_halign=text.align_right, text_size=size.tiny)
+
+// =============================================================================
+// 12. ALERTS  (descriptive only - NO buy/sell wording; confirmed-bar gated)
+// =============================================================================
+alertcondition(nearSup and barstate.isconfirmed,            title="RangeClarity: Near Support",        message="RangeClarity: price near support zone (context only, not advice).")
+alertcondition(nearRes and barstate.isconfirmed,            title="RangeClarity: Near Resistance",     message="RangeClarity: price near resistance zone (context only, not advice).")
+alertcondition(verdict == "Breakout Watch" and barstate.isconfirmed, title="RangeClarity: Breakout Watch", message="RangeClarity: compression near a boundary - breakout watch (context only).")
+alertcondition((verdict == "No Edge" or verdict == "Wait") and barstate.isconfirmed, title="RangeClarity: No Edge / Wait", message="RangeClarity: no clear edge - wait (context only, not advice).")
+alertcondition(momentum == "Extended" and barstate.isconfirmed, title="RangeClarity: Momentum Extended", message="RangeClarity: momentum is extended - avoid chasing (context only).")
+alertcondition(confLabel == "High" and confLabel[1] != "High" and barstate.isconfirmed, title="RangeClarity: Confidence Improved", message="RangeClarity: confidence rose to High (context only, not advice).")
+
+// =============================================================================
+// REPAINTING NOTES (read me)
+// -----------------------------------------------------------------------------
+// • Swing pivots (ta.pivothigh/low) confirm `sensitivity` bars AFTER the pivot
+//   bar - this lag is intentional and honest; levels are never back-dated.
+// • Everything that drives the verdict uses confirmed price relationships, and
+//   alerts are gated on barstate.isconfirmed so they cannot flip intrabar.
+// • The dashboard shows "forming" vs "confirmed" so you always know whether the
+//   current bar's read is final.
+// • "No Edge" is repaint-safe by design: when inputs disagree or data is thin,
+//   the tool says No Edge rather than inventing a level.
+// • The confidence number may update intrabar on the live bar; treat the read
+//   as final only once the bar closes ("confirmed").
+// =============================================================================

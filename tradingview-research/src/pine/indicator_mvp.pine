@@ -1,0 +1,11 @@
+// SUPERSEDED - the stable core indicator now lives at the project root:
+//   RangeClarity_Core.pine
+//
+// This Phase-1 placeholder is kept only for history. The architecture gate
+// ("do not build until A/B/C approved") was lifted and the MVP defined in
+// 05_indicator_specs/mvp_spec.md has been implemented.
+//
+// See also:
+//   RANGECLARITY_CORE_INDICATOR_SPEC.md   (what the engine does + how to use it)
+//   RANGECLARITY_MODULE_AUDIT.md          (keep/cut decisions)
+//   RANGECLARITY_INDICATOR_TEST_PLAN.md   (how to validate it)

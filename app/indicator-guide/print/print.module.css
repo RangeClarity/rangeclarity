@@ -1,0 +1,88 @@
+/* ============================================================
+   RangeClarity — print / PDF handbook. Light, A4/Letter-friendly.
+   Designed for browser Print → Save as PDF.
+   ============================================================ */
+.doc {
+  --ink: #14181f;
+  --soft: #46505f;
+  --faint: #6b7689;
+  --line: #d8dee8;
+  --bg: #ffffff;
+  --panel: #f6f8fb;
+  --mono: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  max-width: 900px;
+  margin-inline: auto;
+  padding: clamp(1.2rem, 4vw, 2.4rem);
+}
+
+.toolbar {
+  display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+  background: #eef2f8; border: 1px solid var(--line); border-radius: 10px;
+  padding: 0.7rem 1rem; font-size: 0.82rem; color: var(--soft); margin-bottom: 1.6rem;
+}
+.back { color: #2e75b6; text-decoration: none; font-weight: 600; white-space: nowrap; }
+
+.cover { border-bottom: 2px solid var(--ink); padding-bottom: 1.4rem; margin-bottom: 1.6rem; }
+.eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: #14a3a3; }
+.title { font-size: clamp(1.9rem, 5vw, 2.8rem); letter-spacing: -0.02em; margin: 0.5rem 0 0.3rem; color: #0b1020; font-weight: 800; }
+.sub { font-size: 1.1rem; color: var(--soft); }
+.lead { margin-top: 0.9rem; color: var(--soft); font-size: 0.95rem; max-width: 70ch; }
+.glance { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.7rem; margin-top: 1.3rem; }
+.glance > div { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 0.75rem; }
+.glance h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: #14a3a3; margin-bottom: 0.3rem; }
+.glance p { font-size: 0.82rem; color: var(--soft); }
+
+.section { margin-bottom: 1.6rem; break-inside: avoid; page-break-inside: avoid; }
+.h2 { font-size: 1.25rem; color: #0b1020; font-weight: 800; margin-bottom: 0.7rem; border-bottom: 1px solid var(--line); padding-bottom: 0.3rem; break-after: avoid; }
+.h3 { font-size: 0.95rem; color: #0b1020; font-weight: 700; margin-bottom: 0.5rem; }
+
+.table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.table th { text-align: left; background: var(--panel); color: var(--ink); font-weight: 700; padding: 0.45rem 0.6rem; border: 1px solid var(--line); }
+.table td { padding: 0.45rem 0.6rem; border: 1px solid var(--line); color: var(--soft); vertical-align: top; }
+.table td strong { color: var(--ink); }
+
+.tag { display: inline-block; font-size: 0.74rem; font-weight: 700; border: 1px solid; border-radius: 999px; padding: 0.1rem 0.5rem; white-space: nowrap; }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+.line { font-size: 0.85rem; color: var(--soft); margin-bottom: 0.4rem; }
+.para { font-size: 0.9rem; color: var(--soft); margin-bottom: 0.5rem; }
+.bullets { padding-left: 1.1rem; }
+.bullets li { font-size: 0.85rem; color: var(--soft); margin-bottom: 0.3rem; }
+.bullets strong { color: var(--ink); }
+.flow { padding-left: 1.2rem; }
+.flow li { font-size: 0.85rem; color: var(--soft); margin-bottom: 0.25rem; }
+.flow strong { color: var(--ink); }
+.fine { font-size: 0.75rem; color: var(--faint); margin-top: 0.5rem; font-style: italic; }
+
+.notList { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; }
+.notList li { font-size: 0.86rem; color: #9a3b38; background: #fbeeee; border: 1px solid #e8c9c8; border-radius: 8px; padding: 0.5rem 0.7rem; }
+
+.quickPage { break-before: page; page-break-before: always; }
+.chipRow { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.9rem; }
+
+.faq { margin-bottom: 0.7rem; break-inside: avoid; }
+.faq strong { display: block; color: #0b1020; font-size: 0.9rem; }
+.faq p { font-size: 0.84rem; color: var(--soft); }
+
+.foot { border-top: 1px solid var(--line); margin-top: 1.6rem; padding-top: 1rem; }
+.foot p { font-size: 0.78rem; color: var(--faint); }
+.footMeta { margin-top: 0.4rem; font-family: var(--mono); }
+
+@media (max-width: 680px) {
+  .glance { grid-template-columns: repeat(2, 1fr); }
+  .two { grid-template-columns: 1fr; }
+  .notList { grid-template-columns: 1fr; }
+}
+
+@media print {
+  .doc [data-noprint] { display: none !important; }
+  .doc { max-width: none; padding: 0; font-size: 11pt; }
+  .section { margin-bottom: 14pt; }
+  .doc a { color: #14181f; text-decoration: none; }
+  @page { margin: 14mm; }
+}

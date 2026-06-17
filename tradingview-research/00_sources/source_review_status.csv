@@ -1,0 +1,17 @@
+script_name,author,url_slug,open_source_status,reviewed,concept_class,decision,notes
+Siege Structure Engine (Multi-TF),DAFE,4dTBTLXL-Siege-Structure-Engine-Multi-TF-DAFE,VERIFY,yes,structure,inspire,multi-TF BOS/CHoCH engine
+Simulation Structural Synthesis,DAFE,YcPzIKqI-Simulation-Structural-Synthesis-DAFE,VERIFY,partial,structure/analog,inspire,structural simulation
+Liquidity Hunter,unknown,7mWjLVnQ-Liquidity-Hunter,VERIFY,yes,liquidity,inspire,clustered swing liquidity
+Liquidity Stress Oscillator Pro,unknown,S02UoUxh-Liquidity-Stress-Oscillator-Pro2,VERIFY,yes,liquidity/regime,inspire,composite liquidity regime
+AG Pro VWAP Reclaim Quality,AGPro,1HZCCeTg-AG-Pro-VWAP-Reclaim-Quality-AGPro-Series,VERIFY,yes,scoring/entry,inspire,reclaim quality scoring
+HTF PD Arrays,unknown,DeKFdP4G-HTF-PD-Arrays-6H-90m-OB-FVG-Pivot-RB,VERIFY,partial,zones/structure,inspire,premium/discount arrays
+Volume Zones,unknown,7PmTJIqs-Volume-Zones,VERIFY,yes,zones/volume,inspire,volume-weighted zones
+Long Tail RVOL Trigger,unknown,FIrQd7xO-Long-Tail-RVOL-Trigger,VERIFY,yes,volume,inspire,relative volume trigger
+GammaRSI,MarketFragments,Dkc6Axai-GammaRSI-MarketFragments,VERIFY,yes,momentum,inspire,adaptive RSI K-Means bands
+Auto Pivot Trendlines,Tella,A9A8LDt1-Tella-Auto-Pivot-Trendlines,VERIFY,partial,structure,inspire,pivot pools/trendlines
+Candle Pattern Marker Engine,unknown,QJp0WQk2-Candle-Pattern-Marker-Engine,VERIFY,partial,patterns,caution,clutter risk
+AI SuperTrend Strength Forecasting,TraderZen,Y6sJ2odK-AI-SuperTrend-Strength-Forecasting-Engine-TraderZen,VERIFY,yes,trend,reject,forecasting hype anti-pattern
+Sniper Entry Exit ONLY SIGNALS,KhanSaab,wzw29T1g-Sniper-Entry-Exit-with-SL-TP-by-KhanSaab-V-02-ONLY-SIGNALS,VERIFY-likely-protected,yes,signals,reject,signal spam anti-pattern
+BTC Cycle Alpha V3,unknown,iviwLDEl-BTC-Cycle-Alpha-V3-LIVE-2D,VERIFY,partial,cycle,reject,single-asset out of scope
+Auto Fibonacci,Hash,norgbc7Q-Hash-Auto-Fibonacci,VERIFY,partial,zones,later,auto pivot fibs
+Precision Edge System,JOAT,rNLAk5IW-Precision-Edge-System-JOAT,VERIFY,partial,system,caution,multi-factor system

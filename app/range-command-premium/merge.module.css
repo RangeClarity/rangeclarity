@@ -1,0 +1,32 @@
+/* ============================================================
+   /range-command-premium — seam + override styles for the merge ONLY.
+   Scoped to this variant; does not affect premium-fintech or range-command-v2.
+   ============================================================ */
+.merge {
+  position: relative;
+  background: #05070d; /* matches premium ink so the seam never flashes */
+  overflow-x: hidden;
+}
+
+/* The premium .page sets min-height:100vh; in the merge the hero is only the
+   top block, so we let it size to its content (no empty gap before Toolkit). */
+.heroBlock {
+  min-height: auto !important;
+}
+
+/* Subtle premium divider between hero and Toolkit (V2's own top glow does the
+   rest of the blending). */
+.seam {
+  position: relative;
+  z-index: 2;
+  height: 1px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: linear-gradient(90deg, transparent, rgba(52, 245, 176, 0.35), transparent);
+}
+
+/* Pull the V2 lower block up slightly so its top glow overlaps the hero base,
+   making the transition feel continuous rather than stacked. */
+.lowerBlock {
+  margin-top: -1px;
+}
