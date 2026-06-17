@@ -1,0 +1,35 @@
+.bridge {
+  position: relative;
+  z-index: 1;
+  height: clamp(2rem, 5vw, 4rem);
+  margin-top: -1px;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(27, 39, 64, 0.9);
+  background:
+    radial-gradient(ellipse 70% 120% at 50% 0%, rgba(168, 240, 209, 0.12), transparent 62%),
+    linear-gradient(180deg, #05070d 0%, #060a12 100%);
+}
+
+.bridge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  opacity: 0.45;
+}
+
+.anchor {
+  position: relative;
+  top: -82px;
+  display: block;
+  height: 0;
+  overflow: hidden;
+}
+
+.lowerPage {
+  margin-top: -1px;
+}
