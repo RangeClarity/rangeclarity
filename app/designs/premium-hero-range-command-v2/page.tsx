@@ -48,10 +48,11 @@ export default function PremiumHeroRangeCommandV2Page() {
             <Link className={hero.active} href="/">
               Premium Indicators
             </Link>
+            <Link href="/indicator-guide">Investor Research Lab</Link>
           </nav>
 
-          <a className={hero.navCta} href="#early-access">
-            Join Early Access
+          <a className={hero.navCta} href="/beta?plan=beta_29">
+            Get Beta Access
           </a>
         </div>
       </header>
@@ -88,11 +89,11 @@ export default function PremiumHeroRangeCommandV2Page() {
             </p>
 
             <div className={hero.actions}>
-              <a className={hero.primary} href="#early-access">
-                Join Early Access
+              <a className={hero.primary} href="/beta?plan=beta_29">
+                Get Beta Access
               </a>
-              <a className={hero.secondary} href="#indicator-modules">
-                View Indicator Modules
+              <a className={hero.secondary} href="/beta?plan=free_preview">
+                Free Preview
               </a>
             </div>
 

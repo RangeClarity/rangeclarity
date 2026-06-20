@@ -9,7 +9,9 @@ const compat = new FlatCompat({ baseDirectory: __dirname });
 
 const eslintConfig = [
   {
-    ignores: [".next/**", "node_modules/**", "next-env.d.ts"],
+    // scripts/** are dependency-free Node tooling scripts (Hermes adapter, etc.),
+    // intentionally outside the Next app's React/TS lint scope.
+    ignores: [".next/**", "node_modules/**", ".qatmp/**", "next-env.d.ts", "scripts/**", "docs/video-production/runway-inputs/_gen*.cjs"],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),
 ];
