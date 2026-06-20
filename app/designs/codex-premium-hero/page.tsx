@@ -52,13 +52,10 @@ export default function CodexPremiumHeroPage() {
             <span>RangeClarity</span>
           </Link>
 
-          <nav className={s.navLinks} aria-label="Design navigation">
+          <nav className={s.navLinks} aria-label="Primary navigation">
             <Link className={s.active} href="/designs/codex-premium-hero">
               Premium Indicators
             </Link>
-            <Link href="/designs/premium-fintech">Indicator Terminal</Link>
-            <Link href="/indicator-guide">Investor Research Lab</Link>
-            <Link href="/designs/range-command-v2">Bold Hero</Link>
           </nav>
 
           <a className={s.navCta} href="#early-access">

@@ -44,13 +44,10 @@ export default function PremiumHeroRangeCommandV2Page() {
             <span>RangeClarity</span>
           </Link>
 
-          <nav className={hero.navLinks} aria-label="Design navigation">
+          <nav className={hero.navLinks} aria-label="Primary navigation">
             <Link className={hero.active} href="/">
               Premium Indicators
             </Link>
-            <Link href="/designs/premium-fintech">Indicator Terminal</Link>
-            <Link href="/indicator-guide">Investor Research Lab</Link>
-            <Link href="/designs/range-command-v2">Bold Hero</Link>
           </nav>
 
           <a className={hero.navCta} href="#early-access">
