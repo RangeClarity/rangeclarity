@@ -112,12 +112,11 @@ export function RangeCommandV2LowerSections() {
             <h2 className={s.h2} style={{ marginTop: "1.4rem" }}>
               Stop chasing candles. <span className={s.grad}>Start reading the range.</span>
             </h2>
-            <form className={s.finalForm} action="#" aria-label="Join early access">
-              <input className={s.input} type="email" placeholder="you@portfolio.com" aria-label="Email address" />
-              <button type="button" className={s.btnPrimary}>
-                Join Early Access
-              </button>
-            </form>
+            <div className={s.finalForm}>
+              <Link className={s.btnPrimary} href="/beta?plan=beta_29">
+                Get Beta Access — $29
+              </Link>
+            </div>
             <p className={s.mono} style={{ marginTop: "1rem", fontSize: 12, letterSpacing: "0.05em", color: "#5d6a8c" }}>
               No spam. No signals-for-hire. Just the range, clearly.
             </p>

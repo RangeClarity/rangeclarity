@@ -126,6 +126,8 @@ export type Plan = {
   cta: string;
   featured?: boolean;
   note?: string;
+  slug?: string;
+  href?: string;
 };
 
 export const PLANS: Plan[] = [
@@ -142,7 +144,9 @@ export const PLANS: Plan[] = [
       "Early product updates",
       "Founder notes & roadmap",
     ],
-    cta: "Join Free Preview",
+    cta: "Get Free Preview",
+    slug: "free_preview",
+    href: "/beta?plan=free_preview",
     note: "For curious chart readers.",
   },
   {
@@ -162,7 +166,9 @@ export const PLANS: Plan[] = [
       "TradingView setup guide",
       "Priority access to future AI Chart Companion",
     ],
-    cta: "Join Annual Early Access",
+    cta: "Get Beta Access",
+    slug: "beta_29",
+    href: "/beta?plan=beta_29",
     featured: true,
     note: "Best value for serious watchlist builders.",
   },
@@ -182,8 +188,10 @@ export const PLANS: Plan[] = [
       "TradingView setup guide",
       "Community & feedback access",
     ],
-    cta: "Go Month-to-Month",
-    note: "For people who want flexibility.",
+    cta: "Get Pro Beta",
+    slug: "pro_beta_49",
+    href: "/beta?plan=pro_beta_49",
+    note: "Everything in Beta Access, plus priority support, feedback & early previews.",
   },
 ];
 

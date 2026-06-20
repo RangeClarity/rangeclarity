@@ -29,7 +29,7 @@ export default function PricingSectionV2() {
                 {p.cadence ? <span className={s.priceCadence}>{p.cadence}</span> : null}
               </div>
               <p className={s.priceBilling}>{p.billing}</p>
-              <a href="#join" className={`${s.btnPrimary} ${s.priceCta}`}>{p.cta}</a>
+              <a href={p.href ?? "#join"} className={`${s.btnPrimary} ${s.priceCta}`}>{p.cta}</a>
               <ul className={s.priceFeats}>
                 {p.features.map((f) => (
                   <li key={f}><Check /><span>{f}</span></li>
