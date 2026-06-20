@@ -1,5 +1,8 @@
 import type { SelectedPlan } from "./types";
 
+const DEFAULT_BETA_29_PAYMENT_LINK =
+  "https://rangeclarity.lemonsqueezy.com/checkout/buy/0f5fcd29-b83d-421c-aafb-1c1357ecb484";
+
 export type PlanConfig = {
   id: SelectedPlan;
   label: string;
@@ -31,7 +34,7 @@ export const PLAN_CONFIG: Record<SelectedPlan, PlanConfig> = {
     price: "$29",
     paid: true,
     manualPaymentLink:
-      process.env.MANUAL_PAYMENT_LINK_29 ?? "[MANUAL_PAYMENT_LINK_29_HERE]",
+      process.env.MANUAL_PAYMENT_LINK_29 ?? DEFAULT_BETA_29_PAYMENT_LINK,
     blurb:
       "Main beta access — the full RangeClarity indicator, invite-only on TradingView.",
   },

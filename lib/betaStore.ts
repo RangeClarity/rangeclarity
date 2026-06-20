@@ -12,14 +12,23 @@
  *  - Refund => access revoked. betaEndDate passed => expired / flagged for review.
  */
 import { promises as fs } from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import crypto from "node:crypto";
 import type { PaymentStatus, SelectedPlan } from "@/lib/payments/types";
 import { normalizePlan } from "@/lib/payments/plans";
 
+function getDefaultDataFile() {
+  if (process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return path.join(os.tmpdir(), "rangeclarity-beta-signups.jsonl");
+  }
+
+  return path.join(process.cwd(), ".data", "beta-signups.jsonl");
+}
+
 const DATA_FILE =
   process.env.BETA_SIGNUPS_FILE ??
-  path.join(process.cwd(), ".data", "beta-signups.jsonl");
+  getDefaultDataFile();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BETA_DAYS = Number(process.env.BETA_PERIOD_DAYS ?? "30");
