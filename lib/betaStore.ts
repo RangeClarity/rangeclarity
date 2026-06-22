@@ -70,8 +70,12 @@ export type BetaSignup = {
   tradingViewUsername: string;
   userType: UserType;
   selectedPlan: SelectedPlan;
+  signupType: "paid_beta" | "free_preview";
   notes?: string;
   source?: string;
+  consentAccepted: true;
+  environment?: string;
+  userAgent?: string;
   paymentProvider: PaymentProviderTag;
   paymentStatus: PaymentStatus;
   accessStatus: AccessStatus;
@@ -84,12 +88,15 @@ export type BetaSignup = {
 
 export type NewSignupInput = {
   name: string;
-  email: string;
-  tradingViewUsername: string;
+  email: unknown;
+  tradingViewUsername: unknown;
   userType: string;
   selectedPlan?: string;
   notes?: string;
   source?: string;
+  consentAccepted?: unknown;
+  environment?: string;
+  userAgent?: string | null;
 };
 
 export function normalizeEmail(raw: unknown): string | null {
@@ -146,38 +153,51 @@ export type AddResult =
   | { status: "added"; signup: BetaSignup }
   | { status: "duplicate"; signup: BetaSignup };
 
-/** Register a new lead/user (state: registered, unpaid, access pending). */
-export async function addSignup(input: NewSignupInput): Promise<AddResult> {
+export function createBetaSignup(input: NewSignupInput): BetaSignup {
   const email = normalizeEmail(input.email);
   const tradingViewUsername = normalizeTvUsername(input.tradingViewUsername);
   const name = cleanStr(input.name, 120);
   if (!email) throw new Error("invalid_email");
   if (!tradingViewUsername) throw new Error("invalid_tv_username");
   if (!name) throw new Error("invalid_name");
+  if (input.consentAccepted !== true) throw new Error("missing_consent");
 
-  const rows = await readAll();
-  const existing = rows.find((r) => r.email === email);
-  if (existing) return { status: "duplicate", signup: existing };
-
+  const selectedPlan = normalizePlan(input.selectedPlan);
   const now = new Date().toISOString();
-  const signup: BetaSignup = {
+  return {
     id: crypto.randomUUID(),
     name,
     email,
     tradingViewUsername,
     userType: normalizeUserType(input.userType),
-    selectedPlan: normalizePlan(input.selectedPlan),
+    selectedPlan,
+    signupType: selectedPlan === "free_preview" ? "free_preview" : "paid_beta",
     notes: cleanStr(input.notes, 1000) || undefined,
     source: cleanStr(input.source, 64) || "beta-landing",
+    consentAccepted: true,
+    environment: cleanStr(input.environment, 80) || undefined,
+    userAgent: cleanStr(input.userAgent, 500) || undefined,
     paymentProvider: providerTag(process.env.PAYMENT_PROVIDER ?? "manual"),
     paymentStatus: "unpaid",
     accessStatus: "pending",
     createdAt: now,
     updatedAt: now,
   };
+}
+
+export async function saveBetaSignup(signup: BetaSignup): Promise<AddResult> {
+  const rows = await readAll();
+  const existing = rows.find((r) => r.email === signup.email);
+  if (existing) return { status: "duplicate", signup: existing };
+
   rows.push(signup);
   await writeAll(rows);
   return { status: "added", signup };
+}
+
+/** Register a new lead/user (state: registered, unpaid, access pending). */
+export function addSignup(input: NewSignupInput): Promise<AddResult> {
+  return saveBetaSignup(createBetaSignup(input));
 }
 
 async function update(
