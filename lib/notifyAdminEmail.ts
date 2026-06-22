@@ -323,3 +323,70 @@ export function notifyAdminBetaSignup(
   `;
   return send({ to: admin, subject, text: body, html });
 }
+
+export function sendAccessGrantedEmail(args: {
+  email: string;
+  tradingViewUsername: string;
+  selectedPlan?: string;
+}): Promise<SendResult> {
+  const onboarding = "https://www.rangeclarity.com/beta/onboarding";
+  const subject = "Your RangeClarity access is now active";
+  const tv = args.tradingViewUsername;
+  const body = [
+    "Hi,",
+    "",
+    "Good news — your RangeClarity invite-only access is now active.",
+    "",
+    `TradingView username granted: ${tv}`,
+    "",
+    "How to add the indicator:",
+    "1. Open TradingView",
+    "2. Open any chart",
+    "3. Click Indicators",
+    "4. Go to Invite-only Scripts",
+    "5. Select RangeClarity",
+    "6. Add it to the chart",
+    "",
+    `Onboarding guide: ${onboarding}`,
+    "",
+    "RangeClarity is an educational market-structure visualization tool. No financial advice, no buy/sell signals, no predictions, no guaranteed results.",
+    "",
+    "Thanks,",
+    "RangeClarity",
+  ].join("\n");
+  const safeTv = escapeHtml(tv);
+  const html = `
+    <div style="margin:0;background:#03070c;color:#e8f2fb;font-family:Inter,Arial,sans-serif;padding:32px 18px;">
+      <div style="max-width:620px;margin:0 auto;border:1px solid #183348;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#0b121d 0%,#060a10 100%);">
+        <div style="padding:30px 28px 20px;text-align:center;border-bottom:1px solid #183348;">
+          <img src="${escapeHtml(emailLogoUrl())}" alt="RangeClarity" width="72" height="72" style="display:block;margin:0 auto 16px;border-radius:18px;" />
+          <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#35f0d0;">Access active</div>
+          <h1 style="margin:10px 0 0;font-size:28px;line-height:1.18;color:#ffffff;">Your RangeClarity access is now active</h1>
+        </div>
+        <div style="padding:28px;">
+          <p style="margin:0 0 16px;font-size:16px;line-height:1.65;color:#d7e5f2;">Your invite-only access has been granted.</p>
+          <div style="margin:18px 0;padding:16px;border-radius:14px;background:#0c1622;border:1px solid #1d3a50;">
+            <div style="font-size:12px;letter-spacing:0.13em;text-transform:uppercase;color:#91a4b8;">TradingView username granted</div>
+            <div style="margin-top:6px;font-size:18px;color:#ffffff;font-weight:700;">${safeTv}</div>
+          </div>
+          <p style="margin:0 0 10px;font-size:15px;font-weight:700;color:#ffffff;">How to add the indicator</p>
+          <ol style="margin:0 0 18px;padding-left:20px;font-size:15px;line-height:1.7;color:#c8d6e3;">
+            <li>Open TradingView</li>
+            <li>Open any chart</li>
+            <li>Click Indicators</li>
+            <li>Go to Invite-only Scripts</li>
+            <li>Select RangeClarity</li>
+            <li>Add it to the chart</li>
+          </ol>
+          <p style="margin:0 0 18px;">
+            <a href="${onboarding}" style="display:inline-block;padding:12px 18px;border-radius:12px;background:#35f0d0;color:#04210f;font-weight:700;text-decoration:none;">Open the onboarding guide</a>
+          </p>
+          <p style="margin:20px 0 0;padding:14px 16px;border-radius:14px;background:#071018;color:#9fb1c3;font-size:13px;line-height:1.55;">
+            RangeClarity is an educational market-structure visualization tool. No financial advice. No buy/sell signals. No predictions. No guaranteed results.
+          </p>
+        </div>
+      </div>
+    </div>
+  `;
+  return send({ to: args.email, subject, text: body, html });
+}

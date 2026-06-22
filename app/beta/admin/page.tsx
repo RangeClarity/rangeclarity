@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "../beta.module.css";
 import AdminConsole from "./AdminConsole";
+import GrantConsole from "./GrantConsole";
 
 export const metadata: Metadata = {
   title: "RangeClarity — Beta Admin",
@@ -23,6 +24,18 @@ export default function BetaAdmin() {
         </div>
       </header>
       <main className={styles.main}>
+        <section className={styles.section} style={{ borderTop: "none" }}>
+          <span className={styles.eyebrow}>Manual fulfilment · Supabase</span>
+          <h2 className={styles.h2}>Access <span style={{ color: "var(--accent)" }}>grants</span></h2>
+          <p className={styles.lead}>
+            Source of truth: the <code>beta_signups</code> table. After adding a TradingView username to
+            the invite-only script, mark the user granted to send the Access Granted email. Gated by{" "}
+            <code>ADMIN_ACCESS_TOKEN</code>.
+          </p>
+          <div style={{ marginTop: "1.4rem" }}>
+            <GrantConsole />
+          </div>
+        </section>
         <section className={styles.section} style={{ borderTop: "none" }}>
           <span className={styles.eyebrow}>Manual fulfilment</span>
           <h2 className={styles.h2}>Beta access <span style={{ color: "var(--accent)" }}>console</span></h2>
