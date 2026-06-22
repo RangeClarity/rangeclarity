@@ -2,6 +2,8 @@ import type { SelectedPlan } from "./types";
 
 const DEFAULT_BETA_29_PAYMENT_LINK =
   "https://rangeclarity.lemonsqueezy.com/checkout/buy/0f5fcd29-b83d-421c-aafb-1c1357ecb484";
+const DEFAULT_PRO_BETA_49_PAYMENT_LINK =
+  "https://rangeclarity.lemonsqueezy.com/checkout/buy/5a6c5b6a-3222-47b1-9bd2-761767438f17";
 
 export type PlanConfig = {
   id: SelectedPlan;
@@ -30,23 +32,23 @@ export const PLAN_CONFIG: Record<SelectedPlan, PlanConfig> = {
   },
   beta_29: {
     id: "beta_29",
-    label: "Beta Access",
-    price: "$29",
+    label: "Beta Access — Standard",
+    price: "$29.90",
     paid: true,
     manualPaymentLink:
       process.env.MANUAL_PAYMENT_LINK_29 ?? DEFAULT_BETA_29_PAYMENT_LINK,
     blurb:
-      "Main beta access — the full RangeClarity indicator, invite-only on TradingView.",
+      "Core beta access to the RangeClarity TradingView indicator.",
   },
   pro_beta_49: {
     id: "pro_beta_49",
-    label: "Pro Beta · Founder Access",
-    price: "$49",
+    label: "Extended Access",
+    price: "$49.90",
     paid: true,
     manualPaymentLink:
-      process.env.MANUAL_PAYMENT_LINK_49 ?? "[MANUAL_PAYMENT_LINK_49_HERE]",
+      process.env.MANUAL_PAYMENT_LINK_49 ?? DEFAULT_PRO_BETA_49_PAYMENT_LINK,
     blurb:
-      "Everything in Beta Access, plus priority support, feedback, and early feature previews.",
+      "Extended beta access with priority updates, deeper setup guidance, and early access to upcoming RangeClarity improvements.",
   },
 };
 
