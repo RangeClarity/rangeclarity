@@ -54,7 +54,7 @@ export async function saveSignupCapture(
 ): Promise<DurableCaptureResult> {
   const url = envValue("SUPABASE_URL");
   const key = envValue("SUPABASE_SERVICE_ROLE_KEY");
-  const table = envValue("SUPABASE_BETA_SIGNUPS_TABLE") ?? DEFAULT_TABLE;
+  const tableSetting = envValue("SUPABASE_BETA_SIGNUPS_TABLE") ?? DEFAULT_TABLE;
 
   if (!url || !key) {
     return {
@@ -64,7 +64,17 @@ export async function saveSignupCapture(
     };
   }
 
-  const endpoint = `${url.replace(/\/+$/, "")}/rest/v1/${encodeURIComponent(table)}?on_conflict=id`;
+  // Resolve schema + table from the setting (accept "beta_signups" or "public.beta_signups").
+  const dot = tableSetting.indexOf(".");
+  const schema = dot >= 0 ? tableSetting.slice(0, dot) : "public";
+  const table = dot >= 0 ? tableSetting.slice(dot + 1) : tableSetting;
+  // Accept either the Supabase project URL or a REST endpoint URL (strip trailing /rest/v1).
+  const base = url.replace(/\/+$/, "").replace(/\/rest\/v1$/, "");
+  const endpoint = `${base}/rest/v1/${encodeURIComponent(table)}?on_conflict=id`;
+  // Temporary diagnostics (safe: no secret values; the service key is only in headers).
+  console.log(`[beta-signup] table=${table}`);
+  console.log(`[beta-signup] schema=${schema}`);
+  console.log(`[beta-signup] supabase endpoint=${endpoint}`);
   const row = {
     id: input.id,
     email: input.email,
@@ -90,6 +100,8 @@ export async function saveSignupCapture(
         apikey: key,
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
+        "Accept-Profile": schema,
+        "Content-Profile": schema,
         Prefer: "resolution=merge-duplicates",
       },
       body: JSON.stringify(row),
