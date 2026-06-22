@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { addFreeAccessRequest } from "@/lib/freeAccessStore";
 import { notifyAdminFreeAccess, confirmUserFreeAccess } from "@/lib/notifyAdminEmail";
+import type { SendResult } from "@/lib/notifyAdminEmail";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,30 @@ type Payload = {
   source?: unknown;
   company?: unknown; // honeypot
 };
+
+function logEmailResult(kind: "admin" | "user", requestId: string, result: SendResult) {
+  if (result.sent) return;
+  console.warn(`free-access: ${kind} email not sent`, {
+    requestId,
+    skipped: result.skipped,
+    error: result.error,
+  });
+}
+
+async function runEmailNotification(
+  kind: "admin" | "user",
+  requestId: string,
+  sendEmail: () => Promise<SendResult>,
+) {
+  try {
+    logEmailResult(kind, requestId, await sendEmail());
+  } catch (err) {
+    console.warn(`free-access: ${kind} email failed unexpectedly`, {
+      requestId,
+      error: err instanceof Error ? err.message : "unknown email error",
+    });
+  }
+}
 
 export async function POST(request: Request) {
   let body: Payload;
@@ -44,8 +69,10 @@ export async function POST(request: Request) {
       source: typeof body.source === "string" ? body.source : "free-access",
     });
     // best-effort notifications — they never throw and never block the request
-    await notifyAdminFreeAccess(res.request);
-    await confirmUserFreeAccess(res.request);
+    await Promise.all([
+      runEmailNotification("admin", res.request.id, () => notifyAdminFreeAccess(res.request)),
+      runEmailNotification("user", res.request.id, () => confirmUserFreeAccess(res.request)),
+    ]);
     return NextResponse.json({ ok: true, status: res.status, id: res.request.id });
   } catch (err) {
     const code = err instanceof Error ? err.message : "error";
