@@ -71,6 +71,12 @@ export default function FreeAccessForm() {
               How access works &rarr;
             </Link>
           </div>
+          <p className={styles.consent} style={{ marginTop: "0.7rem" }}>
+            Need a TradingView account?{" "}
+            <Link href="/tradingview-setup" style={{ color: "var(--accent)" }}>
+              See the TradingView setup &rarr;
+            </Link>
+          </p>
         </div>
       </div>
     );
