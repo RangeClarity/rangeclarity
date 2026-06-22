@@ -159,3 +159,9 @@
 .star { width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg-2);
   color: var(--fg-faint); font-size: 1.1rem; cursor: pointer; }
 .starOn { color: var(--gold, #ffce4d); border-color: rgba(255,206,77,0.5); background: rgba(255,206,77,0.08); }
+
+/* plan-selector mobile stack — avoid 3 cramped buttons at 375-390px */
+@media (max-width: 480px) {
+  .planRow { flex-direction: column; }
+  .planRow .planOpt { width: 100%; }
+}

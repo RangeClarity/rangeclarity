@@ -15,11 +15,10 @@ export function RangeCommandV2LowerSections() {
       <section id="modules" className={s.section}>
         <div className={s.wrap}>
           <div className={`${s.head} ${s.headCenter}`}>
-            <span className={s.eyebrow}>The Toolkit</span>
-            <h2 className={s.h2}>Three modules. One clear call.</h2>
+            <span className={s.eyebrow}>What it shows</span>
+            <h2 className={s.h2}>Three modules. One clean read.</h2>
             <p className={s.lead}>
-              Each module is a collectible panel in your market command center - built to answer one
-              question well.
+              Each module answers one question about market structure - clearly, with no clutter.
             </p>
           </div>
           <div className={s.modGrid}>
@@ -52,7 +51,7 @@ export function RangeCommandV2LowerSections() {
         <div className={s.wrap}>
           <div className={`${s.head} ${s.headCenter}`}>
             <span className={s.eyebrow}>How it works</span>
-            <h2 className={s.h2}>From chart to decision in five steps</h2>
+            <h2 className={s.h2}>How RangeClarity reads a chart</h2>
           </div>
           <div className={s.steps}>
             {STEPS.map((st) => (
@@ -107,14 +106,14 @@ export function RangeCommandV2LowerSections() {
           <div className={s.finalCard}>
             <span className={s.badge}>
               <span className={s.pulse} style={{ width: 6, height: 6, borderRadius: 999, background: "#34f5b0" }} />
-              EARLY ACCESS - LIMITED SEATS
+              PRIVATE BETA - INVITE-ONLY
             </span>
             <h2 className={s.h2} style={{ marginTop: "1.4rem" }}>
               Stop chasing candles. <span className={s.grad}>Start reading the range.</span>
             </h2>
             <div className={s.finalForm}>
               <Link className={s.btnPrimary} href="/beta?plan=beta_29">
-                Get Beta Access — $29
+                Get Beta Access
               </Link>
             </div>
             <p className={s.mono} style={{ marginTop: "1rem", fontSize: 12, letterSpacing: "0.05em", color: "#5d6a8c" }}>
@@ -139,7 +138,6 @@ export function RangeCommandV2LowerSections() {
             <a href="#modules">Modules</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
-            <Link href="/designs">All designs</Link>
           </div>
         </div>
       </footer>

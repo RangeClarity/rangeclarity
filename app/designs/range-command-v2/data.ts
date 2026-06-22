@@ -28,11 +28,11 @@ export const MODULES: ModuleV2[] = [
     pill: "THE RANGE",
     chip: "MAPS THE TERRAIN",
     title: "Range Map Overlay",
-    tagline: "Reads the battlefield before you click buy.",
+    tagline: "Reads the structure on the chart, not the noise.",
     blurb:
       "Plots support and resistance as zones and shows exactly where price sits inside the structure right now.",
     shows: "Support / resistance zones, price position, and a 0–100 range score.",
-    avoids: "Buying straight into resistance like a candle chaser.",
+    avoids: "Mistaking a heavy resistance zone for open space.",
     bestFor: "Swing traders and long-term investors timing entries.",
     stats: [
       { value: "0–100", label: "Range Score" },
@@ -68,15 +68,15 @@ export const MODULES: ModuleV2[] = [
     pill: "THE RISK",
     chip: "ANTI-FOMO",
     title: "Risk Radar",
-    tagline: "The part that quietly says: relax, this entry is too hot.",
+    tagline: "The part that quietly says: relax, this looks stretched.",
     blurb:
-      "Weighs nearby upside against downside so you can see whether the reward justifies the entry.",
-    shows: "Risk/reward context, entry-quality grade, and late-entry warnings.",
-    avoids: "Becoming exit liquidity near the top.",
+      "Weighs nearby structure above and below so you can see how stretched price is.",
+    shows: "Risk/reward context, structure-quality read, and late-move warnings.",
+    avoids: "Chasing a move that is already stretched.",
     bestFor: "Investors who care about patience and position sizing.",
     stats: [
       { value: "R / R", label: "Risk / Reward" },
-      { value: "A–F", label: "Entry Grade" },
+      { value: "A–F", label: "Structure Grade" },
       { value: "3", label: "Alert Zones" },
     ],
     visual: "radar",
@@ -93,10 +93,10 @@ export const CHART = {
   support: "$28.50 – $31.00",
   resistance: "$39.00 – $42.00",
   momentum: "Strong but Extended",
-  entryQuality: "Wait for Pullback",
+  entryQuality: "Extended / upper range",
   risk: "Medium / High",
   price: "$39.40",
-  verdict: "WAIT",
+  verdict: "EXTENDED",
 };
 
 export const STEPS = [
@@ -104,7 +104,7 @@ export const STEPS = [
   { n: "02", t: "Add the indicators", d: "Range Map, Momentum Engine, and Risk Radar overlay your chart." },
   { n: "03", t: "Read the range", d: "See support, resistance, and where price sits inside structure." },
   { n: "04", t: "Confirm momentum", d: "Check whether the move is strengthening, fading, or extended." },
-  { n: "05", t: "Decide", d: "Buy, wait, or avoid — with the full picture in view." },
+  { n: "05", t: "Read the verdict", d: "Get a clean structural read - bias, levels, and range position - and decide for yourself." },
 ];
 
 export const NOTS = [
@@ -161,10 +161,10 @@ export const PLANS: Plan[] = [
       "Momentum Engine",
       "Risk Radar",
       "Range Score (0–100)",
-      "Entry-quality context",
+      "Structure-quality context",
       "Late / extended labels",
       "TradingView setup guide",
-      "Priority access to future AI Chart Companion",
+      "Priority support and early feature previews",
     ],
     cta: "Get Beta Access",
     slug: "beta_29",
@@ -184,7 +184,7 @@ export const PLANS: Plan[] = [
       "Range Map Overlay",
       "Momentum Engine",
       "Risk Radar",
-      "Pullback & wait-zone labels",
+      "Pullback & range-context labels",
       "TradingView setup guide",
       "Community & feedback access",
     ],

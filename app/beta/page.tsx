@@ -151,27 +151,18 @@ export default async function BetaLanding({
             <div className={styles.pay}>
               <div className={styles.payHead}>
                 <div className={styles.kicker}>Payment</div>
-                <span className={`${styles.tag} ${styles.tagOk}`}>No live charges yet</span>
+                <span className={`${styles.tag} ${styles.tagOk}`}>Secure checkout</span>
               </div>
               <h3 style={{ marginTop: "0.5rem", fontSize: "1rem", fontWeight: 650 }}>
                 {active ? active.label : "Manual (founder-confirmed)"}
               </h3>
               <p className={styles.payNote}>
-                The first beta runs on manual confirmation. Free preview is lead-capture only;
-                paid plans ($29 / $49) get a manual payment link and personal access. The checkout
-                is provider-agnostic, with integration slots ready for:
+                Secure checkout powered by Lemon Squeezy. The paid plans ($29.90 / $49.90) open a
+                hosted Lemon Squeezy checkout; the 7-day free option is a manual request.
               </p>
-              <div className={styles.provChips}>
-                {providers.map((p) => (
-                  <span key={p.id} className={`${styles.prov} ${p.active ? styles.provActive : ""}`}>
-                    <span className="d" style={{ width: 6, height: 6, borderRadius: "50%", background: p.active ? "var(--accent)" : "var(--fg-faint)" }} />
-                    {p.label}{p.active ? " · active" : p.configured ? " · ready" : " · slot"}
-                  </span>
-                ))}
-              </div>
               <p className={styles.payNote}>
-                No live payment is processed in the app. When billing is switched on, the same flow
-                plugs into the chosen provider without changing your experience.
+                TradingView access is fulfilled manually during beta &mdash; you&rsquo;ll receive access
+                instructions after your purchase or request is reviewed (usually within 24&ndash;48 hours).
               </p>
             </div>
           </div>
@@ -211,6 +202,8 @@ export default async function BetaLanding({
               <p>No charge happens in the app — there are no live automated payments yet. Paid plans receive a manual payment link and personal confirmation from a founder.</p></details>
             <details className={styles.faq}><summary>Can I leave the beta?</summary>
               <p>Yes, anytime. Access is invite-only and managed by hand, so we can add or remove it on request.</p></details>
+            <details className={styles.faq}><summary>How do I get TradingView access?</summary>
+              <p>RangeClarity runs inside TradingView as an invite-only indicator. Create a TradingView account, then submit your exact username — eligible users are added manually, usually within 24 hours during beta. <Link href="/tradingview-setup" style={{ color: "var(--accent)" }}>See the TradingView setup &rarr;</Link></p></details>
           </div>
           <div className={styles.disclaimer}>
             <strong>Disclaimer.</strong> RangeClarity is provided for educational and informational purposes only and is not financial, investment, or trading advice. It does not generate buy or sell signals, predict prices, or guarantee any result. Markets carry risk; decisions and outcomes are your own. This is a private beta — features and access may change.
