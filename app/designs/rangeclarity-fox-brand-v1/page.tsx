@@ -87,8 +87,8 @@ export default function RangeClarityFoxBrandV1Page() {
               <a className={styles.primary} href="/beta?plan=beta_29">
                 Get Beta Access <span aria-hidden="true">→</span>
               </a>
-              <a className={styles.secondary} href="/beta?plan=free_preview">
-                Free Preview
+              <a className={styles.secondary} href="/beta/free-access">
+                7-Day Free Access
               </a>
             </div>
 

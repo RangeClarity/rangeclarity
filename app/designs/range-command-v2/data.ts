@@ -133,10 +133,10 @@ export type Plan = {
 export const PLANS: Plan[] = [
   {
     id: "free",
-    badge: "START FREE",
-    name: "Early Access Preview",
+    badge: "FREE",
+    name: "7-Day Free Access",
     price: "$0",
-    billing: "No card needed.",
+    billing: "No card. Manual TradingView invite.",
     features: [
       "Sample Range Map overlay",
       "Example support / resistance zones",
@@ -144,10 +144,10 @@ export const PLANS: Plan[] = [
       "Early product updates",
       "Founder notes & roadmap",
     ],
-    cta: "Get Free Preview",
+    cta: "Request Free Access",
     slug: "free_preview",
-    href: "/beta?plan=free_preview",
-    note: "For curious chart readers.",
+    href: "/beta/free-access",
+    note: "Try RangeClarity for 7 days — submit email + TradingView username; eligible users added manually.",
   },
   {
     id: "annual",
