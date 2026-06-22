@@ -1,2 +1,2 @@
-export { metadata } from "./designs/premium-hero-range-command-v2/page";
-export { default } from "./designs/premium-hero-range-command-v2/page";
+export { metadata } from "./designs/rangeclarity-fox-brand-v1/page";
+export { default } from "./designs/rangeclarity-fox-brand-v1/page";
