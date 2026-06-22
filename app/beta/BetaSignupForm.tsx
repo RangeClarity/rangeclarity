@@ -16,6 +16,9 @@ const USER_TYPES: { value: string; label: string }[] = [
   { value: "other", label: "Other" },
 ];
 
+const CAPTURE_SUCCESS_MESSAGE =
+  "Your request was received. We'll review your TradingView username and manually add eligible users within 24-48 hours during beta.";
+
 export default function BetaSignupForm({
   initialPlan,
   plans,
@@ -34,6 +37,7 @@ export default function BetaSignupForm({
     tvUsername: "",
     userType: "swing_trader",
     notes: "",
+    consent: false,
     company: "", // honeypot
   });
 
@@ -47,6 +51,11 @@ export default function BetaSignupForm({
     e.preventDefault();
     setStatus("submitting");
     setError("");
+    if (!form.consent) {
+      setError("Please confirm the access + disclaimer checkbox.");
+      setStatus("error");
+      return;
+    }
     try {
       const res = await fetch("/api/beta-signup", {
         method: "POST",
@@ -55,13 +64,12 @@ export default function BetaSignupForm({
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(data.error ?? "Something went wrong. Please try again, or contact support.");
         setStatus("error");
         return;
       }
 
-      let nextMessage =
-        "You're registered. A founder will confirm your beta access shortly.";
+      const nextMessage = CAPTURE_SUCCESS_MESSAGE;
       let link: string | null = null;
       try {
         const co = await fetch("/api/beta-checkout", {
@@ -71,23 +79,20 @@ export default function BetaSignupForm({
         });
         const coData = await co.json();
         if (coData?.result?.mode === "manual") {
-          nextMessage = coData.result.message;
           link = coData.result.paymentLink ?? null;
         } else if (coData?.result?.mode === "redirect" && coData.result.url) {
           window.location.href = coData.result.url;
           return;
-        } else if (coData?.error) {
-          nextMessage = coData.error;
         }
       } catch {
-        /* checkout is best-effort; the signup is already saved */
+        /* Checkout is best-effort after server-confirmed capture. */
       }
 
       setMessage(nextMessage);
       setPaymentLink(link);
       setStatus("success");
     } catch {
-      setError("Network error. Please try again.");
+      setError("Something went wrong. Please try again, or contact support.");
       setStatus("error");
     }
   }
@@ -98,7 +103,7 @@ export default function BetaSignupForm({
       <div className={styles.form}>
         <div className={styles.successCard}>
           <div className={styles.tick}>&#10003;</div>
-          <h3>Your spot is reserved</h3>
+          <h3>Request received</h3>
           <p>{message}</p>
           {paymentLink && (
             <div style={{ marginTop: "0.9rem" }}>
@@ -203,6 +208,23 @@ export default function BetaSignupForm({
             onChange={(e) => update("company", e.target.value)} />
         </label>
       </div>
+
+      <label
+        className={styles.consent}
+        style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start", cursor: "pointer" }}
+      >
+        <input
+          type="checkbox"
+          checked={form.consent}
+          onChange={(e) => setForm((f) => ({ ...f, consent: e.target.checked }))}
+          style={{ marginTop: "0.2rem", flex: "none" }}
+          required
+        />
+        <span>
+          I understand RangeClarity is an educational market-structure visualization tool, not
+          financial advice, and access is manually reviewed.
+        </span>
+      </label>
 
       {status === "error" && <div className={styles.error}>{error}</div>}
 
