@@ -5,6 +5,7 @@ import { RangeCommandV2LowerSections } from "../premium-hero-range-command-v2/Ra
 import v2 from "../range-command-v2/v2.module.css";
 import variant from "../premium-hero-range-command-v2/variant.module.css";
 import styles from "./foxBrandHero.module.css";
+import { StickyCtaBar } from "./StickyCtaBar";
 
 /* ============================================================
    /designs/rangeclarity-fox-brand-v1
@@ -56,7 +57,7 @@ export default function RangeClarityFoxBrandV1Page() {
       <section className={styles.hero} aria-label="RangeClarity — market-structure clarity">
         <Image
           className={styles.heroImage}
-          src="/brand/fox-hero.png"
+          src="/brand/fox-hero.jpg"
           alt=""
           aria-hidden="true"
           fill
@@ -67,7 +68,7 @@ export default function RangeClarityFoxBrandV1Page() {
         <div className={styles.heroGlow} aria-hidden="true" />
 
         <div className={styles.heroInner}>
-          <div className={styles.copy}>
+          <div className={`${styles.copy} ${styles.copyDesktop}`}>
             <div className={styles.eyebrow}>
               <span className={styles.eyebrowDot} aria-hidden="true" />
               Market-structure clarity
@@ -78,9 +79,8 @@ export default function RangeClarityFoxBrandV1Page() {
             </h1>
 
             <p className={styles.lead}>
-              Market-structure clarity for TradingView. RangeClarity reads strong and weak
-              structure, ranges, zones and a visual verdict — so the chart stays simple while the
-              engine does the work.
+              Built for TradingView. RangeClarity reads strong and weak structure, ranges, zones
+              and a visual verdict — so the chart stays simple while the engine does the work.
             </p>
 
             <div className={styles.actions}>
@@ -93,7 +93,7 @@ export default function RangeClarityFoxBrandV1Page() {
             </div>
 
             <p className={styles.proofLine}>
-              No repaint hype. No signals-for-hire. Just cleaner structure context.
+              Private beta · TradingView username required · manual invite within 24–48h.
             </p>
 
             <div className={styles.micro}>
@@ -107,6 +107,19 @@ export default function RangeClarityFoxBrandV1Page() {
               </div>
             </div>
           </div>
+
+          {/* Mobile-only "Editorial" hero (≤767px). Type-led, no mascot; CTAs live in the sticky bar. */}
+          <div className={styles.mobileHero}>
+            <div className={styles.eyebrow}>
+              <span className={styles.eyebrowDot} aria-hidden="true" />
+              Market-structure clarity
+            </div>
+            <h1 className={styles.mTitle}>
+              Read market structure <span className={styles.mAccent}>clearly.</span>
+            </h1>
+            <p className={styles.mSub}>Trend, location, zones and structure quality — without signals.</p>
+            <p className={styles.mNote}>Private beta. TradingView username required.</p>
+          </div>
         </div>
       </section>
 
@@ -117,6 +130,9 @@ export default function RangeClarityFoxBrandV1Page() {
         <div className={v2.grid} aria-hidden="true" />
         <RangeCommandV2LowerSections />
       </div>
+
+      {/* Mobile-only sticky conversion bar (≤767px); fades out when the final #join CTA is in view. */}
+      <StickyCtaBar />
     </main>
   );
 }

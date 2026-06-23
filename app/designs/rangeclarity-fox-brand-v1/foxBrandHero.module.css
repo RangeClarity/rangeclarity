@@ -344,3 +344,87 @@
   .proofLine { margin-top: 1.2rem; }
   .micro { gap: 1.25rem; margin-top: 1.8rem; padding-top: 1.2rem; }
 }
+
+/* ============================================================
+   Mobile "Editorial" hero + sticky CTA (Concept C).
+   Active ≤767px only. The desktop fox hero is untouched ≥768px.
+   ============================================================ */
+.mobileHero { display: none; flex-direction: column; }
+.mTitle {
+  margin: 0 0 1.05rem;
+  font-size: clamp(2.2rem, 11vw, 2.7rem);
+  font-weight: 850;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: #f4f7fa;
+}
+.mAccent { color: var(--teal); }
+.mSub {
+  margin: 0 0 1.1rem;
+  max-width: 19rem;
+  color: var(--dim);
+  font-size: 1.02rem;
+  line-height: 1.5;
+}
+.mNote {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+}
+
+.mobileCta { display: none; gap: 0.6rem; align-items: stretch; transition: transform 240ms ease, opacity 200ms ease; }
+.mobileCtaHidden { transform: translateY(130%); opacity: 0; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .mobileCta { transition: none; } }
+.mCtaPrimary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 50px;
+  padding: 0 1rem;
+  border-radius: 11px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: #04130d;
+  background: var(--teal);
+}
+.mCtaSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  padding: 0 0.95rem;
+  border-radius: 11px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--fg);
+  border: 1px solid var(--line-2);
+  background: rgba(12, 19, 34, 0.6);
+}
+
+@media (max-width: 767px) {
+  .copyDesktop { display: none; }
+  .heroImage,
+  .heroGlow { display: none; }
+  .heroInner { justify-content: flex-start; padding-top: 2.4rem; padding-bottom: 3.5rem; }
+  .mobileHero { display: flex; }
+  .page { padding-bottom: 86px; }
+  .mobileCta {
+    display: flex;
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 60;
+    padding: 0.7rem 0.9rem calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    background: rgba(6, 9, 15, 0.86);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
