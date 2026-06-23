@@ -1,0 +1,234 @@
+/* ============================================================
+   /ops — RC Ops Console (internal, read-only command center).
+   Dark, calm, compact. Not marketing. Scoped CSS module.
+   ============================================================ */
+.wrap {
+  --bg: #0a0e16;
+  --panel: #0e1422;
+  --panel-2: #121a2c;
+  --line: #1e2a44;
+  --line-2: #2b3c5e;
+  --fg: #e7eefc;
+  --dim: #93a1c4;
+  --faint: #5d6a8c;
+  --green: #34f5b0;
+  --teal: #2fe9d6;
+  --amber: #ffcf5c;
+  --red: #ff6b6b;
+  --mono: ui-monospace, "JetBrains Mono", "Cascadia Code", Menlo, monospace;
+
+  min-height: 100vh;
+  background: radial-gradient(120% 80% at 80% -10%, rgba(47, 233, 214, 0.05), transparent 60%), var(--bg);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+.inner {
+  width: min(100%, 1200px);
+  margin-inline: auto;
+  padding: 1.4rem clamp(0.9rem, 3vw, 1.6rem) 3rem;
+}
+
+/* ---------- header ---------- */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+.title {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+.title .g { color: var(--green); }
+.subtitle {
+  margin: 0.2rem 0 0;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--faint);
+}
+.headMeta { font-family: var(--mono); font-size: 0.7rem; color: var(--faint); text-align: right; }
+
+/* ---------- section scaffolding ---------- */
+.section { margin-top: 1.5rem; }
+.sectionLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.7rem;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+.sectionLabel .k {
+  display: inline-grid;
+  place-items: center;
+  width: 18px; height: 18px;
+  border-radius: 5px;
+  background: rgba(47, 233, 214, 0.12);
+  color: var(--teal);
+  font-size: 0.66rem;
+  border: 1px solid rgba(47, 233, 214, 0.25);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 0.85rem;
+}
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+
+.card {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.95rem 1rem;
+}
+.cardTitle { margin: 0 0 0.5rem; font-size: 0.92rem; font-weight: 700; }
+
+/* ---------- A. status strip ---------- */
+.statStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.7rem;
+}
+.tile {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 0.7rem 0.8rem;
+}
+.tileLabel {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.tileValue { margin-top: 0.3rem; font-size: 0.95rem; font-weight: 650; line-height: 1.3; }
+.metrics { display: flex; gap: 0.5rem; margin-top: 0.35rem; flex-wrap: wrap; }
+.metric { font-family: var(--mono); font-size: 0.78rem; font-weight: 700; }
+
+.callout {
+  margin-top: 0.7rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+@media (max-width: 680px) { .callout { grid-template-columns: 1fr; } }
+.calloutBox {
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--teal);
+  border-radius: 0 10px 10px 0;
+  background: var(--panel);
+  padding: 0.7rem 0.85rem;
+}
+.calloutBox.next { border-left-color: var(--green); }
+.calloutLabel {
+  font-family: var(--mono); font-size: 0.62rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--dim);
+}
+.calloutText { margin-top: 0.3rem; font-size: 0.86rem; color: var(--fg); line-height: 1.45; }
+
+/* ---------- pills ---------- */
+.pill {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.12rem 0.5rem; border-radius: 999px;
+  font-family: var(--mono); font-size: 0.68rem; font-weight: 700;
+  border: 1px solid var(--line-2);
+}
+.pillOk { color: var(--green); border-color: rgba(52, 245, 176, 0.4); background: rgba(52, 245, 176, 0.08); }
+.pillWarn { color: var(--amber); border-color: rgba(255, 207, 92, 0.4); background: rgba(255, 207, 92, 0.08); }
+.pillCrit { color: var(--red); border-color: rgba(255, 107, 107, 0.4); background: rgba(255, 107, 107, 0.08); }
+.pillIdle { color: var(--dim); }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+.ok { color: var(--green); }
+.warn { color: var(--amber); }
+.crit { color: var(--red); }
+.muted { color: var(--faint); }
+
+/* ---------- B. agent cards ---------- */
+.agent { display: flex; flex-direction: column; gap: 0.45rem; }
+.agentHead { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.agentTool {
+  font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--teal); border: 1px solid rgba(47, 233, 214, 0.3); border-radius: 5px; padding: 0.1rem 0.4rem;
+}
+.agentPurpose { font-size: 0.82rem; color: var(--fg); line-height: 1.4; }
+.agentMeta { font-family: var(--mono); font-size: 0.68rem; color: var(--faint); }
+.agentMeta b { color: var(--dim); font-weight: 600; }
+.agentHint { font-size: 0.74rem; color: var(--dim); line-height: 1.4; }
+.agentRow { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.1rem; }
+.path { font-family: var(--mono); font-size: 0.68rem; color: var(--faint); word-break: break-all; }
+
+/* ---------- C. commands ---------- */
+.cmdList { display: flex; flex-direction: column; gap: 0.5rem; }
+.cmdRow {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.7rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 9px;
+  padding: 0.5rem 0.6rem 0.5rem 0.75rem;
+}
+.cmdMain { min-width: 0; }
+.cmdText { font-family: var(--mono); font-size: 0.82rem; color: var(--fg); }
+.cmdNote { font-size: 0.68rem; color: var(--faint); margin-top: 0.1rem; }
+
+/* ---------- D. output feed ---------- */
+.feed { display: flex; flex-direction: column; gap: 0.5rem; }
+.feedRow {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 0.5rem 0.7rem;
+}
+.feedMain { min-width: 0; }
+.feedTitle { font-size: 0.82rem; font-weight: 600; }
+.feedPath { font-family: var(--mono); font-size: 0.66rem; color: var(--faint); word-break: break-all; }
+.feedSide { display: flex; align-items: center; gap: 0.5rem; flex: none; }
+
+/* ---------- E. workflow map ---------- */
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+.flowStep {
+  flex: 1 1 130px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 9px;
+  padding: 0.55rem 0.65rem;
+}
+.flowNum { font-family: var(--mono); font-size: 0.6rem; color: var(--teal); }
+.flowText { font-size: 0.76rem; margin-top: 0.15rem; line-height: 1.3; }
+.flowText b { color: var(--fg); }
+
+/* ---------- F & G lists ---------- */
+.list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+.list li {
+  display: flex; gap: 0.55rem; align-items: flex-start;
+  font-size: 0.82rem; color: var(--fg); line-height: 1.4;
+}
+.list .mk { color: var(--teal); flex: none; font-family: var(--mono); }
+.dontCard { border-color: rgba(255, 107, 107, 0.25); }
+.dont li .mk { color: var(--red); }
+
+/* ---------- copy button ---------- */
+.copyBtn {
+  flex: none;
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
+  color: #04130d; background: linear-gradient(120deg, var(--green), var(--teal));
+  border: none; border-radius: 7px; padding: 0.34rem 0.6rem; cursor: pointer;
+  transition: filter 160ms ease;
+}
+.copyBtn:hover { filter: brightness(1.08); }
+.copyBtnSm { padding: 0.26rem 0.5rem; font-size: 0.66rem; }
+
+.noteBar {
+  margin-top: 1.5rem; padding: 0.7rem 0.85rem;
+  border: 1px dashed var(--line-2); border-radius: 10px;
+  font-size: 0.74rem; color: var(--dim); line-height: 1.5;
+}
+.noteBar b { color: var(--fg); }
