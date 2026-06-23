@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { DailyKanbanBoard } from "./DailyKanbanBoard";
 import {
   getLinearErrorMessage,
@@ -17,6 +18,10 @@ export const metadata: Metadata = {
 };
 
 export default async function LinearBoardPage() {
+  if (process.env.RC_INTERNAL_PAGES_ENABLED !== "true") {
+    notFound();
+  }
+
   let issues: LinearBoardIssue[] = [];
   let error: string | null = null;
 

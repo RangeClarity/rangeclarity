@@ -6,6 +6,7 @@ The internal command-center routes are disabled by default.
 
 - `/ops`
 - `/command-center`
+- `/linear-board`
 
 Both routes return a 404 unless this environment variable is explicitly enabled:
 
@@ -25,4 +26,3 @@ RC_INTERNAL_PAGES_ENABLED=false
 - Do not expose Linear data, internal planning data, or operational dashboards publicly.
 - Keep the default production posture disabled.
 - Review this gate before any main deploy.
-
