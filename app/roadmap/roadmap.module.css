@@ -1,0 +1,488 @@
+.page {
+  min-height: 100vh;
+  padding: 32px;
+  background:
+    linear-gradient(rgba(124, 247, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 247, 255, 0.035) 1px, transparent 1px),
+    #05060a;
+  background-size: 40px 40px;
+  color: var(--fg);
+}
+
+.hero,
+.decisionBand,
+.section {
+  width: min(1500px, 100%);
+  margin-inline: auto;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+  gap: 24px;
+  align-items: end;
+  padding: 18px 0 30px;
+}
+
+.heroText h1,
+.sectionHead h2,
+.decisionBand h2 {
+  margin-top: 8px;
+  font-size: 3rem;
+  line-height: 1.03;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.sectionHead h2,
+.decisionBand h2 {
+  font-size: 2rem;
+}
+
+.kicker {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.lead,
+.sectionHead p,
+.decisionBand p,
+.systemNode p,
+.taskCard p {
+  color: var(--fg-dim);
+}
+
+.lead {
+  max-width: 72ch;
+  margin-top: 16px;
+  font-size: 1rem;
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--line);
+}
+
+.metaGrid div {
+  min-width: 0;
+  padding: 14px;
+  background: rgba(10, 12, 22, 0.92);
+}
+
+.metaGrid dt,
+.systemNode dt,
+.phaseMeta dt,
+.taskMeta dt,
+.automationItem dt {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.metaGrid dd,
+.systemNode dd,
+.phaseMeta dd,
+.taskMeta dd,
+.automationItem dd {
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+  color: var(--fg);
+  font-size: 0.84rem;
+}
+
+.decisionBand {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.34fr) minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px 0 34px;
+  border-top: 1px solid var(--line);
+}
+
+.decisionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.decisionList,
+.warnList,
+.systemNode,
+.taskCard,
+.automationItem {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent),
+    rgba(10, 12, 22, 0.82);
+}
+
+.decisionList,
+.warnList {
+  padding: 14px;
+}
+
+.decisionList h3,
+.warnList h3,
+.systemNode h3,
+.taskCard h3,
+.automationItem h3 {
+  font-size: 1rem;
+  font-weight: 680;
+  letter-spacing: 0;
+}
+
+.decisionList ul,
+.warnList ul,
+.compactList {
+  margin-top: 10px;
+  padding-left: 18px;
+  color: var(--fg-dim);
+  font-size: 0.88rem;
+}
+
+.decisionList li + li,
+.warnList li + li,
+.compactList li + li {
+  margin-top: 6px;
+}
+
+.warnList {
+  border-color: rgba(255, 206, 77, 0.28);
+  background: rgba(255, 206, 77, 0.055);
+}
+
+.section {
+  padding: 32px 0;
+  border-top: 1px solid var(--line);
+}
+
+.sectionHead {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.42fr) minmax(0, 0.58fr);
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 18px;
+}
+
+.systemMap {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.systemNode,
+.taskCard,
+.automationItem {
+  position: relative;
+  min-width: 0;
+  padding: 15px;
+}
+
+.systemNode::before,
+.taskCard::before,
+.automationItem::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--line-2);
+}
+
+.nodeTop,
+.cardTop,
+.phaseTitleRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.systemNode h3,
+.taskCard h3,
+.automationItem h3 {
+  margin-top: 12px;
+}
+
+.systemNode p,
+.taskCard p {
+  margin-top: 8px;
+  font-size: 0.88rem;
+}
+
+.systemNode dl,
+.taskMeta,
+.automationItem dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.status,
+.timing {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.statusDone {
+  color: var(--bull);
+}
+
+.statusProgress,
+.timingNow {
+  color: var(--accent);
+}
+
+.statusNext,
+.timingNext {
+  color: var(--neon-cyan);
+}
+
+.statusBlocked {
+  color: var(--bear);
+}
+
+.statusLater,
+.timingLater {
+  color: var(--fg-faint);
+}
+
+.scoreHigh {
+  color: var(--bull);
+  font-family: var(--mono);
+}
+
+.scoreMedium {
+  color: var(--warn);
+  font-family: var(--mono);
+}
+
+.scoreLow {
+  color: var(--fg-dim);
+  font-family: var(--mono);
+}
+
+.phaseRail {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+}
+
+.phaseItem {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(10, 12, 22, 0.58);
+}
+
+.phaseIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  color: var(--accent);
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+.phaseTitleRow h3 {
+  min-width: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.phaseItem p {
+  margin-top: 8px;
+  color: var(--fg-dim);
+}
+
+.phaseMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.scoreFormula {
+  padding: 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: rgba(47, 255, 214, 0.06);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.weightGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.weightGrid div {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(10, 12, 22, 0.7);
+}
+
+.weightGrid span {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--fg-faint);
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weightGrid strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 1.2rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+  background: rgba(10, 12, 22, 0.72);
+}
+
+.table th,
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.86rem;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background: rgba(14, 17, 32, 0.98);
+  color: var(--fg-faint);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.table td span {
+  display: block;
+  margin-top: 3px;
+  color: var(--fg-faint);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+}
+
+.taskGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.automationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.automationItem dl {
+  grid-template-columns: 1fr;
+}
+
+.automationItem .cardTop span,
+.automationItem .cardTop strong {
+  color: var(--fg-faint);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1180px) {
+  .hero,
+  .decisionBand,
+  .sectionHead {
+    grid-template-columns: 1fr;
+  }
+
+  .systemMap,
+  .taskGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .decisionGrid,
+  .weightGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 18px;
+  }
+
+  .heroText h1 {
+    font-size: 2.25rem;
+  }
+
+  .sectionHead h2,
+  .decisionBand h2 {
+    font-size: 1.55rem;
+  }
+
+  .metaGrid,
+  .systemMap,
+  .taskGrid,
+  .automationGrid,
+  .decisionGrid,
+  .weightGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .phaseItem {
+    grid-template-columns: 1fr;
+  }
+
+  .phaseMeta,
+  .systemNode dl,
+  .taskMeta {
+    grid-template-columns: 1fr;
+  }
+}
