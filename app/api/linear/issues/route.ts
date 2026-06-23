@@ -11,6 +11,10 @@ export const dynamic = "force-dynamic";
 // This endpoint intentionally supports GET only.
 
 export async function GET() {
+  if (process.env.RC_INTERNAL_PAGES_ENABLED !== "true") {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
+
   try {
     const issues = await listLinearIssues();
 
