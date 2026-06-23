@@ -2,7 +2,7 @@
 
 **Purpose:** Pause point. This file lets you return later and continue quickly without losing context.
 **Status:** Planning & foundation only — intentionally not coding yet.
-**Last updated:** 2026-06-14
+**Last updated:** 2026-06-23
 **Owner:** Dean
 
 ---
@@ -13,6 +13,8 @@
 
 Pick one of those four tracks and we proceed from the matching next step below. Nothing else starts until you choose.
 
+**Current planning priority:** Simple Surface + Complex Engine. First lock the visible indicator shape, then define the complex structure engine underneath. The first feature upgrade remains Location Context / Distance-to-Key-Zone. Do not add more indicators, Volume/Liquidity, complex MTF, AI commentary, or signal-like features before this phase system is approved.
+
 ---
 
 ## 1. Current project summary
@@ -22,14 +24,16 @@ RangeClarity is a clean TradingView dashboard/indicator (Pine Script) that helps
 Business model: free public **Starter** script for discovery → invite-only paid **Pro** script → **Whop** for checkout/access → **Discord** for onboarding/retention → landing page on **RangeClarity.com**. TradingView Paid Spaces possibly later.
 
 **Where things stand right now:**
-- `RANGECLARITY_MASTER_PLAN.md` — complete (21 sections: strategy, MVP, indicator spec, S/R engine, scoring, UX, landing page, GTM, monetization, compliance, architecture, 30/60/90 roadmap, Phase 1 plan, open questions). This is the source of truth.
+- `docs/rangeclarity-master-action-plan.md` — current source of truth / RC-MAP for all critique, planning, implementation, and prioritization.
+- `RANGECLARITY_MASTER_PLAN.md` — legacy long-form plan (21 sections: strategy, MVP, indicator spec, S/R engine, scoring, UX, landing page, GTM, monetization, compliance, architecture, 30/60/90 roadmap, Phase 1 plan, open questions). Use as supporting historical context.
 - A minimal Next.js + TypeScript scaffold exists in this folder from an earlier step. It is **parked** — the plan calls for a static landing page later, not now. Note: `git init` could not complete in the build environment; run it locally when you resume.
 - No production code, no landing page, no Pine Script written. By design.
 - A strict review pass was completed in-house on 2026-06-14 (`REVIEW_AND_PHASE1.md`). The intended external **Codex output was never saved into the project** — only the review *request* prompt (`Codex_REVIEW_REQUEST.md`) exists. If you ran Codex elsewhere, paste its output and I'll reconcile.
 - The master plan is now **revision 2**: review refinements applied as recommendations pending your approval.
 
 **Files in this project:**
-- `RANGECLARITY_MASTER_PLAN.md` — full plan, revision 2 (source of truth)
+- `docs/rangeclarity-master-action-plan.md` — current source of truth / RC-MAP
+- `RANGECLARITY_MASTER_PLAN.md` — full legacy plan, revision 2
 - `REVIEW_AND_PHASE1.md` — review verdict, changelog, consolidated Phase 1 plan
 - `Codex_REVIEW_REQUEST.md` — the review prompt (no Codex output captured)
 - `PROJECT_HANDOFF.md` — this file

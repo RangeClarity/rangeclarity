@@ -3,6 +3,39 @@
 **North star:** Ship the landing page on rangeclarity.com, then validate demand. Build the product only after people show they want it.
 **Rule of the month:** Every day ends with something **shipped, tested, or decided**. Max 3 main tasks/day. Stop redesigning.
 
+## 2026-06-23 Strategic Update
+
+The active roadmap has changed. The next product priority is **S/R Quality
+Upgrade first**, not a new Volume / Liquidity Confirmation Engine.
+
+Users will pay and stay only if RangeClarity becomes a trusted daily
+chart-reading tool. Do not add more generic indicators before the core S/R
+engine feels excellent.
+
+Active work cards:
+
+1. S/R Quality Upgrade Plan
+2. Fewer Better Zones Implementation
+3. Structure-First RC Score Adjustment
+4. Dashboard Explanation Upgrade
+5. 20-Chart Validation Pack
+6. Closed Beta Cohort
+7. Onboarding Explainer
+8. Analytics Funnel Tracking
+
+Rejected for MVP:
+
+- Full Volume / Liquidity Confirmation Engine
+- Volume at 15% of RC Score
+- Statistical RVOL
+- VWMA conviction
+- Absorption/rejection labels
+- Breakout participation scoring
+- Volume-at-price binning
+- Signal-like dashboard rows
+
+Current source-of-truth board: [docs/kanban.md](docs/kanban.md).
+
 ---
 
 ## A. Roadmap overview (next 30 days)
@@ -53,7 +86,24 @@ Milestones overlap on purpose (M4 starts while M3 finishes). **M1 is the only th
 
 ---
 
-## C. Kanban board (current state)
+## C. Current Kanban Board
+
+The active board is maintained in [docs/kanban.md](docs/kanban.md). Current
+state:
+
+```
+INBOX             | SPEC NEEDED       | READY             | DOING              | REVIEW
+------------------|-------------------|-------------------|--------------------|------------------
+VWAP/AVWAP later  | S/R criteria      | Dashboard explain | S/R Quality Plan   | Founder approval
+HTF structure     | 20-chart symbols  | RC Score adjust   |                    | Implementation gate
+Volume tiebreaker | Beta cohort list  | Onboarding draft  |                    |
+Compression eng.  | Analytics events  | Funnel tracking   |                    |
+```
+
+Nothing enters Pine implementation until the S/R spec is approved. No new
+module enters the build queue during this S/R quality pass.
+
+## C-old. Historical Kanban Board
 
 ```
 INBOX            | SPEC NEEDED      | READY            | DOING            | HUMAN REVIEW     | DONE

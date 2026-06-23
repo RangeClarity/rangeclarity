@@ -1,26 +1,30 @@
 # MVP spec (DRAFT — Phase 1 seed, build only after architecture approval)
 
+> 2026-06-23 update: S/R Quality Upgrade is the current priority. Do not build
+> the Volume / Liquidity Confirmation Engine now. Volume is parked for MVP and
+> may return later only as a small context/tiebreaker around major zones.
+
 Working name: **RangeClarity Engine — Market Map**. Overlay indicator, Pine v6.
 
 ## MVP scope (smallest thing that feels like a real product)
-Surface = one table + max 4 zones. Engine = 4 inputs → confidence → verdict.
+Surface = one table + max 4 zones. Engine = structure inputs → confidence → verdict.
 
 ### Modules in MVP
 1. **Regime:** ATR percentile (compression/normal/expansion/shock) + range position (upper/mid/lower third).
 2. **Structure & Bias:** confirmed swing pivots → last BOS/CHoCH → bias up/down/neutral.
-3. **Smart Zones:** nearest support + nearest resistance (ATR-clustered, touch count, RVOL weight, recency). Max 2 each side; draw nearest only.
-4. **Momentum/Volume confirm:** RSI-percentile + EMA slope + ADX gate; RVOL context. Confirm-only.
+3. **Smart Zones:** nearest support + nearest resistance (ATR-clustered, touch count, recency, freshness, reaction quality). Max 2 each side; draw nearest only.
+4. **Momentum context:** RSI-percentile + EMA slope + ADX gate. Context-only.
 5. **Confidence 0–100:** weighted blend with explicit downgrades; explainable.
 6. **Verdict:** No edge / Caution / Clean setup + bias color.
 
 ### Dashboard (one table, top-right)
-`Ticker · Regime · Bias · Nearest support · Nearest resistance · Liquidity target · Confidence · Verdict`
+`Ticker · Regime · Bias · Nearest support · Nearest resistance · Location · Confidence · Verdict`
 
 ### Inputs — beginner (5–7)
 Sensitivity (pivot lookback), Zone strictness, Show zones (on/off), Momentum confirm (on/off), Theme, Advanced mode (toggle).
 
 ### Inputs — advanced (hidden groups)
-Per-factor weights, ATR length/percentile window, ADX/RSI lengths, RVOL window, max zones, debug overlay, alert thresholds.
+Per-factor weights, ATR length/percentile window, ADX/RSI lengths, max zones, debug overlay, alert thresholds.
 
 ### Alerts (MVP)
 - Zone of interest activated (price entered nearest zone, confirmed).

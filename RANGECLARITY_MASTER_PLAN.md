@@ -2,19 +2,33 @@
 
 **Status:** Planning phase only. No production code, no landing page, no Pine Script yet.  
 **Owner:** Dean  
-**Last updated:** 2026-06-14 (revision 2 — review pass applied)  
+**Last updated:** 2026-06-23 (Simple Surface + Complex Engine phase update)  
 **Domain:** RangeClarity.com  
 **Core message:** No signals. No hype. Just chart clarity.
 
+> Current source of truth: `docs/rangeclarity-master-action-plan.md` (RC-MAP).
+> This file is retained as legacy long-form planning context.
+
 > Revision 2 note: A strict review pass was applied on 2026-06-14. The intended external (Codex) review output was not available, so the review was performed in-house; refinements are summarized in `REVIEW_AND_PHASE1.md`. Items marked "(recommended, pending approval)" below are not yet locked.
 
-This document is the operating plan for RangeClarity. It is intentionally scoped down for a clean Phase 1. When a feature makes the product louder, more signal-like, harder to explain, or harder to launch, it is deferred.
+> 2026-06-23 strategic update: The build direction is Simple Surface +
+> Complex Engine. Interpret "most viewed indicator" as the most useful, calm,
+> screenshot-friendly daily chart-reading companion, not the loudest or most
+> signal-like indicator. Do not build the Volume / Liquidity Confirmation
+> Engine now. Do not add more generic indicators. The first feature upgrade is
+> still Location Context / Distance-to-Key-Zone: one calm dashboard read that
+> explains whether price location is clean, extended, mid-range, near
+> support/resistance, or structurally poor. S/R Quality is a supporting
+> dependency for Location Context, not the headline product upgrade. The active
+> board lives in `docs/kanban.md`.
+
+This document is legacy long-form planning context for RangeClarity. The current operating source of truth is RC-MAP. When a feature makes the product louder, more signal-like, harder to explain, or harder to launch, it is deferred.
 
 ---
 
 ## 1. Executive Summary
 
-RangeClarity is a clean TradingView dashboard that helps traders understand chart context: trend, support, resistance, range, location, extension, volume, and momentum.
+RangeClarity is a clean TradingView dashboard that helps traders understand chart context: trend, support, resistance, range, location, extension, and structure quality.
 
 The product does not provide buy or sell signals. It does not promise profits, accuracy, win rate, or trade outcomes. Its purpose is to make the chart easier to read before the trader makes their own decision.
 
@@ -38,7 +52,6 @@ RangeClarity should become the simplest trustworthy way for a TradingView user t
 - Is price near support, resistance, or the middle of a range?
 - Is the move extended?
 - Is the range clean or messy?
-- Is volume helping or not?
 - Is this chart worth attention, or should I wait?
 
 The long-term product can grow into a Pro dashboard inspired by Mark Minervini and Brian Shannon, but Phase 1 must stay narrow. The first job is to prove that a trader wants this kind of clarity and trusts the product language.
@@ -153,7 +166,6 @@ The Starter indicator should include:
 - Range width %
 - Position inside range %
 - ATR extension
-- Volume / RVOL status
 - Momentum status
 - One plain-English interpretation sentence
 
@@ -227,7 +239,7 @@ Hidden or deferred:
 3. Support / Resistance (both zone values on one line)
 4. Location (distance to support %, distance to resistance %, position in range %)
 5. Range Width %
-6. Extension + Volume (ATR extension state; RVOL/volume state)
+6. Extension (ATR extension state)
 7. Interpretation sentence
 
 Momentum feeds State and the Interpretation sentence internally rather than taking its own Starter row. The first visible read is State + Bias. Context Score is **recommended Pro-only / internal in V1** (see below) and is not shown as a row in Starter.
@@ -266,9 +278,8 @@ Suggested starting weights:
 - Moving average relationship: 15
 - Range location: 20
 - ATR extension: 15
-- Volume / RVOL: 10
 - Momentum: 10
-- Data quality / range quality: 5
+- Data quality / range quality: 15
 
 Hard caps:
 
@@ -305,12 +316,13 @@ Use a simple method such as rate of change, slope, or smoothed oscillator behavi
 
 ### Volume / RVOL
 
-V1 volume should show:
+Volume is parked for MVP. Do not build a Volume / Liquidity Confirmation Engine,
+do not give volume a 15% RC Score weight, and do not use confirmation,
+conviction, absorption, rejection, or breakout-participation language.
 
-- RVOL compared with a rolling average
-- Volume above / normal / below average
-
-Do not overstate volume "confirmation." Prefer "volume is elevated," "volume is normal," or "volume is light."
+Future option: after S/R quality is trusted by beta users, volume may return as
+a small context/tiebreaker around major zones only. If shown, it should be
+neutral and descriptive, such as "volume is elevated" or "volume is light."
 
 ### ATR Extension
 
@@ -424,7 +436,7 @@ Middle section:
 
 Bottom section:
 
-- Extension + Volume (ATR extension state; RVOL/volume state)
+- Extension (ATR extension state)
 - Interpretation sentence
 
 ### UX Rules
@@ -446,7 +458,7 @@ Approved:
 - "Trend is constructive, but price is extended from support."
 - "Range is unclear; wait for cleaner structure."
 - "Price is near resistance, so location is less attractive."
-- "Volume is light and momentum is flat."
+- "Momentum is flat and structure is unclear."
 - "Price is near support inside a defined range."
 
 Avoid:
@@ -776,7 +788,7 @@ Phase 1 is planning and product-definition only. It ends with an approved, build
 ### P1-2: Finalize Starter Dashboard Spec
 
 **Goal:** Define every row and label.  
-**Output:** Dashboard spec with Bias, State, Context Score, S/R, distance metrics, ATR extension, RVOL, momentum, and interpretation rules.  
+**Output:** Dashboard spec with Bias, State, Context Score, S/R, distance metrics, ATR extension, momentum, and interpretation rules.  
 **Done when:** No new product decisions are needed to build the dashboard.
 
 ### P1-3: Finalize Support/Resistance Rules
@@ -852,7 +864,7 @@ Only these questions block Phase 1 approval:
 2. Are the safer state labels approved, replacing "Favorable"?
 3. Should Context Score be visible in Starter, or should it be Pro-only later? *(Review recommendation: hide the number in Starter — compute internally, surface only State. Needs your confirmation.)*
 4. Should EMA 200 be included in V1 trend logic when available?
-5. What exact RVOL lookback should be used for the first spec?
+5. Which 20 symbols/charts should anchor the first S/R validation pack?
 6. What exact ATR extension thresholds should define Normal, Stretched, and Extended?
 7. Which waitlist tool should be used?
 8. Who will review compliance language before paid Pro launch?

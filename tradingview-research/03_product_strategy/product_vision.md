@@ -1,5 +1,9 @@
 # Product vision & strongest direction
 
+> 2026-06-23 update: S/R Quality Upgrade is the current priority. Do not build
+> the Volume / Liquidity Confirmation Engine now. Volume is parked for MVP and
+> may return later only as a small context/tiebreaker around major zones.
+
 ## The recommendation (strongest direction)
 Build **one indicator** — working name **"RangeClarity Engine — Market Map"** — whose surface is a single calm read and whose engine is a **weighted, explainable confidence score** built from a few robust modules. The differentiator is not any one module (all are copyable); it is the **scoring spine + the "No edge" honesty + the clean one-line read**. That combination is what an SMC/signal clone can't easily reproduce, and it's on-brand with RangeClarity.
 
@@ -9,19 +13,19 @@ Build **one indicator** — working name **"RangeClarity Engine — Market Map"*
 - It compounds into the RangeClarity moat: the same engine output feeds the **Daily Range Brief** (Telegram) and the **setup library**. The indicator is the hook; the brief/data is the moat (see `moat.md`).
 
 ## Best combined product concept (MVP composition)
-A single dashboard read driven by 4 engine inputs + a score:
+A single dashboard read driven by structure-first engine inputs + a score:
 
 1. **Regime** (from cards 3): trend / range / compression / expansion / shock — from ATR-percentile + range position.
 2. **Structure & Bias** (card 1): confirmed swing pivots → BOS/CHoCH → up/down/neutral bias.
-3. **Smart Zones** (cards 6, 2, 5-trimmed): 2 zones max each side, ATR-clustered, volume-weighted, with touch count + recency; nearest untouched liquidity pool + proximity score.
-4. **Momentum & Volume confirmation** (cards 7, 8): RSI-percentile + EMA-slope + ADX gate; RVOL context. Confirm-only, never a signal.
+3. **Smart Zones** (cards 6, 2, 5-trimmed): fewer better zones, ATR-clustered, with touch count, recency, freshness, and reaction quality. No liquidity-pool claims in MVP.
+4. **Momentum context** (card 7): RSI-percentile + EMA-slope + ADX gate. Context-only, never a signal.
 
-→ **Confidence Score 0–100** (card 4 philosophy): weighted blend of regime suitability, bias clarity, zone quality, momentum agreement, volume backing — with **explicit downgrades** (e.g., extended from support, price mid-range, low volume) and an **explainable breakdown**.
+→ **Confidence Score 0–100** (card 4 philosophy): weighted blend of regime suitability, bias clarity, zone quality, momentum agreement, and location clarity — with **explicit downgrades** (e.g., extended from support, price mid-range, unclear structure) and an **explainable breakdown**.
 
 → **Verdict (the only "main read"):** `No edge` / `Caution` / `Clean setup` + bias color (green/red/neutral). Never "buy/sell".
 
 ### The one-line dashboard (beginner surface)
-`Regime · Bias · Nearest support · Nearest resistance · Liquidity target · Confidence · Verdict`
+`Regime · Bias · Nearest support · Nearest resistance · Location · Confidence · Verdict`
 
 ### Advanced mode (hidden)
 Per-factor score breakdown, weights, raw values, debug zones — behind a settings toggle. Beginner sees 5–7 inputs; advanced unlocks the rest.
