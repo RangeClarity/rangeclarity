@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./beta.module.css";
+import TradingViewCTA from "@/app/_components/TradingViewCTA";
 import BetaSignupForm from "./BetaSignupForm";
 import { listProviderStatus, PLAN_CONFIG, normalizePlan } from "@/lib/payments";
 
@@ -18,7 +20,6 @@ export const metadata: Metadata = {
   },
 };
 
-const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? "https://www.tradingview.com/";
 
 function RangeChart() {
   return (
@@ -77,7 +78,7 @@ export default async function BetaLanding({
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link href="/" className={styles.brand}>
-            <span className={styles.brandMark} />RangeClarity <small>Beta</small>
+            <Image className={styles.brandBadge} src="/brand/fox-badge.png" alt="" aria-hidden="true" width={24} height={24} />RangeClarity <small>Beta</small>
           </Link>
           <nav className={styles.headerNav}>
             <a href="#how">How it works</a>
@@ -94,17 +95,21 @@ export default async function BetaLanding({
             <div>
               <span className={styles.eyebrow}>Private paid beta &middot; invite-only</span>
               <h1 className={styles.h1}>
-                Read the range before<br />you make the <span className={styles.accent}>move</span>.
+                Read the range before you make the <span className={styles.accent}>move</span>.
               </h1>
               <p className={styles.heroSub}>
-                Simple chart. Complex engine. RangeClarity is a clarity layer for market
-                structure inside TradingView — structure, bias, support and resistance,
-                range position, and a clarity score. No signals. No noise. Just structure.
+                Simple chart, complex engine. A clarity layer for market structure inside
+                TradingView — structure, bias, support and resistance, range position, and a
+                clarity score. No signals. No noise. Just structure.
               </p>
               <div className={styles.ctaRow}>
                 <a href="#join" className={`${styles.btn} ${styles.btnPrimary}`}>Request beta access</a>
                 <a href="#what" className={styles.btn}>See what it shows</a>
               </div>
+              <p className={styles.ctaNote}>
+                Private beta &middot; TradingView username required &middot; manual invite.{" "}
+                <Link href="/beta/free-access">Or try 7-Day Free Access &rarr;</Link>
+              </p>
               <div className={styles.heroStats}>
                 <div><div style={{ fontFamily: "var(--mono)", color: "var(--fg)" }}>Clarity</div>
                   <div style={{ fontFamily: "var(--mono)", fontSize: "0.62rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--fg-faint)" }}>over noise</div></div>
@@ -140,7 +145,7 @@ export default async function BetaLanding({
           </div>
         </section>
 
-        <section className={styles.section}>
+        <section className={styles.section} id="join">
           <span className={styles.eyebrow}>Join the beta</span>
           <h2 className={styles.h2}>Request your <span style={{ color: "var(--accent)" }}>beta access</span></h2>
           <p className={styles.lead}>
@@ -157,7 +162,7 @@ export default async function BetaLanding({
                 {active ? active.label : "Manual (founder-confirmed)"}
               </h3>
               <p className={styles.payNote}>
-                Secure checkout powered by Lemon Squeezy. The paid plans ($29.90 / $49.90) open a
+                Secure checkout powered by Lemon Squeezy. The paid plans ($29/mo / $49/mo) open a
                 hosted Lemon Squeezy checkout; the 7-day free option is a manual request.
               </p>
               <p className={styles.payNote}>
@@ -174,16 +179,13 @@ export default async function BetaLanding({
           <p className={styles.lead}>RangeClarity lives inside TradingView as an invite-only indicator. You need a TradingView account to use it.</p>
           <div className={styles.resGrid}>
             <div className={styles.card}><div className={styles.kicker}>Step 1</div><h3>Create an account</h3>
-              <p>A free TradingView account is enough to start.{" "}
-                <a href={TV_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Open TradingView &rarr;</a></p></div>
+              <p>A free TradingView account is enough to start.</p></div>
             <div className={styles.card}><div className={styles.kicker}>Step 2</div><h3>Share your username</h3>
               <p>Give us your exact TradingView username on signup — that&rsquo;s how invite-only access is granted.</p></div>
             <div className={styles.card}><div className={styles.kicker}>Step 3</div><h3>Add the indicator</h3>
               <p>Once approved, RangeClarity appears under your Invite-only scripts. Add it to any chart and the structure renders instantly.</p></div>
           </div>
-          <p className={styles.payNote} style={{ marginTop: "0.9rem" }}>
-            Note: the TradingView link is a resource slot — wire your referral link via <code>NEXT_PUBLIC_TRADINGVIEW_URL</code> when you have one.
-          </p>
+          <TradingViewCTA note="This may be an affiliate link." />
         </section>
 
         <section className={styles.section} id="faq">
@@ -195,7 +197,7 @@ export default async function BetaLanding({
             <details className={styles.faq}><summary>Does it predict price or guarantee results?</summary>
               <p>No. It does not predict direction, claim win rates, or promise outcomes. It reads the structure already on the chart — range, bias, support and resistance, and clarity.</p></details>
             <details className={styles.faq}><summary>What are the plans?</summary>
-              <p>Three tiers: <b>Free Preview ($0)</b> — docs preview and updates, no invite-only access; <b>Beta Access ($29)</b> — the main paid beta with the full invite-only indicator; <b>Pro Beta ($49)</b> — everything in Beta Access plus priority support, feedback, and early feature previews.</p></details>
+              <p>Three tiers: <b>Free Preview ($0)</b> — docs preview and updates, no invite-only access; <b>RangeClarity Beta ($29/mo)</b> — the main paid beta with the full invite-only indicator; <b>RangeClarity Pro Beta ($49/mo)</b> — everything in RangeClarity Beta plus priority support, feedback, and early feature previews.</p></details>
             <details className={styles.faq}><summary>How do I get access?</summary>
               <p>Register with your TradingView username. A founder confirms your spot and grants invite-only access, then helps you onboard. It&rsquo;s manual on purpose during the private beta.</p></details>
             <details className={styles.faq}><summary>How does payment work right now?</summary>

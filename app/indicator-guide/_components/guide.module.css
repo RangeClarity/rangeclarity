@@ -242,6 +242,11 @@
   .vs { justify-self: center; }
 }
 
+/* phones: single-column the at-a-glance stat grid (2-up is cramped <480px) */
+@media (max-width: 480px) {
+  .glanceGrid { grid-template-columns: 1fr; }
+}
+
 /* ============================================================
    PRINT — the dark page is still usable as PDF, but the
    dedicated /indicator-guide/print route is recommended.

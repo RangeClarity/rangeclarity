@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { TRADINGVIEW_AFFILIATE_URL } from "@/lib/affiliate";
+import TradingViewCTA from "@/app/_components/TradingViewCTA";
 import styles from "./tradingview-setup.module.css";
 
 export const metadata: Metadata = {
@@ -39,6 +40,7 @@ export default function TradingViewSetupPage() {
       <header className={styles.nav}>
         <div className={styles.navInner}>
           <Link className={styles.brand} href="/">
+            <Image className={styles.brandBadge} src="/brand/fox-badge.png" alt="" aria-hidden="true" width={24} height={24} />
             Range<span className={styles.g}>Clarity</span>
           </Link>
           <Link className={styles.back} href="/beta/free-access">
@@ -58,18 +60,7 @@ export default function TradingViewSetupPage() {
           have a TradingView account and send us your exact TradingView username.
         </p>
 
-        <a
-          className={styles.cta}
-          href={TRADINGVIEW_AFFILIATE_URL}
-          target="_blank"
-          rel="sponsored noopener noreferrer"
-        >
-          Open TradingView <span aria-hidden="true">&rarr;</span>
-        </a>
-        <p className={styles.ctaNote}>
-          This may be an affiliate link. RangeClarity access is added manually after your request is
-          reviewed.
-        </p>
+        <TradingViewCTA note="RangeClarity access is added manually after your request is reviewed." />
 
         <div className={styles.sectionLabel}>How it works</div>
         <ol className={styles.steps}>
@@ -85,7 +76,7 @@ export default function TradingViewSetupPage() {
         </ol>
 
         <Link className={styles.cta} href="/beta/free-access">
-          Request 7-Day Free Access <span aria-hidden="true">&rarr;</span>
+          Try 7-Day Free Access <span aria-hidden="true">&rarr;</span>
         </Link>
         <Link className={styles.ctaSecondary} href="/beta">
           See beta plans
