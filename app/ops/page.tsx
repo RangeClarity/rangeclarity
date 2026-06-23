@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import styles from "./ops.module.css";
 
 type ModuleStatus =
@@ -340,6 +341,14 @@ export const metadata: Metadata = {
     "Internal RangeClarity command center for project modules, daily routine, automation boundaries, and next priorities.",
 };
 
+export const dynamic = "force-dynamic";
+
+function assertInternalPagesEnabled() {
+  if (process.env.RC_INTERNAL_PAGES_ENABLED !== "true") {
+    notFound();
+  }
+}
+
 function statusClass(status: ModuleStatus) {
   switch (status) {
     case "active":
@@ -370,6 +379,8 @@ function commandClass(state: Command["state"]) {
 }
 
 export default function OpsPage() {
+  assertInternalPagesEnabled();
+
   const nowCount = automations.filter((item) => item.worthDoingNow === "now").length;
   const missingCount = modules.filter((item) => item.status === "missing").length;
 
