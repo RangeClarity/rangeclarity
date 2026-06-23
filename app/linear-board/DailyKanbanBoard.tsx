@@ -123,9 +123,9 @@ export function DailyKanbanBoard({
 }: Props) {
   const [issues, setIssues] = useState(initialIssues);
   const [draggedIssueId, setDraggedIssueId] = useState<string | null>(null);
-  const [pendingIssueId, setPendingIssueId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(initialError);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const pendingIssueId: string | null = null;
   const columns = useMemo(getColumns, []);
 
   const groupedIssues = useMemo(() => {
@@ -162,58 +162,16 @@ export function DailyKanbanBoard({
     }
   }
 
-  async function moveIssue(issueId: string, column: BoardColumn) {
-    const issue = issues.find((candidate) => candidate.id === issueId);
-
-    if (!issue || issue.dueDate === column.targetDate) {
-      return;
-    }
-
-    const previousIssues = issues;
-    setPendingIssueId(issueId);
-    setMessage(null);
-    setIssues((current) =>
-      current.map((candidate) =>
-        candidate.id === issueId
-          ? { ...candidate, dueDate: column.targetDate }
-          : candidate,
-      ),
-    );
-
-    try {
-      const response = await fetch("/api/linear/issues", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ issueId, dueDate: column.targetDate }),
-      });
-      const payload = (await response.json()) as {
-        issue?: LinearBoardIssue;
-        error?: string;
-      };
-
-      if (!response.ok || !payload.issue) {
-        throw new Error(payload.error ?? "Linear due-date update failed.");
-      }
-
-      setIssues((current) =>
-        current.map((candidate) =>
-          candidate.id === issueId ? payload.issue! : candidate,
-        ),
-      );
-    } catch (error) {
-      setIssues(previousIssues);
-      setMessage(error instanceof Error ? error.message : "Move failed.");
-    } finally {
-      setPendingIssueId(null);
-    }
+  function moveIssue() {
+    setMessage("Linear board writes are deferred until auth exists.");
   }
 
-  function handleDrop(column: BoardColumn) {
-    if (!draggedIssueId) {
+  function handleDrop() {
+    if (!writeEnabled || !draggedIssueId) {
       return;
     }
 
-    void moveIssue(draggedIssueId, column);
+    moveIssue();
     setDraggedIssueId(null);
   }
 
@@ -242,8 +200,8 @@ export function DailyKanbanBoard({
 
       {!writeEnabled ? (
         <p className={styles.notice}>
-          Dragging is active, but Linear writes require{" "}
-          <code>LINEAR_WRITE_ENABLED=true</code>.
+          Linear board writes are deferred until auth exists. This view is
+          read-only.
         </p>
       ) : null}
 
@@ -253,7 +211,7 @@ export function DailyKanbanBoard({
             className={styles.column}
             key={column.id}
             onDragOver={(event) => event.preventDefault()}
-            onDrop={() => handleDrop(column)}
+            onDrop={handleDrop}
           >
             <header className={styles.columnHeader}>
               <div>
@@ -268,7 +226,7 @@ export function DailyKanbanBoard({
                 <article
                   aria-busy={pendingIssueId === issue.id}
                   className={styles.card}
-                  draggable
+                  draggable={writeEnabled}
                   key={issue.id}
                   onDragEnd={() => setDraggedIssueId(null)}
                   onDragStart={(event) => {
@@ -312,9 +270,9 @@ export function DailyKanbanBoard({
                       .filter((target) => target.id !== column.id)
                       .map((target) => (
                         <button
-                          disabled={pendingIssueId === issue.id}
+                          disabled={!writeEnabled || pendingIssueId === issue.id}
                           key={target.id}
-                          onClick={() => void moveIssue(issue.id, target)}
+                          onClick={moveIssue}
                           type="button"
                         >
                           {target.title}

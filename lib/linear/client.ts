@@ -72,7 +72,8 @@ function buildIssueFilter(): IssueFilter | undefined {
 }
 
 export function isLinearWriteEnabled() {
-  return process.env.LINEAR_WRITE_ENABLED === "true";
+  // Write mode is deferred until the internal Linear surfaces have auth.
+  return false;
 }
 
 export function getLinearScopeLabel() {
@@ -142,24 +143,6 @@ export async function listLinearIssues() {
 
     return b.createdAt.localeCompare(a.createdAt);
   });
-}
-
-export async function updateLinearIssueDueDate(issueId: string, dueDate: string) {
-  if (!isLinearWriteEnabled()) {
-    throw new LinearConfigurationError(
-      "Linear writes are disabled. Set LINEAR_WRITE_ENABLED=true to update due dates.",
-    );
-  }
-
-  const client = getLinearClient();
-  const payload = await client.updateIssue(issueId, { dueDate });
-
-  if (!payload.success || !payload.issue) {
-    throw new Error("Linear did not confirm the issue update.");
-  }
-
-  const issue = await payload.issue;
-  return mapIssue(issue);
 }
 
 export function getLinearErrorMessage(error: unknown) {
