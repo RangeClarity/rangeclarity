@@ -84,7 +84,7 @@ export default async function BetaLanding({
             <a href="#how">How it works</a>
             <a href="#resources">TradingView</a>
             <a href="#faq">FAQ</a>
-            <a href="#join" className={`${styles.btn} ${styles.btnPrimary}`}>Join the beta</a>
+            <a href="#join" className={`${styles.btn} ${styles.btnPrimary}`}>Get Beta Access</a>
           </nav>
         </div>
       </header>
@@ -103,8 +103,8 @@ export default async function BetaLanding({
                 clarity score. No signals. No noise. Just structure.
               </p>
               <div className={styles.ctaRow}>
-                <a href="#join" className={`${styles.btn} ${styles.btnPrimary}`}>Request beta access</a>
-                <a href="#what" className={styles.btn}>See what it shows</a>
+                <a href="#join" className={`${styles.btn} ${styles.btnPrimary}`}>Get Beta Access</a>
+                <a href="/beta/free-access" className={styles.btn}>7-Day Free Access</a>
               </div>
               <p className={styles.ctaNote}>
                 Private beta &middot; TradingView username required &middot; manual invite.{" "}
@@ -197,7 +197,7 @@ export default async function BetaLanding({
             <details className={styles.faq}><summary>Does it predict price or guarantee results?</summary>
               <p>No. It does not predict direction, claim win rates, or promise outcomes. It reads the structure already on the chart — range, bias, support and resistance, and clarity.</p></details>
             <details className={styles.faq}><summary>What are the plans?</summary>
-              <p>Three tiers: <b>Free Preview ($0)</b> — docs preview and updates, no invite-only access; <b>RangeClarity Beta ($29/mo)</b> — the main paid beta with the full invite-only indicator; <b>RangeClarity Pro Beta ($49/mo)</b> — everything in RangeClarity Beta plus priority support, feedback, and early feature previews.</p></details>
+              <p>Three tiers: <b>7-Day Free Access ($0)</b> — a 7-day trial of the invite-only indicator, added manually after review; <b>RangeClarity Beta ($29/mo)</b> — the main paid beta with the full invite-only indicator; <b>RangeClarity Pro Beta ($49/mo)</b> — everything in RangeClarity Beta plus priority support, feedback, and early feature previews.</p></details>
             <details className={styles.faq}><summary>How do I get access?</summary>
               <p>Register with your TradingView username. A founder confirms your spot and grants invite-only access, then helps you onboard. It&rsquo;s manual on purpose during the private beta.</p></details>
             <details className={styles.faq}><summary>How does payment work right now?</summary>
