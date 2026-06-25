@@ -89,7 +89,7 @@ export function IndicatorCapabilityGrid() {
 export function IndicatorVisualBreakdown() {
   return (
     <section className={s.section}>
-      <SectionHead kicker="Section 3" title="Visual anatomy" blurb="Everything RangeClarity puts on your chart, labelled. (Illustrative mock — not real prices.)" />
+      <SectionHead kicker="Section 3" title="Visual anatomy" blurb="Everything RangeClarity puts on your chart, labelled. (Illustration — not real prices.)" />
       <div className={s.anatomyWrap}>
         <ChartAnatomy />
       </div>
@@ -115,7 +115,7 @@ export function DashboardExplainer() {
       <div className={s.dashLayout}>
         <div className={s.dashStick}>
           <DashboardMock />
-          <p className={s.caption}>Live dashboard mock (top-right on chart).</p>
+          <p className={s.caption}>Dashboard illustration (top-right on chart).</p>
         </div>
         <div className={s.rowTable}>
           {DASHBOARD_ROWS.map((r) => (
@@ -200,7 +200,7 @@ export function ChartZoneExplainer() {
           </div>
           <div className={s.callBox} style={{ ["--accent" as string]: TONE.red }}>
             <strong>Resistance zone</strong>
-            <p>An area above price where sellers reacted before. Buying right under it gives poor reward-to-risk.</p>
+            <p>An area above price where sellers reacted before. Leaning on it is a stretched, unclear location.</p>
           </div>
           <div className={s.callBox} style={{ ["--accent" as string]: TONE.amber }}>
             <strong>Near support · Mid-range · Near resistance</strong>
@@ -297,7 +297,7 @@ export function NoEdgeExplainer() {
         </div>
       </div>
       <div className={s.reasonGrid}>
-        <span className={s.reasonHead}>No Edge / Wait may appear when:</span>
+        <span className={s.reasonHead}>No Edge / Structure Not Clear may appear when:</span>
         <ul>
           {NO_EDGE_REASONS.map((r) => (
             <li key={r}>{r}</li>
