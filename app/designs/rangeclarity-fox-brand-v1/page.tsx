@@ -115,9 +115,9 @@ export default function RangeClarityFoxBrandV1Page() {
               Market-structure clarity
             </div>
             <h1 className={styles.mTitle}>
-              Read market structure <span className={styles.mAccent}>clearly.</span>
+              No signals. No noise. <span className={styles.mAccent}>Just structure.</span>
             </h1>
-            <p className={styles.mSub}>Trend, location, zones and structure quality — without signals.</p>
+            <p className={styles.mSub}>Market-structure clarity for TradingView: ranges, zones and context, with less noise.</p>
             <p className={styles.mNote}>Private beta. TradingView username required.</p>
           </div>
         </div>
