@@ -1,0 +1,577 @@
+{
+  "meta": {
+    "name": "RangeClarity Neural Map",
+    "subtitle": "Living internal ops map — modules, files, consumers, tests, risk, next safe action",
+    "as_of": "2026-06-25",
+    "conviction": "RED",
+    "conviction_reason": "Founder labeling is only 15/40. Broken-Zone A/B is blocked. Pine is blocked. Scoring changes are blocked until a frozen-baseline comparison.",
+    "legend": {
+      "GREEN": "stable / safe",
+      "YELLOW": "in progress — work carefully",
+      "RED": "blocked — gated",
+      "LOCKED": "do not touch"
+    },
+    "guardrails": [
+      "no scoring change",
+      "no caps change",
+      "no agree3 change",
+      "no Broken-Zone change",
+      "do not touch Pine",
+      "do not touch payment/Lemon",
+      "no commit",
+      "no push"
+    ],
+    "sources": [
+      "docs/ops/rangeclarity-command-center.md",
+      "docs/ops/daily-workflow.md",
+      "docs/architecture/module-status-board.md",
+      "docs/architecture/system-map.md",
+      "docs/ops/decision-log.md"
+    ],
+    "baseline": "Real Baseline v1 (frozen): 1,767 windows, 0 Clear / 0 HighClarity",
+    "golden": "score_window_input == score_window: smoke 93/93, full baseline 1,767/1,767 identical"
+  },
+  "modules": [
+    {
+      "id": "core-scoring",
+      "name": "Core Scoring",
+      "status": "YELLOW",
+      "risk": "HIGH",
+      "lane": "Core Scoring",
+      "purpose": "Turn one window of normalized structure into a single calm verdict — permission, not prediction.",
+      "interface": "score_window_input(RcWindowInput) -> RcVerdict",
+      "owner": "research/rc1_ultimate_offline_indicator",
+      "files": [
+        "negative_first_scorer.py",
+        "rc_scoring_facade.py",
+        "structure_features.py",
+        "zone_engine.py",
+        "regime_engine.py",
+        "location_engine.py",
+        "extension_engine.py",
+        "agreement_engine.py",
+        "indicators.py"
+      ],
+      "functions": [
+        "score_window()",
+        "build_lenses()",
+        "_band_state()",
+        "score_window_input()",
+        "RcWindowInput",
+        "RcVerdict"
+      ],
+      "consumers": [
+        {
+          "name": "render_visual_review.py",
+          "state": "migrated"
+        },
+        {
+          "name": "build_founder_review.py",
+          "state": "migrated"
+        },
+        {
+          "name": "full_real_review.py",
+          "state": "old-interface"
+        },
+        {
+          "name": "optimizer.py",
+          "state": "old-interface"
+        }
+      ],
+      "tests": [
+        "test_rc_scoring_facade.py (golden, full=1,767/1,767)"
+      ],
+      "gates": [
+        "golden equivalence",
+        "before/after baseline report",
+        "suspicious_high must not rise"
+      ],
+      "blocked": false,
+      "blocked_reason": "",
+      "do_not_touch": false,
+      "do_not_touch_items": [
+        "scoring law",
+        "caps",
+        "agree3",
+        "Broken-Zone semantics"
+      ],
+      "progress": "Facade built; 2 of 4 consumers migrated; full baseline 1,767/1,767 identical.",
+      "next_action": "Migrate full_real_review.py to the facade (it chains prior); golden-test after.",
+      "doc": "modules/core-scoring.md"
+    },
+    {
+      "id": "data-adapters",
+      "name": "Data Adapters",
+      "status": "YELLOW",
+      "risk": "MEDIUM",
+      "lane": "Research",
+      "purpose": "Load and normalize market data into one schema so the scoring core never knows the source.",
+      "interface": "loadCandles(symbol, source, range) -> NormalizedCandles  (target)",
+      "owner": "research/rc1_ultimate_offline_indicator + research/rc1_autonomous_model",
+      "files": [
+        "data_loader.py (x2)",
+        "fetch_tiingo.py",
+        "fetch_yfinance.py",
+        "check_data.py"
+      ],
+      "functions": [
+        "_find_csv()",
+        "_load_csv()",
+        "load_universe()",
+        "_synthetic()"
+      ],
+      "consumers": [
+        {
+          "name": "Core Scoring",
+          "state": "upstream"
+        },
+        {
+          "name": "Research Experiments",
+          "state": "upstream"
+        },
+        {
+          "name": "Founder Review",
+          "state": "upstream"
+        }
+      ],
+      "tests": [
+        "schema test (identical NormalizedCandles)",
+        "synthetic-tag assertion"
+      ],
+      "gates": [
+        "check_data validation before a baseline run"
+      ],
+      "blocked": false,
+      "blocked_reason": "",
+      "do_not_touch": false,
+      "do_not_touch_items": [],
+      "progress": "Loads 19/20 real CSVs + a synthetic fallback; isolated from the product.",
+      "next_action": "None until the Core API exists; then extract loadCandles out of the scoring package.",
+      "blocked_actions": "Consolidating the two parallel data_loader copies (HIGH risk).",
+      "doc": "modules/data-adapters.md"
+    },
+    {
+      "id": "research-experiments",
+      "name": "Research Experiments",
+      "status": "YELLOW",
+      "risk": "MEDIUM",
+      "lane": "Research",
+      "purpose": "Run offline experiments + A/B over a stable core, always measured against the frozen baseline.",
+      "interface": "runExperiment(config) -> ExperimentReport  (target)",
+      "owner": "research/rc1_ultimate_offline_indicator + research/*",
+      "files": [
+        "full_real_review.py",
+        "optimizer.py",
+        "ablation.py",
+        "false_high_hunter.py",
+        "metrics.py",
+        "report.py",
+        "run_indicator.py",
+        "run_research.py",
+        "compare_baselines.py",
+        "simulator.py",
+        "weak_labeler.py"
+      ],
+      "functions": [
+        "score_symbol()",
+        "categorize()",
+        "sweep()",
+        "simulate()",
+        "run_ablations()",
+        "hunt()",
+        "write_all()"
+      ],
+      "consumers": [
+        {
+          "name": "Reports / decisions",
+          "state": "downstream"
+        }
+      ],
+      "tests": [
+        "delta-vs-frozen-baseline report",
+        "reproduce 1,767 windows exactly"
+      ],
+      "gates": [
+        "no \"looks better\" without numbers"
+      ],
+      "blocked": true,
+      "blocked_reason": "Broken-Zone A/B blocked until >=20 founder labels + baseline comparison.",
+      "do_not_touch": false,
+      "do_not_touch_items": [],
+      "progress": "Real Baseline v1 frozen: 1,767 windows, 0 Clear / 0 HighClarity.",
+      "next_action": "Wait for >=20 founder labels, then re-run the structural review agent.",
+      "doc": "modules/research-experiments.md"
+    },
+    {
+      "id": "founder-review",
+      "name": "Founder Review",
+      "status": "YELLOW",
+      "risk": "MEDIUM",
+      "lane": "Research",
+      "purpose": "Human labeling + visual review. The founder's eyes are the truth signal that gates conviction.",
+      "interface": "loadFounderLabels() -> FounderLabelSet; compareAgentToFounder(labels) -> ReviewReport  (target)",
+      "owner": "research/rc1_review_agent",
+      "files": [
+        "rc_structural_review_agent.py",
+        "build_founder_review.py",
+        "reports/visual_review/agent_label_suggestions.csv",
+        "reports/visual_review/founder_review_priority.csv",
+        "reports/visual_review/founder_review_charts.html"
+      ],
+      "functions": [
+        "render_fig()",
+        "PRIORITY map",
+        "priority-CSV builder"
+      ],
+      "consumers": [
+        {
+          "name": "Research Experiments (A/B)",
+          "state": "downstream"
+        },
+        {
+          "name": "Ops label guardrail",
+          "state": "downstream"
+        }
+      ],
+      "tests": [
+        "label-schema guardrail (npm run test)"
+      ],
+      "gates": [
+        "founder_label must be one of the 5 allowed values"
+      ],
+      "blocked": false,
+      "blocked_reason": "",
+      "do_not_touch": false,
+      "do_not_touch_items": [
+        "writing labels into founder_review_priority.csv (left blank by request)"
+      ],
+      "progress": "15 / 40 labels written.",
+      "next_action": "Continue founder labels 15 -> 20+, then re-run rc_structural_review_agent.py.",
+      "blocked_actions": "A/B before enough labels.",
+      "doc": "modules/founder-review.md"
+    },
+    {
+      "id": "web-ui",
+      "name": "Web UI / Mobile",
+      "status": "YELLOW",
+      "risk": "MEDIUM",
+      "lane": "Web / Mobile",
+      "purpose": "Explain and sell RangeClarity clearly. Marketing + access; never originates a verdict.",
+      "interface": "displayVerdict(verdict) + marketing pages  (future consumer)",
+      "owner": "app/** + lib",
+      "files": [
+        "app/page.tsx",
+        "app/beta/**",
+        "app/privacy",
+        "app/terms",
+        "app/indicator-guide",
+        "app/tradingview-setup",
+        "lib/analytics.ts",
+        "lib/affiliate.ts",
+        "*.module.css"
+      ],
+      "functions": [
+        "StickyCtaBar",
+        "BetaSignupForm",
+        "FreeAccessForm",
+        "GrantConsole",
+        "analytics events"
+      ],
+      "consumers": [],
+      "tests": [
+        "copy guardrail (npm run test)",
+        "Playwright smoke (test:e2e)"
+      ],
+      "gates": [
+        "no buy/sell/entry/exit/profit/prediction language",
+        "gated routes must 404 in prod"
+      ],
+      "blocked": false,
+      "blocked_reason": "",
+      "do_not_touch": false,
+      "do_not_touch_items": [
+        "homepage/beta redesign during ops work"
+      ],
+      "progress": "Mobile changes pending QA; web commits paused (workspace drift).",
+      "next_action": "Run npm run health/verify + browser smoke tests (mobile verification).",
+      "blocked_actions": "Broad redesign unless explicitly requested.",
+      "doc": "modules/web-ui.md"
+    },
+    {
+      "id": "pine-layer",
+      "name": "Pine Layer",
+      "status": "LOCKED",
+      "risk": "HIGH",
+      "lane": "Pine",
+      "purpose": "TradingView visual companion ONLY. Renders a verdict; must never originate one.",
+      "interface": "(consumer — renders a verdict, no API)",
+      "owner": "pine/**",
+      "files": [
+        "RangeClarity_Core.pine",
+        "pine/rangeclarity_ultimate_core.pine",
+        "pine/rangeclarity_sr_core_v1.pine"
+      ],
+      "functions": [
+        "(Pine-internal) dashboards",
+        "S/R overlays",
+        "MA structure stack"
+      ],
+      "consumers": [],
+      "tests": [
+        "manual validation checklist (no automated test)"
+      ],
+      "gates": [
+        "must mirror the Python verdict, never lead it"
+      ],
+      "blocked": true,
+      "blocked_reason": "All Pine changes blocked until GREEN conviction + a validated core.",
+      "do_not_touch": true,
+      "do_not_touch_items": [
+        "all Pine files"
+      ],
+      "progress": "Frozen. Risk of becoming a second source of truth.",
+      "next_action": "NONE — do not touch until conviction is GREEN.",
+      "doc": "modules/pine-layer.md"
+    },
+    {
+      "id": "payments-access",
+      "name": "Payments / Access",
+      "status": "LOCKED",
+      "risk": "MEDIUM",
+      "lane": "Payments",
+      "purpose": "Provider-agnostic checkout + beta signup/grant + access state. Isolated from scoring/research.",
+      "interface": "lib/payments/index.ts provider selector",
+      "owner": "lib/payments + app/beta + supabase",
+      "files": [
+        "lib/payments/index.ts",
+        "lib/payments/plans.ts",
+        "lib/payments/types.ts",
+        "lib/payments/providers/{lemonsqueezy,manual,paddle,stripe,whop}.ts",
+        "app/beta/**",
+        "lib/betaStore.ts",
+        "lib/betaSupabaseAdmin.ts",
+        "lib/freeAccessStore.ts",
+        "supabase/migrations/*"
+      ],
+      "functions": [
+        "provider selector",
+        "betaStore.normalizeEmail/normalizeTvUsername",
+        "betaSupabaseAdmin.list/get/grant/recordGrantEmail",
+        "notifyAdminEmail"
+      ],
+      "consumers": [
+        {
+          "name": "Web UI (beta flow)",
+          "state": "downstream"
+        }
+      ],
+      "tests": [
+        "typecheck/lint",
+        "betaStore unit tests"
+      ],
+      "gates": [
+        "never commit live links",
+        "compliance line on every CTA"
+      ],
+      "blocked": true,
+      "blocked_reason": "All payment/Lemon behavior changes blocked; Stripe live needs founder approval.",
+      "do_not_touch": true,
+      "do_not_touch_items": [
+        "lib/payments/**",
+        "app/beta checkout behavior",
+        "Lemon links"
+      ],
+      "progress": "Isolated under lib/payments; live links live in env/Vercel only.",
+      "next_action": "NONE — do not touch unless explicitly requested.",
+      "doc": "modules/payments-access.md"
+    },
+    {
+      "id": "ops-feedback",
+      "name": "Ops / Feedback Loops",
+      "status": "YELLOW",
+      "risk": "LOW",
+      "lane": "Ops / Feedback Loops",
+      "purpose": "Make the project fast to test — catch problems in seconds, before git or users. Protects all modules.",
+      "interface": "npm run health (fast) | npm run verify (full)",
+      "owner": "package.json + scripts",
+      "files": [
+        "package.json (scripts)",
+        "scripts/test/run-tests.mjs",
+        "scripts/ops-status.mjs",
+        "scripts/rc-loop.mjs",
+        "research/rc1_ultimate_offline_indicator/test_rc_scoring_facade.py"
+      ],
+      "functions": [
+        "npm run health",
+        "npm run verify",
+        "npm run test",
+        "ops:status"
+      ],
+      "consumers": [
+        {
+          "name": "every module (gate before commit)",
+          "state": "protects"
+        }
+      ],
+      "tests": [
+        "copy guardrail",
+        "label-schema guardrail",
+        "golden equivalence test"
+      ],
+      "gates": [
+        "health green before small changes",
+        "verify before deploy/handoff"
+      ],
+      "blocked": false,
+      "blocked_reason": "",
+      "do_not_touch": false,
+      "do_not_touch_items": [],
+      "progress": "health=fast, verify=full; golden test wired into the routine.",
+      "next_action": "Keep health green; run the golden test before any scoring-package change.",
+      "doc": "modules/ops-feedback-loops.md"
+    },
+    {
+      "id": "product-docs",
+      "name": "Product / Docs / PRD",
+      "status": "GREEN",
+      "risk": "LOW",
+      "lane": "Product / Docs",
+      "purpose": "Planning language + source of truth. Turns ideas into PRDs/issues without touching product.",
+      "interface": "CLAUDE.md | AGENTS.md | docs/** | .claude/commands/*",
+      "owner": "repo root + docs + .claude",
+      "files": [
+        "CLAUDE.md",
+        "AGENTS.md",
+        "docs/**",
+        ".claude/commands/{grill-me,write-a-prd,prd-to-issues,module-awareness,improve-codebase-architecture}.md"
+      ],
+      "functions": [
+        "/grill-me",
+        "/write-a-prd",
+        "/prd-to-issues",
+        "/module-awareness",
+        "/improve-codebase-architecture"
+      ],
+      "consumers": [
+        {
+          "name": "all lanes (governs)",
+          "state": "governs"
+        }
+      ],
+      "tests": [
+        "copy/label guardrails (indirect)"
+      ],
+      "gates": [
+        "one owner file per topic"
+      ],
+      "blocked": false,
+      "blocked_reason": "",
+      "do_not_touch": false,
+      "do_not_touch_items": [],
+      "progress": "Living system model, command center, status board, decision log in place.",
+      "next_action": "Keep the neural map + system model current each day.",
+      "doc": "agents/agent-map.md"
+    }
+  ],
+  "edges": [
+    {
+      "from": "data-adapters",
+      "to": "core-scoring",
+      "type": "feeds"
+    },
+    {
+      "from": "core-scoring",
+      "to": "research-experiments",
+      "type": "feeds"
+    },
+    {
+      "from": "research-experiments",
+      "to": "founder-review",
+      "type": "feeds"
+    },
+    {
+      "from": "founder-review",
+      "to": "reports",
+      "type": "feeds"
+    },
+    {
+      "from": "core-scoring",
+      "to": "pine-layer",
+      "type": "consumer-only"
+    },
+    {
+      "from": "core-scoring",
+      "to": "web-ui",
+      "type": "future-consumer"
+    },
+    {
+      "from": "ops-feedback",
+      "to": "core-scoring",
+      "type": "protects"
+    },
+    {
+      "from": "ops-feedback",
+      "to": "data-adapters",
+      "type": "protects"
+    },
+    {
+      "from": "ops-feedback",
+      "to": "research-experiments",
+      "type": "protects"
+    },
+    {
+      "from": "ops-feedback",
+      "to": "web-ui",
+      "type": "protects"
+    },
+    {
+      "from": "payments-access",
+      "to": null,
+      "type": "isolated"
+    }
+  ],
+  "answers": {
+    "what_exists": [
+      "Core Scoring",
+      "Data Adapters",
+      "Research Experiments",
+      "Founder Review",
+      "Web UI / Mobile",
+      "Pine Layer",
+      "Payments / Access",
+      "Ops / Feedback Loops",
+      "Product / Docs / PRD"
+    ],
+    "done": [
+      "Behavior-preserving scoring facade (score_window_input -> RcVerdict)",
+      "2 of 4 consumers migrated (render_visual_review, build_founder_review)",
+      "Golden equivalence: smoke 93/93, full baseline 1,767/1,767 identical",
+      "Frozen Real Baseline v1 (1,767 windows)",
+      "Feedback-loop gates (health/verify) + always-on guardrails",
+      "Living system model: system-map, module status board, command center, decision log"
+    ],
+    "in_progress": [
+      "Founder labels 15 -> 20",
+      "Facade migration (2/4 consumers)",
+      "Web mobile verification"
+    ],
+    "blocked": [
+      "Broken-Zone A/B (labels <20 + baseline comparison)",
+      "Pine (until GREEN)",
+      "Payments/Lemon (unless explicitly requested)",
+      "Broad / scoring refactors",
+      "Any cap / agree3 / Broken-Zone behavior change"
+    ],
+    "touch_today": [
+      "Continue founder labels to 20+",
+      "Migrate full_real_review.py (golden-tested)",
+      "Keep health green"
+    ],
+    "do_not_touch": [
+      "Pine (all files)",
+      "Payment / Lemon (lib/payments, beta checkout)",
+      "Scoring caps / agree3 / Broken-Zone semantics",
+      "No commit / no push without approval"
+    ]
+  }
+}
