@@ -112,7 +112,7 @@ export default function CommandCenter({ state, qa, roadmap, decisions, reports, 
         <header className={styles.head}>
           <div>
             <h1 className={styles.title}>RangeClarity <span className={styles.g}>Command Center</span> <span className={styles.muted}>v1</span></h1>
-            <p className={styles.subtitle}>internal founder workbench · read-only · copy-only — the UI never runs commands · <a className={styles.opsLink} href="/ops">/ops →</a></p>
+            <p className={styles.subtitle}>internal founder workbench · read-only · copy-only — the UI never runs commands · <a className={styles.opsLink} href="/ops">/ops →</a> · <a className={styles.opsLink} href="/ops/neural-map">Neural Map →</a></p>
           </div>
           <span className={`${styles.pill} ${hp.cls}`}>health: {hp.label}</span>
         </header>

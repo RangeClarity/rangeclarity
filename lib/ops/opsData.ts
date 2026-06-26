@@ -111,3 +111,73 @@ export function readRoadmap(rel = "docs/ops/product-roadmap.md"): RoadmapItem[] 
   }
   return out;
 }
+
+// ---- Neural Map (System Brain): read the structured system-map JSON (read-only). ----
+export type NeuralStatus = "GREEN" | "YELLOW" | "RED" | "LOCKED";
+export type NeuralRisk = "HIGH" | "MEDIUM" | "LOW";
+
+export interface NeuralConsumer {
+  name: string;
+  state: string;
+}
+
+export interface NeuralModule {
+  id: string;
+  name: string;
+  status: NeuralStatus;
+  risk: NeuralRisk;
+  lane: string;
+  purpose: string;
+  interface: string;
+  owner: string;
+  files: string[];
+  functions: string[];
+  consumers: NeuralConsumer[];
+  tests: string[];
+  gates: string[];
+  blocked: boolean;
+  blocked_reason: string;
+  do_not_touch: boolean;
+  do_not_touch_items: string[];
+  progress: string;
+  next_action: string;
+  blocked_actions?: string;
+  doc: string;
+}
+
+export interface NeuralMapMeta {
+  name: string;
+  subtitle: string;
+  as_of: string;
+  conviction: string;
+  conviction_reason: string;
+  legend: Record<string, string>;
+  guardrails: string[];
+  sources: string[];
+  baseline: string;
+  golden: string;
+}
+
+export interface NeuralEdge {
+  from: string;
+  to: string | null;
+  type: string;
+}
+
+export interface NeuralMap {
+  meta: NeuralMapMeta;
+  modules: NeuralModule[];
+  edges: NeuralEdge[];
+  answers: Record<string, string[]>;
+}
+
+/** Read + parse the Neural Map JSON (read-only). Returns null if missing/invalid. */
+export function readNeuralMap(rel = "docs/architecture/rangeclarity-neural-map.json"): NeuralMap | null {
+  const raw = readDoc(rel);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as NeuralMap;
+  } catch {
+    return null;
+  }
+}

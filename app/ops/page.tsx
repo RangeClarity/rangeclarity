@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import styles from "./ops.module.css";
 import { CopyButton } from "./CopyButton";
+import { notFound } from "next/navigation";
 
 /* RC Ops Console — internal, read-only operating dashboard.
    Server component: reads repo files at request time and renders status, agent
@@ -180,6 +181,8 @@ function Pill({ label, cls }: { label: string; cls: string }) {
 }
 
 export default function OpsConsolePage() {
+  // Production gate: internal page. 404 unless explicitly enabled (see .env.example / docs/ops/command-center.md).
+  if (process.env.RC_INTERNAL_PAGES_ENABLED !== "true") notFound();
   return (
     <main className={styles.wrap}>
       <div className={styles.inner}>
@@ -189,7 +192,7 @@ export default function OpsConsolePage() {
             <h1 className={styles.title}>
               RC <span className={styles.g}>Ops Console</span> <span className={styles.muted}>v1</span>
             </h1>
-            <p className={styles.subtitle}>internal · read-only · copy-only — nothing here runs commands or agents · <a href="/command-center" style={{ color: "var(--teal)", textDecoration: "none" }}>Command Center →</a></p>
+            <p className={styles.subtitle}>internal · read-only · copy-only — nothing here runs commands or agents · <a href="/command-center" style={{ color: "var(--teal)", textDecoration: "none" }}>Command Center →</a> · <a href="/ops/neural-map" style={{ color: "var(--teal)", textDecoration: "none" }}>Neural Map →</a></p>
           </div>
           <div className={styles.headMeta}>
             status updated
