@@ -9,6 +9,11 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "node scripts/test/run-tests.mjs",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test -c tests/playwright.config.ts",
+    "verify": "npm run health && npm run build",
+    "health": "npm run typecheck && npm run lint && npm run test",
     "ops:status": "node scripts/ops-status.mjs"
   },
   "dependencies": {
