@@ -1,3 +1,15 @@
+> **LEGACY v1 — decision-support era. SUPERSEDED.**
+> This document describes the original RangeClarity (Regime / Structure / S-R /
+> **Momentum** / **Confidence** / **No-Edge verdict** with labels like *Avoid Chase*,
+> *Pullback Zone*, *Breakout Watch*, *Wait*, and a **Volume** confirmation factor).
+> It is retained for history only. The canonical product is now the **calm-structure
+> V2** spec: `docs/RANGECLARITY_V2_SURFACE_SPEC.md` + `docs/RANGECLARITY_V2_ENGINE_SPEC.md`.
+> Momentum, Confidence verdicts, the No-Edge/Avoid-Chase/Pullback/Wait instruction
+> labels, `poor R/R`/`size down` wording, and the Volume engine described below are
+> **RETIRED**. Do not implement from this file.
+
+---
+
 # RangeClarity Core Indicator — Specification
 
 **File:** `RangeClarity_Core.pine` · **Platform:** TradingView, Pine Script v6 · **Type:** overlay
@@ -53,6 +65,8 @@ Tells the user when not to act. Checked in priority order; emits one decision la
 
 Allowed labels: `No Edge` · `Wait` · `Avoid Chase` · `Breakout Watch` · `Pullback Zone` · `Strong Context` · `Watch`.
 **Forbidden, by design:** Buy · Sell · Guaranteed Entry · Profit Prediction · Win-rate claims.
+
+> **Retired legacy wording (superseded):** `Avoid Chase`, `Pullback Zone`, `Breakout Watch`, and `Wait` (as an instruction) are **retired** under the V2 language policy (`docs/RANGECLARITY_V2_SURFACE_SPEC.md` → Language policy). They are forbidden by the Live QA compliance rule (`compliance.forbidden_word`) and must not be surfaced in product output. Replace with structure / location / regime / quality language (e.g. *Extended* / *Stretched* / *Upper Range* for the former "Avoid Chase"; *Near Key Support* / *Retest Area* / *Lower Range* for the former "Pullback Zone").
 
 ---
 

@@ -1,0 +1,1157 @@
+//@version=6
+// =============================================================================
+// RangeClarity S/R Core v1
+// A clean market-structure map: classify the setup (bias) first, then show only
+// the most relevant dynamic support/resistance ZONES for that setup.
+// No signals, no buy/sell arrows, no predictions. Architecture: see
+// docs/rangeclarity_sr_core_v1_architecture.md. Original code; concepts only
+// reverse-engineered from indicator_research_library/sources/RangeClarity.
+// =============================================================================
+indicator("RangeClarity S/R Core v1", "RC SR", overlay = true,
+     max_boxes_count = 60, max_labels_count = 60, max_lines_count = 60, max_bars_back = 1000)
+
+// ============================ 1. INPUTS ======================================
+// ---- RangeClarity Visual preset (one-click look; resolved in the Visual System block) ----
+gV = "RangeClarity Visual"
+vizPreset  = input.string("Max Visual", "Visual preset", options = ["Minimal", "Clean", "Premium Dark", "Max Visual"], group = gV, tooltip = "One-click look. Max Visual = full premium default (channel + zones + MA cloud + dashboard). Clean = restrained (no channel). Minimal = dashboard + key levels only. Per-element toggles still apply.")
+showLegend = input.bool(false, "Show legend", group = gV, tooltip = "Small on-chart legend of the visual elements. Off by default.")
+
+gP = "Structure"
+pivL        = input.int(8,  "Pivot left",  minval = 1, group = gP)
+pivR        = input.int(8,  "Pivot right (confirm lag, bars)", minval = 1, group = gP)
+biasSens    = input.float(0.5, "Bias flatness (x ATR)", minval = 0.1, step = 0.1, group = gP,
+     tooltip = "Smaller = more often Bullish/Bearish; larger = more often Sideways.")
+
+gZ = "Zones"
+atrLen      = input.int(14, "ATR length", minval = 1, group = gZ)
+atrMult     = input.float(1.0, "Zone width (x ATR)", minval = 0.2, step = 0.1, group = gZ)
+mergeATR    = input.float(0.8, "Merge sensitivity (x ATR)", minval = 0.1, step = 0.1, group = gZ,
+     tooltip = "Nearby same-type zones within this distance merge into one stronger zone.")
+breakoutBuf = input.float(0.4, "Breakout buffer (x ATR)", minval = 0.0, step = 0.1, group = gZ)
+touchCool   = input.int(5, "Touch cooldown (bars)", minval = 0, group = gZ,
+     tooltip = "One zone cannot be re-touched within this many bars (stops chop inflating counts).")
+reactWin    = input.int(6, "Reaction window (bars)", minval = 1, group = gZ)
+reactATR    = input.float(1.0, "Reaction move (x ATR)", minval = 0.2, step = 0.1, group = gZ)
+
+gS = "Scoring & display"
+minScore    = input.int(40, "Min score for strongest/extra zones", minval = 0, maxval = 100, group = gS, tooltip = "Strongest support/resistance must score at least this. The nearest valid level is always shown regardless of score.")
+showWeak    = input.bool(false, "Show weak / developing zones", group = gS)
+volScoring  = input.bool(true, "Use volume in scoring", group = gS)
+volLen      = input.int(20, "Volume average length", minval = 1, group = gS)
+showDash    = input.bool(false, "Show legacy S/R detail table", group = gS, tooltip = "Detailed engine read-out (bias, setup, levels, channel, events). Superseded by the RangeClarity dashboard; off by default. Enable for debugging.")
+showLabels  = input.bool(true, "Show labels", group = gS)
+approachATR = input.float(0.75, "Alert: approach distance (x ATR)", minval = 0.1, step = 0.1, group = gS)
+showFar     = input.bool(false, "Show far zones (history mode)", group = gS)
+strongThr   = input.int(80, "Strong score → shaded zone (box)", minval = 1, maxval = 100, group = gS, tooltip = "At/above this score a level can render as a shaded zone box. Medium/weak render as lighter lines.")
+medThr      = input.int(60, "Medium score → solid line", minval = 1, maxval = 100, group = gS, tooltip = "At/above this (but below Strong) a level renders as a clear solid line. Below it, weak = thin dashed line.")
+maxBoxHtPct = input.float(8.0, "Max zone box height (%)", minval = 0.5, step = 0.5, group = gS, tooltip = "A strong zone taller than this renders as a solid line instead of a giant box.")
+showLineLabels = input.bool(true, "Show fallback line labels", group = gS)
+
+// ---- adaptive display distance + fallback (keeps the chart from going empty, cleanly) ----
+gD = "Display distance & fallback"
+maxLocalDistPct = input.float(12.0, "Local display distance (%)", minval = 1.0, step = 1.0, group = gD, tooltip = "Base radius for primary local zones/lines. Widened adaptively by volatility, capped by Hard max.")
+atrDistMult     = input.float(4.0,  "Adaptive: ATR ×", minval = 0.0, step = 0.5, group = gD, tooltip = "localDist = min(HardMax, max(Local%, ATR% × this, Range% × range-mult)).")
+rangeDistMult   = input.float(0.3,  "Adaptive: recent-range ×", minval = 0.0, step = 0.05, group = gD)
+fallbackDistPct = input.float(30.0, "Fallback display distance (%)", minval = 1.0, step = 1.0, group = gD, tooltip = "Wider radius used only for subtle fallback swing/pivot lines when a side has no primary level.")
+hardMaxDistPct  = input.float(40.0, "Hard max display distance (%)", minval = 1.0, step = 1.0, group = gD, tooltip = "Never show levels farther than this from price (unless Show far zones).")
+minVisibleLevels   = input.int(2, "Min visible structure levels", minval = 0, maxval = 6, group = gD, tooltip = "If fewer than this are visible, add subtle fallback swing/pivot lines on the empty side(s).")
+showFallbackSwings = input.bool(true, "Show fallback local levels", group = gD)
+fallbackLookback   = input.int(50, "Structure lookback (bars)", minval = 5, group = gD, tooltip = "Window for the broader structure low used as a last-resort fallback support.")
+pullbackLookback   = input.int(20, "Recent pullback lookback (bars)", minval = 3, group = gD, tooltip = "Short window for the nearest recent pullback low — the usual Local support in a trend.")
+
+// ---- Soft Structure Channel (optional secondary context; never overrides S/R) ----
+gC = "Soft structure channel"
+showSoftChannel         = input.bool(true,  "Show soft structure channel", group = gC, tooltip = "Subtle trend/range channel built from the 2 most recent confirmed pivots. Off = pure S/R.")
+showSoftChannelMidline  = input.bool(false, "Show channel midline", group = gC)
+showSoftChannelFill     = input.bool(false, "Show channel fill (ultra-subtle)", group = gC)
+channelLookbackBars     = input.int(150, "Channel lookback (bars)", minval = 20, group = gC, tooltip = "Window for containment scoring and relevance.")
+channelMinPivotPoints   = input.int(2, "Min pivot points per side", minval = 2, maxval = 4, group = gC)
+channelParallelTol      = input.float(0.35, "Parallel tolerance (width drift)", minval = 0.05, step = 0.05, group = gC, tooltip = "Rejects wedges/triangles: max relative channel-width drift over one span. Higher = more channels.")
+channelBreakBufferAtr   = input.float(0.3, "Channel break buffer (x ATR)", minval = 0.0, step = 0.1, group = gC)
+maxChannelWidthPct      = input.float(20.0, "Max channel width (%)", minval = 1.0, step = 1.0, group = gC)
+minChannelQualityToShow = input.int(55, "Min channel quality to show", minval = 0, maxval = 100, group = gC, tooltip = "Below this the channel is Developing (very subtle) or hidden.")
+channelOpacity          = input.int(72, "Channel line transparency", minval = 0, maxval = 95, group = gC, tooltip = "Higher = more subtle / faint.")
+
+// ============================ 2. TYPE / STATE ================================
+// ============================================================================
+// BEGIN RangeClarity Visual System
+// ----------------------------------------------------------------------------
+// Central palette + one-click preset resolution. Presets resolve to EFFECTIVE
+// visual flags here (Pine cannot mutate other inputs); the tagged gates below
+// read these flags. Structural context only -- no signals, arrows, predictions.
+// ============================================================================
+color RC_SUP   = color.rgb(45, 212, 189)    // teal -- support / bullish structure
+color RC_RES   = color.rgb(244, 114, 182)   // magenta -- resistance / bearish structure
+color RC_SLATE = color.rgb(148, 163, 184)   // slate -- neutral / range / mixed
+
+bool vizIsMin  = vizPreset == "Minimal"
+bool vizIsMax  = vizPreset == "Max Visual"
+bool vizIsPrem = vizPreset == "Premium Dark"
+// Trend channel: on for Max Visual + Premium Dark (and only if its toggle allows); off in Clean/Minimal.
+bool effChannel = (vizIsMax or vizIsPrem) and showSoftChannel
+// On-chart labels: hidden in Minimal; otherwise follow the per-element toggle.
+bool effLabels  = not vizIsMin
+// (effMAVisuals + effDashMode are resolved where the MA / dashboard inputs live.)
+// END RangeClarity Visual System
+
+type Zone
+    int    id
+    string ztype
+    float  top
+    float  bottom
+    float  mid
+    int    createdBar
+    int    lastTouchBar
+    int    touchCount
+    int    reactionCount
+    int    failedBreakCount
+    int    breakoutCount
+    int    retestCount
+    float  volScore
+    float  biasScore
+    float  ageScore
+    float  score
+    string strength
+    string state
+    int    pendingTouchBar
+    int    lastBreakBar
+    box    boxRef       // reserved for v1.1 (drawings managed via pools in v1)
+    label  labelRef
+
+var array<Zone>  zones    = array.new<Zone>()
+var array<box>   drawnBox = array.new<box>()
+var array<line>  drawnLine = array.new<line>()
+var array<label> drawnLab = array.new<label>()
+var array<float> phArr    = array.new<float>()   // recent confirmed pivot highs
+var array<float> plArr    = array.new<float>()   // recent confirmed pivot lows
+var table dash = na
+
+// soft structure channel state (additive — does not touch the S/R engine above)
+var array<int>  phBarArr  = array.new<int>()     // bars of recent pivot highs (channel anchors)
+var array<int>  plBarArr  = array.new<int>()     // bars of recent pivot lows  (channel anchors)
+var array<line> drawnChan = array.new<line>()    // channel line pool (own teardown)
+var linefill    chanFill  = na
+var bool fChanBreakUp = false
+var bool fChanBreakDn = false
+var bool fChanTestUp  = false
+var bool fChanTestDn  = false
+
+// ============================ 3. UTILITIES ===================================
+f_clamp(float x, float lo, float hi) => math.max(lo, math.min(hi, x))
+f_distPct(float ref) => (ref - close) / close * 100.0   // + above price, - below
+
+atr   = ta.atr(atrLen)
+volMa = ta.sma(volume, volLen)
+volRel = na(volMa) or volMa == 0 ? 1.0 : volume / volMa
+
+// recent structure extremes (fallback sources) + adaptive display radius — computed every bar
+swingHi = ta.highest(high, fallbackLookback)
+swingLo = ta.lowest(low,  fallbackLookback)
+pullHi  = ta.highest(high, pullbackLookback)   // nearest recent swing high (short window)
+pullLo  = ta.lowest(low,  pullbackLookback)    // nearest recent pullback low (short window)
+float atrPct   = na(atr) or close == 0 ? 0.0 : atr / close * 100.0
+float rangePct = na(swingHi) or na(swingLo) or close == 0 ? 0.0 : (swingHi - swingLo) / close * 100.0
+float localDist    = math.min(hardMaxDistPct, math.max(maxLocalDistPct, atrPct * atrDistMult, rangePct * rangeDistMult))
+float fallbackDist = math.min(hardMaxDistPct, math.max(fallbackDistPct, localDist))
+
+// strength label from score (thresholds drive both the label and the render mode)
+f_strength(float sc) =>
+    sc >= strongThr ? "Strong" : sc >= medThr ? "Medium" : sc >= 40 ? "Weak" : "Developing"
+
+// validity + display-distance guards (reject na / zero / negative / degenerate / far zones)
+f_isValidZone(Zone z) =>
+    not na(z.mid) and not na(z.top) and not na(z.bottom) and z.mid > syminfo.mintick and z.top > syminfo.mintick and z.bottom >= syminfo.mintick and z.top >= z.bottom and z.createdBar > 0
+f_inRange(Zone z) =>
+    showFar or math.abs(f_distPct(z.mid)) <= localDist
+
+// ============================ 4. PIVOTS ======================================
+// Confirmed pivots: value returns R bars after the pivot formed (lag accepted).
+ph = ta.pivothigh(high, pivL, pivR)
+pl = ta.pivotlow(low,  pivL, pivR)
+
+// ============================ 8/9. SCORING + BIAS HELPERS ====================
+f_rescore(Zone z, string bias) =>
+    int barsSince = bar_index - z.lastTouchBar
+    // RangeClarity S/R Quality v2: structure-only (volume excluded from score).
+    // Freshness 25 / Reaction 25 / Touch+retest 20 / Cleanliness 15 / Bias 15; penalties below.
+    float touchSc  = math.min(z.touchCount * 4.0 + z.retestCount * 5.0, 20.0)
+    float reactSc  = math.min(z.reactionCount * 8.0 + z.failedBreakCount * 5.0, 25.0)
+    float freshSc  = f_clamp(25.0 - barsSince / 10.0, 0.0, 25.0)
+    float biasSc   = bias == "Bullish" ? (z.ztype == "support" ? 15.0 : 12.0) : bias == "Bearish" ? (z.ztype == "resistance" ? 15.0 : 12.0) : bias == "Sideways" ? 10.0 : 5.0
+    float cleanSc  = (z.touchCount >= 2 ? 5.0 : 0.0) + ((z.top - z.bottom) < atr * 1.3 ? 5.0 : 0.0) + ((z.top - z.bottom) < atr * 0.8 ? 5.0 : 0.0)
+    float brkPen   = z.state == "Broken" ? -25.0 : z.state == "Weakened" ? -12.0 : 0.0
+    float weakPen  = (z.touchCount >= 4 and z.reactionCount == 0) ? -10.0 : 0.0
+    float stalePen = (barsSince > 250 and z.touchCount < 2) ? -15.0 : 0.0
+    z.biasScore := biasSc
+    z.ageScore  := freshSc
+    z.score     := f_clamp(touchSc + reactSc + freshSc + biasSc + cleanSc + brkPen + weakPen + stalePen, 0.0, 100.0)
+    z.strength  := f_strength(z.score)
+
+// market bias from last confirmed pivots
+f_bias() =>
+    string b = "Unclear"
+    if array.size(phArr) >= 2 and array.size(plArr) >= 2
+        float h1 = array.get(phArr, array.size(phArr) - 1)
+        float h0 = array.get(phArr, array.size(phArr) - 2)
+        float l1 = array.get(plArr, array.size(plArr) - 1)
+        float l0 = array.get(plArr, array.size(plArr) - 2)
+        float flat = biasSens * atr
+        bool hh = h1 > h0 + flat
+        bool lh = h1 < h0 - flat
+        bool hl = l1 > l0 + flat
+        bool ll = l1 < l0 - flat
+        if hh and hl
+            b := "Bullish"
+        else if lh and ll
+            b := "Bearish"
+        else if math.abs(h1 - h0) <= flat and math.abs(l1 - l0) <= flat
+            b := "Sideways"
+        else
+            b := "Unclear"
+    b
+
+// ============================ 5/6. CREATE + MERGE ============================
+f_addZone(string ztype, float mid, int sourceBar) =>
+    float w   = atr * atrMult
+    float top = mid + w / 2.0
+    float bot = mid - w / 2.0
+    int   mergedIdx = -1
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            if z.ztype == ztype and z.state != "Broken" and mergedIdx == -1
+                bool near    = math.abs(z.mid - mid) <= mergeATR * atr
+                bool overlap = top >= z.bottom and bot <= z.top
+                if near or overlap
+                    z.top      := math.max(z.top, top)
+                    z.bottom   := math.min(z.bottom, bot)
+                    z.mid      := (z.mid + mid) / 2.0
+                    z.touchCount := z.touchCount + 1
+                    z.lastTouchBar := bar_index
+                    z.state    := "Active"
+                    mergedIdx  := i
+    if mergedIdx == -1
+        Zone nz = Zone.new(id = bar_index, ztype = ztype, top = top, bottom = bot, mid = mid, createdBar = sourceBar, lastTouchBar = bar_index, touchCount = 1, reactionCount = 0, failedBreakCount = 0, breakoutCount = 0, retestCount = 0, volScore = 0.0, biasScore = 0.0, ageScore = 0.0, score = 0.0, strength = "Developing", state = "Fresh", pendingTouchBar = -1, lastBreakBar = na)
+        array.push(zones, nz)
+
+// ============================ 7. UPDATES (touch/reaction/break) ==============
+// bar-level alert flags + persistent dashboard "last event"
+var bool fApproachSup = false
+var bool fApproachRes = false
+var bool fEnterSupDef = false
+var bool fEnterResTgt = false
+var bool fBreakUp     = false
+var bool fBreakDn     = false
+var bool fRetest      = false
+var string lastEvent  = "—"
+
+// reset event flags every execution so an alert can never stay true past its event bar
+fApproachSup := false
+fApproachRes := false
+fEnterSupDef := false
+fEnterResTgt := false
+fBreakUp     := false
+fBreakDn     := false
+fRetest      := false
+fChanBreakUp := false
+fChanBreakDn := false
+fChanTestUp  := false
+fChanTestDn  := false
+
+if barstate.isconfirmed
+    // record new confirmed pivots (zones anchored to the pivot bar in f_addZone)
+    if not na(ph)
+        array.push(phArr, ph)
+        array.push(phBarArr, bar_index - pivR)
+        if array.size(phArr) > 4
+            array.shift(phArr)
+            array.shift(phBarArr)
+        f_addZone("resistance", ph, bar_index - pivR)
+    if not na(pl)
+        array.push(plArr, pl)
+        array.push(plBarArr, bar_index - pivR)
+        if array.size(plArr) > 4
+            array.shift(plArr)
+            array.shift(plBarArr)
+        f_addZone("support", pl, bar_index - pivR)
+
+    string biasNow = f_bias()
+    float bufAbs   = breakoutBuf * atr
+
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            bool touchedNow = false
+            bool inZone = high >= z.bottom and low <= z.top
+            // touch (with cooldown)
+            if inZone and (bar_index - z.lastTouchBar) > touchCool and z.state != "Broken"
+                z.touchCount    := z.touchCount + 1
+                z.lastTouchBar  := bar_index
+                z.pendingTouchBar := bar_index
+                z.volScore      := f_clamp(volRel * 6.0, 0.0, 15.0)
+                z.state         := z.state == "Fresh" ? "Tested" : "Active"
+                touchedNow      := true
+            // reaction (price moved away after a touch)
+            if z.pendingTouchBar >= 0 and (bar_index - z.pendingTouchBar) >= 1 and (bar_index - z.pendingTouchBar) <= reactWin
+                float moved = z.ztype == "support" ? (high - z.top) : (z.bottom - low)
+                if moved >= reactATR * atr
+                    z.reactionCount := z.reactionCount + 1
+                    z.pendingTouchBar := -1
+            // failed break (rejection) vs confirmed break
+            if z.ztype == "resistance"
+                if high > z.top + bufAbs and close <= z.top
+                    z.failedBreakCount := z.failedBreakCount + 1
+                if close > z.top + bufAbs and z.state != "Broken"
+                    z.state := "Broken"
+                    z.breakoutCount := z.breakoutCount + 1
+                    z.lastBreakBar := bar_index
+                    fBreakUp := true
+                    lastEvent := "Breakout ↑"
+            else
+                if low < z.bottom - bufAbs and close >= z.bottom
+                    z.failedBreakCount := z.failedBreakCount + 1
+                if close < z.bottom - bufAbs and z.state != "Broken"
+                    z.state := "Broken"
+                    z.breakoutCount := z.breakoutCount + 1
+                    z.lastBreakBar := bar_index
+                    fBreakDn := true
+                    lastEvent := "Breakdown ↓"
+            // retest/flip only on a LATER confirmed bar than the break (no same-bar flip)
+            if z.state == "Broken" and not na(z.lastBreakBar) and bar_index > z.lastBreakBar
+                bool backInside = high >= z.bottom and low <= z.top
+                if backInside
+                    z.state := "Flipped"
+                    z.retestCount := z.retestCount + 1
+                    fRetest := true
+                    lastEvent := "Retest"
+            f_rescore(z, biasNow)
+            // enter-zone alerts only for meaningful (visible) zones
+            if touchedNow and (z.score >= minScore or showWeak)
+                if z.ztype == "support"
+                    fEnterSupDef := true
+                else
+                    fEnterResTgt := true
+            // approach alerts vs strong zones
+            if z.score >= 60 and z.state != "Broken"
+                if z.ztype == "support" and low > z.top and (low - z.top) <= approachATR * atr
+                    fApproachSup := true
+                if z.ztype == "resistance" and high < z.bottom and (z.bottom - high) <= approachATR * atr
+                    fApproachRes := true
+
+    // prune: cap zone count by removing the lowest-score zone
+    if array.size(zones) > 40
+        int worst = 0
+        float worstSc = 1e9
+        for i = 0 to array.size(zones) - 1
+            float s = array.get(zones, i).score
+            if s < worstSc
+                worstSc := s
+                worst := i
+        array.remove(zones, worst)
+
+// ============================ 9. BIAS (for display) ==========================
+bias = f_bias()
+setupMode = bias == "Bullish" ? "Resistance above + key support" : bias == "Bearish" ? "Support below + key resistance" : bias == "Sideways" ? "Range boundaries" : "Developing structure"
+
+// ====================== 9b. SOFT STRUCTURE CHANNEL (geometry) ================
+// Built from the 2 most recent confirmed pivot highs (upper) and lows (lower).
+// Secondary context only — never alters S/R selection, rendering, or market bias.
+f_chanVal(float anchorPx, int anchorBar, float slope, int bi) => anchorPx + slope * (bi - anchorBar)
+
+float upSlope   = na
+float loSlope   = na
+float upAnchPx  = na
+float loAnchPx  = na
+int   upAnchBar = -1
+int   loAnchBar = -1
+float upRef     = na
+float loRef     = na
+float chMid     = na
+float chWidth   = na
+float chDrift   = na
+float chWidthPct = na
+bool  chanGeomOk = false
+bool  chanValid  = false
+bool  chanHasPivots = array.size(phArr) >= channelMinPivotPoints and array.size(plArr) >= channelMinPivotPoints
+if chanHasPivots
+    int   n   = array.size(phArr)
+    int   m   = array.size(plArr)
+    float ph1 = array.get(phArr, n - 1)
+    float ph2 = array.get(phArr, n - 2)
+    int   pb1 = array.get(phBarArr, n - 1)
+    int   pb2 = array.get(phBarArr, n - 2)
+    float pl1 = array.get(plArr, m - 1)
+    float pl2 = array.get(plArr, m - 2)
+    int   qb1 = array.get(plBarArr, m - 1)
+    int   qb2 = array.get(plBarArr, m - 2)
+    if pb1 != pb2 and qb1 != qb2
+        upSlope   := (ph1 - ph2) / (pb1 - pb2)
+        loSlope   := (pl1 - pl2) / (qb1 - qb2)
+        upAnchPx  := ph1
+        loAnchPx  := pl1
+        upAnchBar := pb1
+        loAnchBar := qb1
+        upRef     := f_chanVal(ph1, pb1, upSlope, bar_index)
+        loRef     := f_chanVal(pl1, qb1, loSlope, bar_index)
+        chMid     := (upRef + loRef) / 2.0
+        chWidth   := upRef - loRef
+        chanGeomOk := chWidth > 0
+        if chanGeomOk
+            int   startBar = math.min(pb2, qb2)
+            int   span     = math.max(20, bar_index - startBar)
+            float upFwd    = f_chanVal(ph1, pb1, upSlope, bar_index + span)
+            float loFwd    = f_chanVal(pl1, qb1, loSlope, bar_index + span)
+            float wFwd     = upFwd - loFwd
+            chDrift    := chWidth != 0 ? math.abs(wFwd - chWidth) / chWidth : 1e9
+            chWidthPct := close != 0 ? chWidth / close * 100.0 : 1e9
+            bool parallelOk = chDrift <= channelParallelTol
+            bool widthOk    = chWidthPct <= maxChannelWidthPct
+            bool relevantOk = math.abs(f_distPct(chMid)) <= hardMaxDistPct
+            chanValid := parallelOk and widthOk and relevantOk
+
+float chBuf = channelBreakBufferAtr * atr
+bool chanBrokeAbove = chanValid and not na(upRef) and close > upRef + chBuf
+bool chanBrokeBelow = chanValid and not na(loRef) and close < loRef - chBuf
+float avgSlope = na(upSlope) or na(loSlope) ? na : (upSlope + loSlope) / 2.0
+string chBiasRaw = "Unclear"
+if chanValid and not na(avgSlope) and not na(chMid)
+    bool chFlat = math.abs(avgSlope) <= atr * 0.05
+    if chFlat and close <= upRef and close >= loRef
+        chBiasRaw := "Sideways"
+    else if avgSlope > 0 and close >= chMid and not chanBrokeBelow
+        chBiasRaw := "Bullish"
+    else if avgSlope < 0 and close <= chMid and not chanBrokeAbove
+        chBiasRaw := "Bearish"
+    else
+        chBiasRaw := "Unclear"
+// deference: if the channel disagrees with the structural HH/HL bias, stay Unclear
+string chBias = chBiasRaw
+if (chBiasRaw == "Bullish" and bias == "Bearish") or (chBiasRaw == "Bearish" and bias == "Bullish")
+    chBias := "Unclear"
+
+// confirmed-bar channel state flags (for alerts only; never wick-only)
+if barstate.isconfirmed and chanValid and not na(upRef) and not na(loRef)
+    if close > upRef + chBuf
+        fChanBreakUp := true
+    else if close < loRef - chBuf
+        fChanBreakDn := true
+    else if high >= upRef - chBuf
+        fChanTestUp := true
+    else if low <= loRef + chBuf
+        fChanTestDn := true
+
+// ============================ 10. RENDER (last bar only) =====================
+// nearest valid level of a type on the correct side of price, within maxD% (index or -1).
+// ALLOWS broken/flipped levels on the correct side (a broken resistance now below price
+// is a flipped support) so the chart never goes empty right after a move. Called with
+// localDist for the primary map and the wider fallbackDist for the fallback layer.
+f_nearestIdxD(string ztype, bool below, float maxD) =>
+    int best = -1
+    float bestDist = 1e18
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            bool sideOk = below ? z.mid < close : z.mid > close
+            bool nearOk = showFar or math.abs(f_distPct(z.mid)) <= maxD
+            if f_isValidZone(z) and nearOk and z.ztype == ztype and sideOk
+                float dd = math.abs(f_distPct(z.mid))
+                if dd < bestDist
+                    bestDist := dd
+                    best := i
+    best
+
+// strongest valid in-range scored zone of a type on the correct side (index or -1)
+f_strongestIdx(string ztype, bool below) =>
+    int best = -1
+    float bestSc = -1.0
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            bool sideOk = below ? z.mid < close : z.mid > close
+            if f_isValidZone(z) and f_inRange(z) and z.ztype == ztype and z.state != "Broken" and (z.score >= minScore or showWeak) and sideOk and z.score > bestSc
+                bestSc := z.score
+                best := i
+    best
+
+// add a tracked-zone index to the draw set, de-duplicated
+f_pushUniq(array<int> selA, int idx) =>
+    if idx >= 0 and not array.includes(selA, idx)
+        array.push(selA, idx)
+
+// RangeClarity S/R Quality: pick the KEY zone per side (relevance = 0.85*quality + 0.15*proximity)
+// plus an optional, clearly-distinct (>1.5 ATR), high-quality SECONDARY. Fewer, better zones.
+f_pickSide(array<int> selA, string ztype, bool below) =>
+    int   keyIdx = -1
+    float keyRel = -1.0
+    int   secIdx = -1
+    float secRel = -1.0
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            bool  onSide = below ? (z.mid <= close) : (z.mid >= close)
+            float adist  = math.abs(f_distPct(z.mid))
+            if z.ztype == ztype and z.state != "Broken" and onSide and adist <= localDist
+                float prox = f_clamp(100.0 * (1.0 - adist / localDist), 0.0, 100.0)
+                float rel  = z.score * 0.85 + prox * 0.15
+                if rel > keyRel
+                    secIdx := keyIdx
+                    secRel := keyRel
+                    keyIdx := i
+                    keyRel := rel
+                else if rel > secRel
+                    secIdx := i
+                    secRel := rel
+    f_pushUniq(selA, keyIdx)
+    if secIdx >= 0 and keyIdx >= 0
+        Zone zk = array.get(zones, keyIdx)
+        Zone zs = array.get(zones, secIdx)
+        bool distinct = math.abs(zs.mid - zk.mid) > atr * 1.5
+        bool hiQual   = zs.score >= (vizIsMax ? medThr : strongThr)
+        if distinct and hiQual
+            f_pushUniq(selA, secIdx)
+
+// render a tracked zone by QUALITY TIER (boxes stay rare; everything else is a line):
+//   Strong (>= strongThr) & narrow -> shaded box (a real, capped area)
+//   Strong & too tall              -> thick solid line
+//   Key    (>= medThr)             -> clean thin solid line
+//   Local  (< medThr)              -> subtle thin dashed line
+// Label: Strong/Key show the score; Local shows the % distance.
+f_draw(int idx) =>
+    Zone z = array.get(zones, idx)
+    color base = z.ztype == "support" ? RC_SUP : RC_RES
+    string side = z.ztype == "support" ? "S" : "R"
+    float htPct = close == 0 ? 0.0 : (z.top - z.bottom) / close * 100.0
+    string tier = z.score >= strongThr ? "Strong" : z.score >= medThr ? "Key" : "Local"
+    string mode = tier == "Strong" and htPct <= maxBoxHtPct ? "box" : tier == "Strong" ? "sline" : tier == "Key" ? "kline" : "lline"
+    if mode == "box"
+        box b = box.new(bar_index - 40, z.top, bar_index + 10, z.bottom, border_color = color.new(base, 20), bgcolor = color.new(base, 80), border_width = 2)
+        array.push(drawnBox, b)
+    else
+        int    ltp  = mode == "sline" ? 10 : mode == "kline" ? 28 : 48
+        int    lwd  = mode == "sline" ? 2 : 1
+        string lsty = (mode == "sline" or mode == "kline") ? line.style_solid : line.style_dashed
+        line ln = line.new(bar_index - 40, z.mid, bar_index + 10, z.mid, color = color.new(base, ltp), width = lwd, style = lsty)
+        array.push(drawnLine, ln)
+    if showLabels and effLabels
+        float d = f_distPct(z.mid)
+        string txt = tier + " " + side
+        int labChip = mode == "box" ? 68 : 86
+        int labTxt  = mode == "box" ? 0 : mode == "sline" ? 8 : mode == "kline" ? 14 : 24
+        label lb = label.new(bar_index + 10, z.mid, txt, style = label.style_label_left, size = size.small, color = color.new(base, labChip), textcolor = color.new(color.white, labTxt))
+        array.push(drawnLab, lb)
+
+// render a SUBTLE fallback structure level as a dashed line only (never a box).
+// role = "Local S" / "Local R"; always shows the % distance. Used when a side has no
+// scored level and visible < minVisibleLevels.
+f_drawLevel(float px, string ztype, string role) =>
+    color base = ztype == "support" ? RC_SUP : RC_RES
+    line ln = line.new(bar_index - 40, px, bar_index + 10, px, color = color.new(base, 50), width = 1, style = line.style_dashed)
+    array.push(drawnLine, ln)
+    if showLineLabels and effLabels
+        float d = f_distPct(px)
+        string txt = role + " • " + (d >= 0 ? "+" : "") + str.tostring(d, "#.#") + "%"
+        label lb = label.new(bar_index + 10, px, txt, style = label.style_label_left, size = size.small, color = color.new(base, 88), textcolor = color.new(color.white, 22))
+        array.push(drawnLab, lb)
+
+// nearest fallback SUPPORT below price = highest valid candidate < close within maxD%.
+// Sources: nearest support zone, recent pullback low, broader structure low. Returns na if none.
+f_fallbackSup(float maxD) =>
+    float best = na
+    int zi = f_nearestIdxD("support", true, maxD)
+    if zi >= 0
+        best := array.get(zones, zi).mid
+    if not na(pullLo) and pullLo < close and math.abs(f_distPct(pullLo)) <= maxD
+        best := na(best) ? pullLo : math.max(best, pullLo)
+    if not na(swingLo) and swingLo < close and math.abs(f_distPct(swingLo)) <= maxD
+        best := na(best) ? swingLo : math.max(best, swingLo)
+    best
+
+// nearest fallback RESISTANCE above price = nearest real pivot-high zone within maxD%.
+// Resistance must be real overhead structure — never a raw high — so price discovery
+// correctly yields "none above". Returns na if no pivot-high zone exists above.
+f_fallbackRes(float maxD) =>
+    float best = na
+    int zi = f_nearestIdxD("resistance", false, maxD)
+    if zi >= 0
+        best := array.get(zones, zi).mid
+    best
+
+if barstate.islast
+    // clear previous drawings (no leaks)
+    if array.size(drawnBox) > 0
+        for i = 0 to array.size(drawnBox) - 1
+            box.delete(array.get(drawnBox, i))
+    array.clear(drawnBox)
+    if array.size(drawnLine) > 0
+        for i = 0 to array.size(drawnLine) - 1
+            line.delete(array.get(drawnLine, i))
+    array.clear(drawnLine)
+    if array.size(drawnLab) > 0
+        for i = 0 to array.size(drawnLab) - 1
+            label.delete(array.get(drawnLab, i))
+    array.clear(drawnLab)
+    if array.size(drawnChan) > 0
+        for i = 0 to array.size(drawnChan) - 1
+            line.delete(array.get(drawnChan, i))
+    array.clear(drawnChan)
+    if not na(chanFill)
+        linefill.delete(chanFill)
+        chanFill := na
+
+    // ---- primary map: nearest + strongest each side, de-duplicated (drawn by quality tier) ----
+    array<int> sel = array.new<int>()
+    int nSupIdx = f_nearestIdxD("support", true, localDist)
+    int nResIdx = f_nearestIdxD("resistance", false, localDist)
+    int sSupIdx = f_strongestIdx("support", true)
+    int sResIdx = f_strongestIdx("resistance", false)
+    // RangeClarity S/R Quality: fewer, better zones -- key + optional distinct secondary per side.
+    f_pickSide(sel, "support", true)
+    f_pickSide(sel, "resistance", false)
+    if array.size(sel) > 0
+        for i = 0 to array.size(sel) - 1
+            f_draw(array.get(sel, i))
+
+    // ---- fallback structure: subtle Local lines, per empty side, when visible < minVisibleLevels ----
+    // Support = nearest of zone/pullback-low/structure-low. Resistance = real pivot-high only
+    // (never a raw high), so price discovery stays honest as "none above".
+    int   visCount = array.size(sel)
+    bool  supShown = nSupIdx >= 0 or sSupIdx >= 0
+    bool  resShown = nResIdx >= 0 or sResIdx >= 0
+    float fbSupPx  = na
+    float fbResPx  = na
+    if showFallbackSwings and visCount < minVisibleLevels
+        if not supShown
+            fbSupPx := f_fallbackSup(fallbackDist)
+            if not na(fbSupPx)
+                f_drawLevel(fbSupPx, "support", "Local S")
+                visCount += 1
+        if not resShown
+            fbResPx := f_fallbackRes(fallbackDist)
+            if not na(fbResPx)
+                f_drawLevel(fbResPx, "resistance", "Local R")
+                visCount += 1
+
+    // ---- Soft Structure Channel: containment quality + state + subtle draw ----
+    float chQuality = 0.0
+    string chanState = "None"
+    if chanGeomOk
+        int inN = 0
+        int totN = 0
+        int look = math.min(channelLookbackBars, bar_index)
+        if look > 0
+            for i = 0 to look - 1
+                float u = f_chanVal(upAnchPx, upAnchBar, upSlope, bar_index - i)
+                float l = f_chanVal(loAnchPx, loAnchBar, loSlope, bar_index - i)
+                if not na(u) and not na(l) and u > l
+                    totN += 1
+                    float c = close[i]
+                    if c <= u and c >= l
+                        inN += 1
+        float containment = totN > 0 ? inN * 1.0 / totN : 0.0
+        float qPar   = na(chDrift) ? 0.0 : 1.0 - math.min(chDrift / channelParallelTol, 1.0)
+        float qWidth = (not na(chWidthPct) and chWidthPct <= maxChannelWidthPct) ? 15.0 : 0.0
+        chQuality := f_clamp(containment * 60.0 + qPar * 25.0 + qWidth, 0.0, 100.0)
+        // price-position state on the current bar
+        if close > upRef + chBuf
+            chanState := "Break Above"
+        else if close < loRef - chBuf
+            chanState := "Break Below"
+        else if high >= upRef - chBuf
+            chanState := "Test Upper"
+        else if low <= loRef + chBuf
+            chanState := "Test Lower"
+        else
+            chanState := "Inside"
+    if effChannel and chanGeomOk
+        bool chShow = chanValid and chQuality >= minChannelQualityToShow
+        bool chDev  = not chShow and chanValid and chQuality > 0
+        if chShow or chDev
+            color cc  = chDev ? RC_SLATE : (chBias == "Bullish" ? RC_SUP : chBias == "Bearish" ? RC_RES : RC_SLATE)
+            int   ctp = chDev ? math.min(channelOpacity + 12, 95) : channelOpacity
+            int   rx  = bar_index + 10
+            float uR  = f_chanVal(upAnchPx, upAnchBar, upSlope, rx)
+            float lR  = f_chanVal(loAnchPx, loAnchBar, loSlope, rx)
+            line uLn = line.new(upAnchBar, upAnchPx, rx, uR, color = color.new(cc, ctp), width = 1, style = chDev ? line.style_dashed : line.style_solid)
+            line lLn = line.new(loAnchBar, loAnchPx, rx, lR, color = color.new(cc, ctp), width = 1, style = chDev ? line.style_dashed : line.style_solid)
+            array.push(drawnChan, uLn)
+            array.push(drawnChan, lLn)
+            if showSoftChannelMidline
+                line mLn = line.new(upAnchBar, (upAnchPx + loAnchPx) / 2.0, rx, (uR + lR) / 2.0, color = color.new(cc, math.min(ctp + 10, 95)), width = 1, style = line.style_dotted)
+                array.push(drawnChan, mLn)
+            if showSoftChannelFill
+                chanFill := linefill.new(uLn, lLn, color.new(cc, 93))
+
+    // ============================ 11. DASHBOARD ==============================
+    if showDash
+        if na(dash)
+            dash := table.new(position.top_right, 2, 11, bgcolor = color.new(#0b0f1a, 12), border_color = color.new(color.gray, 60), border_width = 1, frame_color = color.new(color.gray, 50), frame_width = 1)
+        // nearest support = primary tier + distance, else fallback Local, else "none nearby"
+        // (guarded with if, not ternary: a ternary can evaluate array.get on a -1 index)
+        string supCell = "none nearby"
+        color  supCol  = color.gray
+        if nSupIdx >= 0
+            Zone zs = array.get(zones, nSupIdx)
+            string ts = zs.score >= strongThr ? "Strong S " : zs.score >= medThr ? "Key S " : "Local S "
+            supCell := ts + str.tostring(f_distPct(zs.mid), "#.#") + "%"
+            supCol  := color.teal
+        else if not na(fbSupPx)
+            supCell := "Local S " + str.tostring(f_distPct(fbSupPx), "#.#") + "%"
+            supCol  := color.new(color.teal, 30)
+        // nearest resistance = primary, else fallback pivot, else "none above" / "price discovery"
+        bool nearHigh = not na(swingHi) and close >= swingHi * 0.999
+        string resCell = nearHigh ? "price discovery" : "none above"
+        color  resCol  = color.gray
+        if nResIdx >= 0
+            Zone zr = array.get(zones, nResIdx)
+            string tr = zr.score >= strongThr ? "Strong R +" : zr.score >= medThr ? "Key R +" : "Local R +"
+            resCell := tr + str.tostring(f_distPct(zr.mid), "#.#") + "%"
+            resCol  := color.orange
+        else if not na(fbResPx)
+            resCell := "Local R +" + str.tostring(f_distPct(fbResPx), "#.#") + "%"
+            resCol  := color.new(color.orange, 30)
+        // single strongest local zone (either side) or "none local"
+        // (nested ifs, not `and array.get`: Pine may evaluate array.get on a -1 index)
+        string strongCell = "none local"
+        int   bestStrong = -1
+        float bestStrongSc = -1.0
+        if sSupIdx >= 0
+            float ssc = array.get(zones, sSupIdx).score
+            if ssc > bestStrongSc
+                bestStrongSc := ssc
+                bestStrong := sSupIdx
+        if sResIdx >= 0
+            float rsc = array.get(zones, sResIdx).score
+            if rsc > bestStrongSc
+                bestStrongSc := rsc
+                bestStrong := sResIdx
+        if bestStrong >= 0
+            Zone zb = array.get(zones, bestStrong)
+            string tb = zb.score >= strongThr ? "Strong " : "Key "
+            strongCell := tb + (zb.ztype == "support" ? "S " : "R ") + str.tostring(math.round(zb.score))
+        color biasCol = bias == "Bullish" ? color.teal : bias == "Bearish" ? color.orange : bias == "Sideways" ? color.gray : color.silver
+        table.cell(dash, 0, 0, "RangeClarity S/R v1", text_color = color.white, text_size = size.small, text_halign = text.align_left, bgcolor = color.new(color.blue, 70))
+        table.cell(dash, 1, 0, syminfo.ticker + " · " + timeframe.period, text_color = color.silver, text_size = size.tiny, text_halign = text.align_right, bgcolor = color.new(color.blue, 70))
+        table.cell(dash, 0, 1, "Market bias", text_color = color.silver, text_size = size.small, text_halign = text.align_left)
+        table.cell(dash, 1, 1, bias, text_color = biasCol, text_size = size.small, text_halign = text.align_right)
+        table.cell(dash, 0, 2, "Active setup", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 2, setupMode, text_color = color.white, text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 3, "Nearest support", text_color = color.silver, text_size = size.small, text_halign = text.align_left)
+        table.cell(dash, 1, 3, supCell, text_color = supCol, text_size = size.small, text_halign = text.align_right)
+        table.cell(dash, 0, 4, "Nearest resistance", text_color = color.silver, text_size = size.small, text_halign = text.align_left)
+        table.cell(dash, 1, 4, resCell, text_color = resCol, text_size = size.small, text_halign = text.align_right)
+        table.cell(dash, 0, 5, "Strongest zone", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 5, strongCell, text_color = color.white, text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 6, "Visible levels", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 6, str.tostring(visCount), text_color = color.white, text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 7, "Tracked zones", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 7, str.tostring(array.size(zones)), text_color = color.silver, text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 8, "Last event", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 8, lastEvent, text_color = color.white, text_size = size.tiny, text_halign = text.align_right)
+        string chanCell = "off"
+        if showSoftChannel
+            chanCell := not chanGeomOk ? "None" : (chanValid and chQuality >= minChannelQualityToShow) ? chanState : (chanValid and chQuality > 0 ? "Developing" : "None")
+        string chanBiasCell = showSoftChannel and chanValid and chQuality >= minChannelQualityToShow ? chBias : (showSoftChannel ? "—" : "off")
+        table.cell(dash, 0, 9, "Channel", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 9, chanCell, text_color = color.new(color.aqua, 10), text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 10, "Channel bias", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 10, chanBiasCell, text_color = color.silver, text_size = size.tiny, text_halign = text.align_right)
+
+// ============================ 12. ALERTS (descriptive only) ==================
+alertcondition(barstate.isconfirmed and fApproachSup, "Approaching strong support", "RangeClarity: price approaching a strong support zone")
+alertcondition(barstate.isconfirmed and fApproachRes, "Approaching strong resistance", "RangeClarity: price approaching a strong resistance zone")
+alertcondition(barstate.isconfirmed and fEnterSupDef, "Entered support zone", "RangeClarity: price entered a support zone")
+alertcondition(barstate.isconfirmed and fEnterResTgt, "Entered resistance zone", "RangeClarity: price entered a resistance zone")
+alertcondition(barstate.isconfirmed and fBreakUp, "Confirmed close above resistance", "RangeClarity: confirmed close above a resistance zone")
+alertcondition(barstate.isconfirmed and fBreakDn, "Confirmed breakdown below support", "RangeClarity: confirmed close below a support zone")
+alertcondition(barstate.isconfirmed and fRetest, "Retest after break", "RangeClarity: price retested a broken zone")
+
+// ---- Soft Structure Channel alerts (optional, descriptive, confirmed bars only) ----
+alertcondition(fChanBreakUp, "Price closed above soft structure channel", "RangeClarity: price closed above the soft structure channel")
+alertcondition(fChanBreakDn, "Price closed below soft structure channel", "RangeClarity: price closed below the soft structure channel")
+alertcondition(fChanTestUp, "Price testing upper structure", "RangeClarity: price testing the upper soft structure")
+alertcondition(fChanTestDn, "Price testing lower structure", "RangeClarity: price testing the lower soft structure")
+
+// ============================================================================
+// BEGIN RangeClarity Structure Stack
+// ----------------------------------------------------------------------------
+// Additive, isolated moving-average STRUCTURE layer (context only).
+// It helps read: trend structure, trend quality, compression/expansion, and
+// long-term context via MA200. It is NOT a signal system: no buy/sell, no
+// arrows, no targets, no entries/exits, no predictions, no alerts.
+// The S/R engine above is untouched - this block only APPENDS new inputs,
+// calculation, plots, one corridor fill, optional price labels, and one small
+// optional table. Every identifier is prefixed `ms` to stay fully isolated
+// from the S/R variables. Disable with "Enable MA Structure Layer" = false and
+// the chart behaves exactly like the S/R-only version.
+// Visual priority is preserved automatically: the S/R engine draws with
+// box/line/label objects (drawing layer), while these MAs use plot()/fill()
+// (plot layer, which renders beneath the S/R drawings). So S/R stays primary.
+// ============================================================================
+msGrp = "RangeClarity Structure Stack"
+msEnable     = input.bool(true,   "Enable MA Structure Layer", group = msGrp, tooltip = "Adds a subtle moving-average structure layer for trend context. Off = chart behaves exactly like the S/R-only version.")
+msType       = input.string("SMA", "MA type", options = ["SMA", "EMA"], group = msGrp, tooltip = "SMA = steadier structure (default). EMA = faster / more reactive.")
+msShowMode   = input.string("Clean", "Show mode", options = ["Clean", "Full", "Band"], group = msGrp, tooltip = "Clean = MA 20/50/200. Full = also show internal MA 100/150 context. Band = fade the 20/50 lines and let the corridor between them carry the read.")
+msShowFill   = input.bool(true,   "Show 20/50 corridor fill", group = msGrp)
+msShowLabels = input.bool(false,  "Show MA price labels", group = msGrp, tooltip = "Off by default to keep the chart clean. MA values are always available in the status line / Data Window via the plot titles.")
+msShowHTF    = input.bool(false,  "Show higher-timeframe 200 anchor", group = msGrp, tooltip = "Optional long-term context line. OFF by default. Repaint-safe: uses confirmed higher-timeframe values only (lookahead off).")
+msHTFtf      = input.timeframe("1W", "Higher-timeframe for 200 anchor", group = msGrp, tooltip = "Only drawn when the HTF 200 anchor is enabled above.")
+msShowDash   = input.bool(false,  "Show legacy MA mini-table", group = msGrp, tooltip = "Standalone MA read-out. Superseded by the RangeClarity dashboard (MA Structure row); off by default.")
+msDashPos    = input.string("Bottom Right", "MA dashboard position", options = ["Top Left", "Top Right", "Middle Right", "Bottom Left", "Bottom Right"], group = msGrp, tooltip = "Defaults to a different corner than the S/R dashboard (top right) to avoid overlap.")
+
+// ---- helpers (ms-scoped) ----
+msClamp(_x, _lo, _hi) => math.max(_lo, math.min(_hi, _x))
+msMA(_len) => msType == "EMA" ? ta.ema(close, _len) : ta.sma(close, _len)
+
+// ---- moving averages + normaliser ----
+ms20  = msMA(20)
+ms50  = msMA(50)
+ms100 = msMA(100)
+ms150 = msMA(150)
+ms200 = msMA(200)
+msAtr     = ta.atr(14)
+msAtrSafe = msAtr > 0 ? msAtr : (close * 0.0001 + 1e-9)   // guard divide-by-zero
+msReady   = not na(ms200) and not na(ms20)                // needs full history (>= ~200 bars)
+
+// ---- optional higher-timeframe 200 anchor (repaint-safe; computed once) ----
+msHtf200 = request.security(syminfo.tickerid, msHTFtf, msType == "EMA" ? ta.ema(close, 200) : ta.sma(close, 200), lookahead = barmerge.lookahead_off)
+
+// ---- alignment: pairwise MA order (perfect bull = 20>50>100>150>200) ----
+msBullViol = (ms20 <= ms50 ? 1 : 0) + (ms20 <= ms100 ? 1 : 0) + (ms20 <= ms150 ? 1 : 0) + (ms20 <= ms200 ? 1 : 0) + (ms50 <= ms100 ? 1 : 0) + (ms50 <= ms150 ? 1 : 0) + (ms50 <= ms200 ? 1 : 0) + (ms100 <= ms150 ? 1 : 0) + (ms100 <= ms200 ? 1 : 0) + (ms150 <= ms200 ? 1 : 0)
+msBearViol = (ms20 >= ms50 ? 1 : 0) + (ms20 >= ms100 ? 1 : 0) + (ms20 >= ms150 ? 1 : 0) + (ms20 >= ms200 ? 1 : 0) + (ms50 >= ms100 ? 1 : 0) + (ms50 >= ms150 ? 1 : 0) + (ms50 >= ms200 ? 1 : 0) + (ms100 >= ms150 ? 1 : 0) + (ms100 >= ms200 ? 1 : 0) + (ms150 >= ms200 ? 1 : 0)
+msDisorder = math.min(msBullViol, msBearViol)             // 0 = clean (either direction) ... high = tangled
+msAlign    = msClamp(100.0 * (1.0 - msDisorder / 5.0), 0, 100)
+
+// ---- slopes (ATR-normalised over 3 bars) ----
+msSlopeLen  = 3
+msS20  = (ms20  - ms20[msSlopeLen])  / msAtrSafe
+msS50  = (ms50  - ms50[msSlopeLen])  / msAtrSafe
+msS100 = (ms100 - ms100[msSlopeLen]) / msAtrSafe
+msS150 = (ms150 - ms150[msSlopeLen]) / msAtrSafe
+msS200 = (ms200 - ms200[msSlopeLen]) / msAtrSafe
+msSlopeMean = (msS20 + msS50 + msS100 + msS150 + msS200) / 5.0
+msSignSum   = math.sign(msS20) + math.sign(msS50) + math.sign(msS100) + math.sign(msS150) + math.sign(msS200)
+msSignCons  = math.abs(msSignSum) / 5.0                   // 0..1 (all MAs agree on direction = 1)
+msSlopeStr  = msClamp(math.abs(msSlopeMean) / 0.5, 0, 1)  // 0..1 (0.5 ATR/3bars ~= strong)
+
+// ---- spacing: ribbon width, expansion, instability ----
+msTop   = math.max(ms20, math.max(ms50, math.max(ms100, math.max(ms150, ms200))))
+msBot   = math.min(ms20, math.min(ms50, math.min(ms100, math.min(ms150, ms200))))
+msWidth = msTop - msBot
+msWidthAtr   = msWidth / msAtrSafe
+msWidthDelta = nz(msWidth - msWidth[1], 0) / msAtrSafe
+msWidthVol   = nz(ta.stdev(msWidth, 10), 0) / msAtrSafe
+msSpacingHealth = msClamp(1.0 - msWidthVol / 1.5, 0, 1)   // steady spacing = healthy; whippy = not
+msCompressed = msWidthAtr < 1.5                           // heuristic: MAs clustered within ~1.5 ATR
+msExpanding  = msWidthDelta > 0.10                        // heuristic: stack widening
+msSpacingState = not msReady ? "-" : (msCompressed ? "Compressed" : (msExpanding ? "Expanding" : "Normal"))
+
+// ---- long-term context: price vs 200 + 200 direction ----
+msAbove200 = close >= ms200
+ms200Dir   = msS200 > 0.05 ? "up" : (msS200 < -0.05 ? "down" : "flat")
+ms200Arrow = ms200Dir == "up" ? "/\\" : (ms200Dir == "down" ? "\\/" : "--")
+msVs200    = not msReady ? "-" : (msAbove200 ? "Above" : "Below") + " 200 " + ms200Arrow
+
+// ---- structure quality 0..100 (alignment 35 / consistency 25 / strength 20 / spacing 20) ----
+msQualityRaw = 0.35 * msAlign + 0.25 * (100.0 * msSignCons) + 0.20 * (100.0 * msSlopeStr) + 0.20 * (100.0 * msSpacingHealth)
+msQuality    = msClamp(ta.ema(msQualityRaw, 3), 0, 100)
+msQualityLabel = not msReady ? "-" : (msQuality >= 75 ? "Strong" : msQuality >= 55 ? "Healthy" : msQuality >= 35 ? "Developing" : "Weak")
+
+// ---- structure class (descriptive state, not a signal) ----
+msPerfBull = msBullViol == 0
+msPerfBear = msBearViol == 0
+string msClass = "Mixed / Transition"
+if not msReady
+    msClass := "-"
+else if msCompressed and not (msPerfBull or msPerfBear)
+    msClass := "Neutral / Compression"
+else if msPerfBull or (msAlign >= 70 and msSlopeMean > 0 and msAbove200)
+    msClass := "Bullish"
+else if msPerfBear or (msAlign >= 70 and msSlopeMean < 0 and not msAbove200)
+    msClass := "Bearish"
+
+// ---- muted palette (no rainbow) ----
+msColBull   = color.rgb(45, 212, 189)     // teal
+msColBear   = color.rgb(244, 114, 182)    // soft magenta
+msColNeut   = color.rgb(148, 163, 184)    // slate
+msColAnchor = color.rgb(203, 213, 225)    // soft slate-white long-term anchor
+msClassCol  = msClass == "Bullish" ? msColBull : msClass == "Bearish" ? msColBear : msColNeut
+
+// ---- visibility per show mode ----
+// RangeClarity Visual System: Minimal preset hides on-chart MA visuals (dashboard MA score still shows).
+bool effMAVisuals = msEnable and not vizIsMin
+msShow20   = effMAVisuals
+msShow50   = effMAVisuals
+msShow200  = effMAVisuals
+msShow100  = effMAVisuals and msShowMode == "Full"
+msShow150  = effMAVisuals and msShowMode == "Full"
+msBandMode = msShowMode == "Band"
+msTransp20 = msBandMode ? 70 : 30
+msTransp50 = msBandMode ? 70 : 35
+
+// ---- plots (plot layer -> below S/R drawings, so S/R stays primary) ----
+msP20 = plot(msShow20 ? ms20 : na, "MA 20", color = color.new(msClassCol, msTransp20), linewidth = 1)
+msP50 = plot(msShow50 ? ms50 : na, "MA 50", color = color.new(msClassCol, msTransp50), linewidth = 1)
+plot(msShow100 ? ms100 : na, "MA 100 (internal)", color = color.new(msColNeut, 60), linewidth = 1)
+plot(msShow150 ? ms150 : na, "MA 150 (internal)", color = color.new(msColNeut, 60), linewidth = 1)
+plot(msShow200 ? ms200 : na, "MA 200", color = color.new(msColAnchor, 10), linewidth = 2)
+plot(msShowHTF ? msHtf200 : na, "HTF 200 anchor", color = color.new(msColAnchor, 35), linewidth = 2)
+
+// ---- subtle corridor fill between 20 and 50 (tinted by class; always faint) ----
+msFillBase   = msBandMode ? 83 : 88
+msFillTransp = int(msClamp(msFillBase - msQuality / 12.0, 80, 96))
+msFillCol    = (msShowFill and effMAVisuals) ? color.new(msClassCol, msFillTransp) : na
+fill(msP20, msP50, color = msFillCol, title = "20/50 corridor")
+
+// ---- optional compact MA price labels (off by default; pooled + cleared each redraw) ----
+var label[] msLabels = array.new<label>()
+if barstate.islast
+    if array.size(msLabels) > 0
+        for i = 0 to array.size(msLabels) - 1
+            label.delete(array.get(msLabels, i))
+        array.clear(msLabels)
+    if effMAVisuals and msShowLabels and msReady
+        if msShow200
+            array.push(msLabels, label.new(bar_index + 3, ms200, "200", style = label.style_label_left, color = color.new(#0b0f1a, 20), textcolor = color.new(msColAnchor, 0), size = size.tiny))
+        if msShow50
+            array.push(msLabels, label.new(bar_index + 3, ms50, "50", style = label.style_label_left, color = color.new(#0b0f1a, 20), textcolor = msClassCol, size = size.tiny))
+        if msShow20
+            array.push(msLabels, label.new(bar_index + 3, ms20, "20", style = label.style_label_left, color = color.new(#0b0f1a, 20), textcolor = msClassCol, size = size.tiny))
+        if msShow100
+            array.push(msLabels, label.new(bar_index + 3, ms100, "100", style = label.style_label_left, color = color.new(#0b0f1a, 20), textcolor = color.new(msColNeut, 0), size = size.tiny))
+        if msShow150
+            array.push(msLabels, label.new(bar_index + 3, ms150, "150", style = label.style_label_left, color = color.new(#0b0f1a, 20), textcolor = color.new(msColNeut, 0), size = size.tiny))
+
+// ---- small separate MA dashboard (own table; S/R dashboard untouched) ----
+msPos = msDashPos == "Top Left" ? position.top_left : msDashPos == "Top Right" ? position.top_right : msDashPos == "Middle Right" ? position.middle_right : msDashPos == "Bottom Left" ? position.bottom_left : position.bottom_right
+var table msTbl = na
+if barstate.islast
+    if msEnable and msShowDash
+        if na(msTbl)
+            msTbl := table.new(msPos, 2, 4, bgcolor = color.new(#0b0f1a, 12), border_color = color.new(color.gray, 60), border_width = 1, frame_color = color.new(color.gray, 50), frame_width = 1)
+        table.clear(msTbl, 0, 0, 1, 3)
+        msQualCell = not msReady ? "-" : msQualityLabel + " (" + str.tostring(int(math.round(msQuality))) + ")"
+        table.cell(msTbl, 0, 0, "MA structure", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(msTbl, 1, 0, msClass,        text_color = msClassCol,    text_size = size.tiny, text_halign = text.align_right)
+        table.cell(msTbl, 0, 1, "MA quality",   text_color = color.silver,  text_size = size.tiny, text_halign = text.align_left)
+        table.cell(msTbl, 1, 1, msQualCell,     text_color = color.new(color.white, 0), text_size = size.tiny, text_halign = text.align_right)
+        table.cell(msTbl, 0, 2, "MA spacing",   text_color = color.silver,  text_size = size.tiny, text_halign = text.align_left)
+        table.cell(msTbl, 1, 2, msSpacingState, text_color = color.new(color.aqua, 10), text_size = size.tiny, text_halign = text.align_right)
+        table.cell(msTbl, 0, 3, "vs 200",       text_color = color.silver,  text_size = size.tiny, text_halign = text.align_left)
+        table.cell(msTbl, 1, 3, msVs200,        text_color = msReady ? (msAbove200 ? msColBull : msColBear) : color.silver, text_size = size.tiny, text_halign = text.align_right)
+    else if not na(msTbl)
+        table.delete(msTbl)
+        msTbl := na
+// ----------------------------------------------------------------------------
+// END RangeClarity Structure Stack
+// ============================================================================
+
+// ============================================================================
+// BEGIN RangeClarity Dashboard UX
+// ----------------------------------------------------------------------------
+// A single, product-grade dashboard that answers "what is market-structure
+// quality right now?" at a glance: one Overall RangeClarity Score, two
+// sub-scores (S/R, MA), a plain-language Market State, the nearest key levels,
+// and long-term position. CONTEXT ONLY - no buy/sell, entries, exits, targets,
+// predictions, or alerts.
+//
+// Isolation: this is the only place in the file that can see BOTH the S/R
+// globals (bias, zones, f_nearestIdxD, f_distPct, localStr thresholds) AND the
+// MA Structure globals (msQuality, msClass, ...), so the unified read-out lives
+// here. The S/R engine and the MA layer are NOT modified. Every identifier is
+// rc-prefixed. Scores are dashboard-derived presentation values; they do not
+// feed back into the engine or the chart drawings.
+// ============================================================================
+rcGrp        = "RangeClarity Dashboard"
+rcDashEnable = input.bool(true, "Show RangeClarity dashboard", group = rcGrp, tooltip = "The main product dashboard. Replaces the two legacy detail tables (off by default).")
+rcDashMode   = input.string("Standard", "Dashboard detail", options = ["Minimal", "Standard", "Advanced"], group = rcGrp, tooltip = "Minimal = score + state + nearest level. Standard = scores + key levels + trend. Advanced = adds structure internals.")
+rcDashAdv    = input.bool(false, "Show advanced dashboard details", group = rcGrp, tooltip = "Adds debug-like component values inside the Advanced view. Off by default.")
+rcDashPosIn  = input.string("Top Right", "Dashboard position", options = ["Top Left", "Top Right", "Middle Right", "Bottom Left", "Bottom Right"], group = rcGrp)
+
+// ---- grade label + muted state color (shared 0-100 scale) ----
+rcGrade(float _s) => _s >= 90 ? "Exceptional" : _s >= 75 ? "Strong" : _s >= 55 ? "Healthy" : _s >= 35 ? "Developing" : "Weak"
+rcGradeCol(float _s) => _s >= 75 ? color.rgb(45, 212, 189) : _s >= 55 ? color.rgb(120, 200, 150) : _s >= 35 ? color.rgb(230, 185, 95) : color.rgb(214, 120, 120)
+
+// ---- append one 3-column row (label | score | value) to the row buffers ----
+rcAdd(array<string> _L, array<string> _S, array<string> _V, array<color> _C, string _lab, string _sc, string _val, color _c) =>
+    array.push(_L, _lab)
+    array.push(_S, _sc)
+    array.push(_V, _val)
+    array.push(_C, _c)
+
+rcPos = rcDashPosIn == "Top Left" ? position.top_left : rcDashPosIn == "Top Right" ? position.top_right : rcDashPosIn == "Middle Right" ? position.middle_right : rcDashPosIn == "Bottom Left" ? position.bottom_left : position.bottom_right
+var table rcTbl = na
+if barstate.islast
+    if rcDashEnable
+        // ---- nearest support / resistance (recomputed from the global zone pool) ----
+        int rcSupIdx = f_nearestIdxD("support", true, localDist)
+        int rcResIdx = f_nearestIdxD("resistance", false, localDist)
+        string rcSupCell = "-"
+        color  rcSupCol  = color.new(color.gray, 30)
+        float  rcSupDist = na
+        if rcSupIdx >= 0
+            Zone zs = array.get(zones, rcSupIdx)
+            string ts = zs.score >= strongThr ? "Strong S" : zs.score >= medThr ? "Key S" : "Local S"
+            rcSupCell := ts + " · " + str.tostring(zs.mid, format.mintick)
+            rcSupDist := f_distPct(zs.mid)
+            rcSupCol  := color.new(color.teal, 0)
+        string rcResCell = "-"
+        color  rcResCol  = color.new(color.gray, 30)
+        float  rcResDist = na
+        if rcResIdx >= 0
+            Zone zr = array.get(zones, rcResIdx)
+            string tr = zr.score >= strongThr ? "Strong R" : zr.score >= medThr ? "Key R" : "Local R"
+            rcResCell := tr + " · " + str.tostring(zr.mid, format.mintick)
+            rcResDist := f_distPct(zr.mid)
+            rcResCol  := color.new(RC_RES, 0)
+        // ---- Location Quality (internal): where price sits within the key support/resistance band ----
+        // rcSupDist / rcResDist (above) are the signed % distances to the key support / resistance.
+        // Nearest key support is below price; nearest key resistance is above price (by selection).
+        float locSupMid = rcSupIdx >= 0 ? array.get(zones, rcSupIdx).mid : na
+        float locResMid = rcResIdx >= 0 ? array.get(zones, rcResIdx).mid : na
+        // Range position 0-100: 0 = at key support, 100 = at key resistance.
+        float locRangePos = (not na(locSupMid) and not na(locResMid) and locResMid > locSupMid) ? f_clamp((close - locSupMid) / (locResMid - locSupMid) * 100.0, 0, 100) : na
+        // ATR-normalized distance to the nearer key level + MA extension (calm internal context).
+        float locNearAtr = (atr > 0 and (rcSupIdx >= 0 or rcResIdx >= 0)) ? math.min(rcSupIdx >= 0 ? math.abs(close - locSupMid) / atr : 1e9, rcResIdx >= 0 ? math.abs(locResMid - close) / atr : 1e9) : na
+        float locExtAtr  = (rcMAavail and atr > 0) ? math.abs(close - ms200) / atr : na
+        // Surfaced Location state (7 buckets): position within the band, or above / below the band.
+        string rcLocState = "-"
+        // "Near Support/Resistance" requires BOTH an extreme range position AND real proximity to that
+        // level (<= 1.5% or within ~1 ATR). A wide band therefore never reads "Near" when price is
+        // structurally far from the level; it falls back to Lower / Upper Range instead.
+        bool locNearSup = not na(locRangePos) and locRangePos <= 20 and rcSupIdx >= 0 and (math.abs(nz(rcSupDist, 99.0)) <= 1.5 or (not na(locNearAtr) and locNearAtr <= 1.0))
+        bool locNearRes = not na(locRangePos) and locRangePos >= 80 and rcResIdx >= 0 and (math.abs(nz(rcResDist, 99.0)) <= 1.5 or (not na(locNearAtr) and locNearAtr <= 1.0))
+        if not na(locRangePos)
+            rcLocState := locNearSup ? "Near Support" : locNearRes ? "Near Resistance" : locRangePos <= 40 ? "Lower Range" : locRangePos < 60 ? "Mid Range" : "Upper Range"
+        else if rcSupIdx >= 0 and rcResIdx < 0
+            rcLocState := "Above Range"
+        else if rcResIdx >= 0 and rcSupIdx < 0
+            rcLocState := "Below Range"
+        color rcLocCol = rcLocState == "Near Support" ? color.new(RC_SUP, 0) : rcLocState == "Near Resistance" ? color.new(RC_RES, 0) : (rcLocState == "Above Range" or rcLocState == "Below Range") ? color.new(color.rgb(230, 185, 95), 0) : color.new(RC_SLATE, 0)
+        // ---- S/R Structure score (derived from real zone scores + framing + bias clarity) ----
+        int   rcSides    = (rcSupIdx >= 0 ? 1 : 0) + (rcResIdx >= 0 ? 1 : 0)
+        float rcSum      = (rcSupIdx >= 0 ? array.get(zones, rcSupIdx).score : 0.0) + (rcResIdx >= 0 ? array.get(zones, rcResIdx).score : 0.0)
+        float rcLevelAvg = rcSides > 0 ? rcSum / rcSides : 0.0
+        float rcFraming  = rcSides == 2 ? 100.0 : rcSides == 1 ? 55.0 : 25.0
+        bool  rcBiasDef  = bias == "Bullish" or bias == "Bearish" or bias == "Sideways"
+        float rcSRScore  = f_clamp(0.55 * rcLevelAvg + 0.30 * rcFraming + 0.15 * (rcBiasDef ? 100.0 : 55.0), 0, 100)
+        // ---- MA Structure score (reused from the MA layer; normalized out if unavailable) ----
+        bool  rcMAavail  = msEnable and msReady
+        // ---- Market State (plain language) + state quality for the blended weight ----
+        string rcState = "Mixed / Transition"
+        if rcMAavail and msCompressed
+            rcState := "Compression"
+        else if rcSides == 2 and bias == "Sideways"
+            rcState := "Range Bound"
+        else if rcMAavail and (msClass == "Bullish" or msClass == "Bearish")
+            rcState := "Trend Developing"
+        else if bias == "Bullish" or bias == "Bearish"
+            rcState := "Trend Developing"
+        float rcStateQ = rcState == "Trend Developing" ? f_clamp(60.0 + 40.0 * (rcMAavail ? msSignCons : 0.5), 0, 100) : rcState == "Range Bound" ? f_clamp(50.0 + 0.35 * rcLevelAvg, 0, 100) : rcState == "Compression" ? 55.0 : 35.0
+        color rcStateCol = rcState == "Trend Developing" ? color.new(color.teal, 0) : rcState == "Range Bound" ? color.new(#6f8fbf, 0) : rcState == "Compression" ? color.new(color.rgb(230, 185, 95), 0) : color.new(color.gray, 0)
+        // ---- RC Engine v2 components: Trend/Channel Quality + Location Clarity (volume = 0%) ----
+        float rcTrendQ     = rcMAavail ? f_clamp(0.40 * msAlign + 0.35 * (100.0 * msSignCons) + 0.25 * (100.0 * msSlopeStr), 0, 100) : na
+        float rcTCQ        = rcMAavail ? rcTrendQ : 50.0
+        float rcVs200Abs   = (rcMAavail and ms200 > 0) ? math.abs((close - ms200) / ms200 * 100.0) : 0.0
+        // Location Quality refines structure clarity: clearly framed + near a clean level = clearer;
+        // stretched far from the 200 = less clean. Bounded 0-100; still the 20% Location component.
+        float rcLocClarity = f_clamp((rcSides == 2 ? 55.0 : rcSides == 1 ? 38.0 : 20.0) + f_clamp(rcVs200Abs * 3.5, 0, 35) + (not na(locRangePos) ? 8.0 : 0.0) + (not na(locNearAtr) and locNearAtr < 1.0 ? 7.0 : 0.0) + (not na(locExtAtr) and locExtAtr > 3.0 ? -8.0 : 0.0), 0, 100)
+        // ---- Overall RangeClarity Score v2: S/R 35 + MA 25 + Trend/Channel 20 + Location 20 + Volume 0 ----
+        float rcWsr  = 0.35
+        float rcWma  = rcMAavail ? 0.25 : 0.0
+        float rcWtcq = 0.20
+        float rcWloc = 0.20
+        float rcWsum = rcWsr + rcWma + rcWtcq + rcWloc
+        float rcOverall = f_clamp((rcWsr * rcSRScore + rcWma * (rcMAavail ? msQuality : 0.0) + rcWtcq * rcTCQ + rcWloc * rcLocClarity) / rcWsum, 0, 100)
+        // ---- display strings ----
+        string rcOverScr = str.tostring(int(math.round(rcOverall))) + "/100"
+        string rcOverWrd = rcGrade(rcOverall) + " Structure"
+        string rcSRScr   = str.tostring(int(math.round(rcSRScore))) + "/100"
+        string rcSRWrd   = rcSRScore >= 65 ? "Clear" : rcSRScore >= 40 ? "Mixed" : "Weak"
+        string rcMAScr   = rcMAavail ? str.tostring(int(math.round(msQuality))) + "/100" : "-"
+        string rcMAWrd   = rcMAavail ? rcGrade(msQuality) + " Trend" : "off"
+        string rcTQScr   = rcMAavail ? str.tostring(int(math.round(rcTrendQ))) + "/100" : "-"
+        string rcTQWrd   = rcMAavail ? rcGrade(rcTrendQ) : "off"
+        float  rcVs200D  = (rcMAavail and ms200 > 0) ? (close - ms200) / ms200 * 100.0 : na
+        string rcVs200   = not rcMAavail ? "-" : (msAbove200 ? "Above" : "Below") + " · " + (rcVs200D >= 0 ? "+" : "") + str.tostring(rcVs200D, "#.#") + "%"
+        color  rcVs200C  = not rcMAavail ? color.new(color.gray, 0) : (msAbove200 ? color.new(color.teal, 0) : color.new(RC_RES, 0))
+        string rcNear  = "-"
+        color  rcNearC = color.new(color.gray, 30)
+        if rcSupIdx >= 0 and rcResIdx >= 0
+            bool rcSupCloser = math.abs(rcSupDist) <= math.abs(rcResDist)
+            rcNear  := rcSupCloser ? rcSupCell : rcResCell
+            rcNearC := rcSupCloser ? rcSupCol  : rcResCol
+        else if rcSupIdx >= 0
+            rcNear  := rcSupCell
+            rcNearC := rcSupCol
+        else if rcResIdx >= 0
+            rcNear  := rcResCell
+            rcNearC := rcResCol
+        // ---- build rows for the active mode (table is sized to fit, so no empty rows) ----
+        array<string> rcLab = array.new<string>()
+        array<string> rcScr = array.new<string>()
+        array<string> rcVal = array.new<string>()
+        array<color>  rcCol = array.new<color>()
+        string effDashMode = vizIsMin ? "Minimal" : rcDashMode
+        rcAdd(rcLab, rcScr, rcVal, rcCol, "RC Score", rcOverScr, rcOverWrd, rcGradeCol(rcOverall))
+        if effDashMode == "Minimal"
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "State", "", rcState, rcStateCol)
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "Near", "", rcNear, rcNearC)
+        else
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "Structure", rcSRScr, rcSRWrd, rcGradeCol(rcSRScore))
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "MA Structure", rcMAScr, rcMAWrd, rcMAavail ? rcGradeCol(msQuality) : color.new(color.gray, 0))
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "Trend Quality", rcTQScr, rcTQWrd, rcMAavail ? rcGradeCol(rcTrendQ) : color.new(color.gray, 0))
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "Market State", "", rcState, rcStateCol)
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "Location", "", rcLocState, rcLocCol)
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "Key Support", "", rcSupCell, rcSupCol)
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "Key Resistance", "", rcResCell, rcResCol)
+            rcAdd(rcLab, rcScr, rcVal, rcCol, "vs 200", "", rcVs200, rcVs200C)
+            if effDashMode == "Advanced"
+                rcAdd(rcLab, rcScr, rcVal, rcCol, "Setup", "", setupMode, color.new(color.silver, 0))
+                rcAdd(rcLab, rcScr, rcVal, rcCol, "MA spacing", "", rcMAavail ? msSpacingState : "-", color.new(color.aqua, 10))
+                rcAdd(rcLab, rcScr, rcVal, rcCol, "Tracked zones", "", str.tostring(array.size(zones)), color.new(color.silver, 0))
+                if rcDashAdv
+                    rcAdd(rcLab, rcScr, rcVal, rcCol, "Components", "", "S/R " + str.tostring(int(math.round(rcSRScore))) + " · MA " + (rcMAavail ? str.tostring(int(math.round(msQuality))) : "-") + " · St " + str.tostring(int(math.round(rcStateQ))), color.new(color.silver, 25))
+                    rcAdd(rcLab, rcScr, rcVal, rcCol, "MA detail", "", rcMAavail ? "align " + str.tostring(int(math.round(msAlign))) + " · agree " + str.tostring(int(math.round(100.0 * msSignCons))) + "%" : "-", color.new(color.silver, 25))
+        // ---- render (row count from inputs => simple int for table.new) ----
+        int rcRows = effDashMode == "Minimal" ? 3 : effDashMode == "Standard" ? 9 : (rcDashAdv ? 14 : 12)
+        int rcN = array.size(rcLab)
+        if na(rcTbl)
+            rcTbl := table.new(rcPos, 3, rcRows, bgcolor = color.new(#0b0f1a, 8), border_color = color.new(color.gray, 75), border_width = 1, frame_color = color.new(color.gray, 55), frame_width = 1)
+        table.clear(rcTbl, 0, 0, 2, rcRows - 1)
+        for i = 0 to rcN - 1
+            color rcRowCol = array.get(rcCol, i)
+            table.cell(rcTbl, 0, i, array.get(rcLab, i), text_color = color.new(color.silver, 0), text_size = size.small, text_halign = text.align_left)
+            table.cell(rcTbl, 1, i, array.get(rcScr, i), text_color = rcRowCol, text_size = i == 0 ? size.large : size.small, text_halign = text.align_right)
+            table.cell(rcTbl, 2, i, array.get(rcVal, i), text_color = rcRowCol, text_size = i == 0 ? size.normal : size.small, text_halign = text.align_right)
+    else if not na(rcTbl)
+        table.delete(rcTbl)
+        rcTbl := na
+// ----------------------------------------------------------------------------
+// END RangeClarity Dashboard UX
+// ============================================================================
+
+// ============================================================================
+// BEGIN RangeClarity Visual System -- Legend (optional, default off)
+// ============================================================================
+var table rcLegend = na
+if barstate.islast
+    if showLegend
+        if na(rcLegend)
+            rcLegend := table.new(position.middle_left, 2, 6, bgcolor = color.new(#0b0f1a, 12), border_color = color.new(color.gray, 70), border_width = 1, frame_color = color.new(color.gray, 55), frame_width = 1)
+        table.clear(rcLegend, 0, 0, 1, 5)
+        table.cell(rcLegend, 0, 0, "  ", bgcolor = RC_SUP, text_size = size.tiny)
+        table.cell(rcLegend, 1, 0, "Uptrend channel / Support", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(rcLegend, 0, 1, "  ", bgcolor = RC_RES, text_size = size.tiny)
+        table.cell(rcLegend, 1, 1, "Downtrend channel / Resistance", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(rcLegend, 0, 2, "  ", bgcolor = RC_SLATE, text_size = size.tiny)
+        table.cell(rcLegend, 1, 2, "Neutral / range / mixed", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(rcLegend, 0, 3, "  ", bgcolor = color.rgb(203, 213, 225), text_size = size.tiny)
+        table.cell(rcLegend, 1, 3, "MA 200 anchor", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(rcLegend, 0, 4, "  ", bgcolor = color.new(RC_SUP, 55), text_size = size.tiny)
+        table.cell(rcLegend, 1, 4, "MA structure cloud (20/50)", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(rcLegend, 0, 5, "RC", text_color = color.white, bgcolor = color.new(color.gray, 40), text_size = size.tiny, text_halign = text.align_center)
+        table.cell(rcLegend, 1, 5, "Dashboard = RC Score + sub-scores", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+    else if not na(rcLegend)
+        table.delete(rcLegend)
+        rcLegend := na
+// END RangeClarity Visual System -- Legend

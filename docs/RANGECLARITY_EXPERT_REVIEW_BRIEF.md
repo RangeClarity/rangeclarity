@@ -13,7 +13,7 @@ A premium, decision-support **chart-context** indicator for swing traders and lo
 3. **Support/Resistance** — pivot clustering + touch count, age/maturity adjustment, volume-percentile weighting → 0–100 zone strength; nearest support + resistance drawn only.
 4. **Momentum** — RSI + EMA slope + ADX, confirm-only, with extension detection.
 5. **Confidence** — weighted blend (regime/structure/momentum/zone) + volume nudge − named penalties → 0–100, label High/Medium/Low/Conflicting.
-6. **No-Edge / Context** — priority-ordered verdict with a reason string; labels: Watch, Wait, No Edge, Avoid Chase, Breakout Watch, Pullback Zone, Strong Context, Risk Elevated.
+6. **No-Edge / Context** — priority-ordered verdict with a reason string; labels: Watch, Structure Not Clear, No Edge, Stretched, Coiled, Retest Area, Strong Context, Risk Elevated.
 7. **Dashboard** — one table (10 rows) + range meter; ≤2 boxes + 2 lines, objects reused.
 8. **Alerts** — six descriptive, confirmed-bar-gated alerts; no buy/sell wording.
 
@@ -22,7 +22,7 @@ A premium, decision-support **chart-context** indicator for swing traders and lo
 - **Pivots:** `ta.pivothigh/low(sensitivity, sensitivity)` — confirm `sensitivity` bars late by design. Recent pivots, their bar index, and volume percentile at formation are stored in capped arrays (default 8/side).
 - **Zone strength** (`zoneStrength()`): `base = min(touches*18, 60)` + age adjustment (penalize <3 bars, +15 up to 300 bars, +5 to 600, −10 beyond) + volume adjustment (vol pct >80 → +15, >60 → +8), clamped 0–100.
 - **Confidence:** weighted average of regimeScore/structScore/momoConfirm/zoneScore (weights .25/.30/.25/.20, sum-normalized) + volume nudge − penalties (Chop 25, conflict 20, mid-range-no-breakout 15, shock 15, extended 10, failed breakout 10).
-- **Verdict:** evaluated in priority order; conflict/chop/confidence<35 → No Edge; shock → Risk Elevated; extended+bigMove → Avoid Chase; etc.
+- **Verdict:** evaluated in priority order; conflict/chop/confidence<35 → No Edge; shock → Risk Elevated; extended+bigMove → Stretched; etc.
 - **Drawing:** only on `barstate.islast`, objects created once then updated (`box.set_*`, `line.set_*`).
 
 ## 4. Questions for the expert

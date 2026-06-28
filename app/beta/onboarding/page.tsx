@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BetaShell from "../_components/BetaShell";
 import styles from "../beta.module.css";
+import TradingViewCTA from "@/app/_components/TradingViewCTA";
 
 export const metadata: Metadata = {
   title: "RangeClarity — Beta Onboarding",
@@ -9,7 +10,6 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? "https://www.tradingview.com/";
 
 export default function Onboarding() {
   return (
@@ -97,9 +97,9 @@ export default function Onboarding() {
             <div className={styles.kicker}>TradingView</div>
             <h3 style={{ marginTop: "0.4rem", fontSize: "1rem", fontWeight: 650 }}>Need an account?</h3>
             <p style={{ marginTop: "0.4rem", color: "var(--fg-dim)", fontSize: "0.88rem" }}>
-              A free TradingView account works to start. <a href={TV_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Open TradingView &rarr;</a>
-              <br /><span className={styles.payNote}>(Affiliate/referral placeholder — set <code>NEXT_PUBLIC_TRADINGVIEW_URL</code>.)</span>
+              A free TradingView account works to start.
             </p>
+            <TradingViewCTA note="This may be an affiliate link." />
             <div className={styles.ctaRow}>
               <Link href="/beta/feedback" className={`${styles.btn} ${styles.btnPrimary}`}>Share feedback</Link>
               <Link href="/beta/how-to-use" className={styles.btn}>How to use</Link>

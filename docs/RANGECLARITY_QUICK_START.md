@@ -34,13 +34,13 @@ On the chart: **green box** = nearest support, **red box** = nearest resistance,
 ## What each Context label means
 
 - **Watch** — developing; observe.
-- **Wait** — let it resolve; poor reward-to-risk now.
+- **Structure Not Clear** — compressed or mid-range; an unclear location to read.
 - **No Edge** — not clean enough to read; stand aside.
-- **Avoid Chase** — move is over-extended; don't chase.
-- **Breakout Watch** — coiled near a boundary.
-- **Pullback Zone** — a trend is pulling back into structure.
+- **Stretched** — the move is over-extended from its mean.
+- **Coiled** — compression near a boundary.
+- **Retest Area** — a trend is pulling back into structure.
 - **Strong Context** — modules aligned (a clean read, not a guarantee).
-- **Risk Elevated** — volatility shock; consider smaller size or standing aside.
+- **Risk Elevated** — volatility shock; conditions are unstable (context only).
 
 None of these is "buy" or "sell."
 

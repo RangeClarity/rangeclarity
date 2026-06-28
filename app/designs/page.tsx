@@ -47,6 +47,16 @@ const designs: Design[] = [
       "linear-gradient(135deg, #05070d, #07111f), radial-gradient(circle at 72% 38%, rgba(159,211,255,0.28), transparent 36%), radial-gradient(circle at 88% 74%, rgba(217,180,108,0.22), transparent 38%)",
   },
   {
+    href: "/designs/rangeclarity-fox-brand-v1",
+    status: "candidate",
+    title: "Fox Brand V1 — new hero candidate",
+    desc: 'The fox mascot as a premium brand presence: cinematic "No signals. No noise. Just structure." hero over the existing Range Command V2 lower sections. Beta CTAs only; payment and pricing untouched.',
+    path: "/designs/rangeclarity-fox-brand-v1",
+    recommended: true,
+    preview:
+      "linear-gradient(135deg, #05070d, #0a1422), radial-gradient(circle at 24% 34%, rgba(52,245,176,0.26), transparent 46%), radial-gradient(circle at 82% 30%, rgba(240,146,46,0.26), transparent 44%)",
+  },
+  {
     href: "/designs/codex-premium-hero",
     status: "candidate",
     title: "Codex Premium Hero (source route)",

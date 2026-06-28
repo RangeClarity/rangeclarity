@@ -1,0 +1,43 @@
+{
+  "_comment": "RangeClarity active task tracker. Human view: docs/rangeclarity-active-roadmap.md. Keep simple; no database. Update 'status' by hand: todo | in_progress | blocked | done.",
+  "updated": "2026-06-20",
+  "status": "Product built; activating paid/private beta",
+  "phase": "Phase 1 - Activate the Paid/Private Beta loop",
+  "week_objective": "Get the first 5-10 beta users into RangeClarity and collect feedback within 72h of access.",
+  "immediate_next_step": "Founder end-to-end dry run in Lemon TEST mode + lock the offer/price in the same sitting.",
+  "tasks": [
+    { "id": "RUN-1", "title": "Founder end-to-end dry run (Lemon TEST)", "priority": "must_now", "status": "todo", "owner": "Dean", "due": "today", "why": "Proves the loop works for a real human; surfaces friction", "acceptance": "register->pay(test)->mark paid->grant->onboard completed; friction list written" },
+    { "id": "O-002", "title": "Lock beta offer + price; reconcile docs vs page", "priority": "must_now", "status": "todo", "owner": "Dean", "due": "today", "why": "Top blocker; gates invites, Lemon config, legal copy", "acceptance": "one offer chosen ($79/90d or $29); /beta labels + Lemon variant match it" },
+    { "id": "PAY-1", "title": "Confirm Lemon TEST mode + amount mapping", "priority": "must_now", "status": "todo", "owner": "Dean", "due": "today", "why": "Prevents accidental live charges / wrong amounts", "acceptance": "checkout in test mode; link maps to decided price; verify amount before marking paid" },
+    { "id": "ACCESS-1", "title": "Publish indicator invite-only; test grant/revoke", "priority": "this_week", "status": "todo", "owner": "Dean", "due": "day2", "why": "No access path = no product delivery", "acceptance": "invite-only on TradingView; grant+revoke own test account works" },
+    { "id": "RUN-2", "title": "Write manual fulfilment runbook", "priority": "this_week", "status": "todo", "owner": "Claude+Dean", "due": "day2", "why": "Repeatable low-error fulfilment for 5-10 buyers", "acceptance": "one doc: buy->verify amount->mark paid in /beta/admin->grant TV->email" },
+    { "id": "RC-6-lite", "title": "Quick indicator confidence pass (~8 charts)", "priority": "this_week", "status": "todo", "owner": "Dean", "due": "day3-4", "why": "Honest basis to charge; catch repaint/false structure", "acceptance": "~8 charts (1D+4H) read sanely; no repaint surprise on bar-replay; go/no-go noted" },
+    { "id": "ROOM-1", "title": "Pick + stand up Private Beta Room", "priority": "this_week", "status": "todo", "owner": "Dean", "due": "day3", "why": "Support + feedback channel; part of the offer", "acceptance": "Discord/Telegram group created; invite link added to /beta/onboarding" },
+    { "id": "ONB-1", "title": "Verify onboarding pages + light paid legal reword", "priority": "this_week", "status": "todo", "owner": "Claude+Dean", "due": "day3", "why": "Self-onboarding; paid needs refund/cancellation terms", "acceptance": "onboarding/TV-access read clean; welcome stub filled; refund+cancellation lines in Terms" },
+    { "id": "INVITE-1", "title": "Invite first 5-10 warm beta users", "priority": "this_week", "status": "todo", "owner": "Dean", "due": "day5-6", "why": "The actual goal: real users + money + learning", "acceptance": "5-10 personally invited; >=3 complete register->pay->access" },
+    { "id": "DIST-1", "title": "Run X agent daily (draft) + post 1/day manually", "priority": "this_week", "status": "in_progress", "owner": "Dean", "due": "daily", "why": "Top-of-funnel; compounds; stays draft-only/safe", "acceptance": "1 approved post/day from content/x/; status in content/x/status.json; no auto-posting" }
+  ],
+  "feedback_loop": "Collect feedback 48-72h after each user gets access via /beta/feedback (form + API + store already exist).",
+  "blockers": [
+    "Price/offer undecided (O-002)",
+    "TradingView invite-only not yet published (ACCESS-1)",
+    "Beta Room not selected (ROOM-1)",
+    "Indicator not formally validated (mitigated by warm invites + RC-6-lite)",
+    "Environment-only: sandbox mount corruption + stale .git/index.lock block build/lint/commit here; run locally"
+  ],
+  "decisions_needed": [
+    "Offer + price: $79/90d (docs) vs $29 or $49/mo (page) - reconcile /beta + Lemon",
+    "Lemon: one shared link vs variants; stay test mode until go-live",
+    "Beta Room platform: Discord vs Telegram vs Circle",
+    "Who are the first 5-10 warm users",
+    "How much of the scoring formula to expose (O-007, minor/later)"
+  ],
+  "do_not_do_yet": [
+    "Lemon webhooks / automated fulfilment",
+    "In-app Stripe / auth / accounts / entitlements",
+    "Website Brain / multi-ticker scanner (EN-1)",
+    "Landing redesign or new app features",
+    "Live X auto-posting",
+    "Community platform, durable DB migration, analytics build-out"
+  ]
+}

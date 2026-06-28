@@ -1,0 +1,99 @@
+[1mdiff --git a/app/_components/TradingViewCTA.tsx b/app/_components/TradingViewCTA.tsx[m
+[1mnew file mode 100644[m
+[1mindex 0000000..f2c4766[m
+[1m--- /dev/null[m
+[1m+++ b/app/_components/TradingViewCTA.tsx[m
+[36m@@ -0,0 +1,56 @@[m
+[32m+[m[32m"use client";[m
+[32m+[m
+[32m+[m[32mimport { TRADINGVIEW_AFFILIATE_URL } from "@/lib/affiliate";[m
+[32m+[m[32mimport { rcTrack } from "@/lib/analytics";[m
+[32m+[m
+[32m+[m[32m/**[m
+[32m+[m[32m * Shared TradingView affiliate CTA. Real <a href> (works on desktop + mobile),[m
+[32m+[m[32m * opens in a new tab, full button area clickable, no overlay, no disabled styling.[m
+[32m+[m[32m * Single source of truth for the referral URL: lib/affiliate.ts.[m
+[32m+[m[32m */[m
+[32m+[m[32mexport default function TradingViewCTA({ note }: { note?: string }) {[m
+[32m+[m[32m  return ([m
+[32m+[m[32m    <div style={{ margin: "1.1rem 0 0" }}>[m
+[32m+[m[32m      <p style={{ margin: "0 0 0.65rem", color: "#9aa3b2", fontSize: "0.9rem", lineHeight: 1.5 }}>[m
+[32m+[m[32m        Open TradingView using our referral link.[m
+[32m+[m[32m      </p>[m
+[32m+[m[32m      <a[m
+[32m+[m[32m        href={TRADINGVIEW_AFFILIATE_URL}[m
+[32m+[m[32m        target="_blank"[m
+[32m+[m[32m        rel="noopener noreferrer sponsored"[m
+[32m+[m[32m        onClick={() => rcTrack("tradingview_referral_click")}[m
+[32m+[m[32m        style={{[m
+[32m+[m[32m          display: "flex",[m
+[32m+[m[32m          alignItems: "center",[m
+[32m+[m[32m          justifyContent: "center",[m
+[32m+[m[32m          gap: "0.5rem",[m
+[32m+[m[32m          width: "100%",[m
+[32m+[m[32m          minHeight: 52,[m
+[32m+[m[32m          padding: "0.95rem 1.25rem",[m
+[32m+[m[32m          borderRadius: 12,[m
+[32m+[m[32m          fontWeight: 800,[m
+[32m+[m[32m          fontSize: "1rem",[m
+[32m+[m[32m          textDecoration: "none",[m
+[32m+[m[32m          color: "#04221e",[m
+[32m+[m[32m          background: "#2dd4bd",[m
+[32m+[m[32m          boxShadow: "0 10px 28px rgba(45, 212, 189, 0.28)",[m
+[32m+[m[32m        }}[m
+[32m+[m[32m      >[m
+[32m+[m[32m        Open TradingView <span aria-hidden="true">&rarr;</span>[m
+[32m+[m[32m      </a>[m
+[32m+[m[32m      <p style={{ margin: "0.65rem 0 0", fontSize: "0.8rem", color: "#9aa3b2", lineHeight: 1.5 }}>[m
+[32m+[m[32m        If the button does not open,{" "}[m
+[32m+[m[32m        <a[m
+[32m+[m[32m          href={TRADINGVIEW_AFFILIATE_URL}[m
+[32m+[m[32m          target="_blank"[m
+[32m+[m[32m          rel="noopener noreferrer sponsored"[m
+[32m+[m[32m          onClick={() => rcTrack("tradingview_referral_click")}[m
+[32m+[m[32m          style={{ color: "#2dd4bd", textDecoration: "underline" }}[m
+[32m+[m[32m        >[m
+[32m+[m[32m          click here[m
+[32m+[m[32m        </a>[m
+[32m+[m[32m        .{note ? ` ${note}` : ""}[m
+[32m+[m[32m      </p>[m
+[32m+[m[32m    </div>[m
+[32m+[m[32m  );[m
+[32m+[m[32m}[m
+[1mdiff --git a/lib/analytics.ts b/lib/analytics.ts[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0e2082b[m
+[1m--- /dev/null[m
+[1m+++ b/lib/analytics.ts[m
+[36m@@ -0,0 +1,31 @@[m
+[32m+[m[32m/**[m
+[32m+[m[32m * RangeClarity funnel analytics — privacy-friendly events.[m
+[32m+[m[32m *[m
+[32m+[m[32m * NEVER pass PII or payment data here: no email, no TradingView username, no tokens,[m
+[32m+[m[32m * no card / payment details. Only the fixed event names below plus low-cardinality,[m
+[32m+[m[32m * non-sensitive props (e.g. a plan id like "beta_29", or a page "source").[m
+[32m+[m[32m *[m
+[32m+[m[32m * The @vercel/analytics dependency is intentionally NOT used for now (it was undeclared in[m
+[32m+[m[32m * package.json and broke the Vercel build). rcTrack is a browser-safe wrapper: if Vercel Web[m
+[32m+[m[32m * Analytics is present on the page (window.va) it forwards the event; otherwise it is a no-op.[m
+[32m+[m[32m * It never throws and never breaks the product flow. The typed API below is unchanged, so[m
+[32m+[m[32m * callers (TradingViewCTA, BetaSignupForm, GrantConsole) need no changes.[m
+[32m+[m[32m */[m
+[32m+[m[32mexport type RcEvent =[m
+[32m+[m[32m  | "join_beta_click"[m
+[32m+[m[32m  | "signup_started"[m
+[32m+[m[32m  | "signup_completed"[m
+[32m+[m[32m  | "tradingview_referral_click"[m
+[32m+[m[32m  | "access_granted_click";[m
+[32m+[m
+[32m+[m[32mexport function rcTrack(event: RcEvent, props?: Record<string, string>): void {[m
+[32m+[m[32m  try {[m
+[32m+[m[32m    if (typeof window === "undefined") return;[m
+[32m+[m[32m    const va = (window as unknown as {[m
+[32m+[m[32m      va?: (name: "event", payload: { name: string; data?: Record<string, string> }) => void;[m
+[32m+[m[32m    }).va;[m
+[32m+[m[32m    va?.("event", { name: event, data: props });[m
+[32m+[m[32m  } catch {[m
+[32m+[m[32m    // Analytics must never break the product flow.[m
+[32m+[m[32m  }[m
+[32m+[m[32m}[m

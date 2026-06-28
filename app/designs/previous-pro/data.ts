@@ -44,7 +44,7 @@ export const MODULES: ModuleV2[] = [
     title: "Momentum Engine",
     blurb:
       "Reads whether the move is strengthening, fading, compressing, or breaking out — so trend confirms structure.",
-    shows: "Momentum lifecycle stage, breakout watch, and weakness zones.",
+    shows: "Momentum lifecycle stage, compression, and weakness zones.",
     avoids: "Chasing a move that is already rolling over.",
     bestFor: "Confirming a setup before committing capital.",
     stats: [

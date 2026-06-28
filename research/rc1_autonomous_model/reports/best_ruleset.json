@@ -1,0 +1,26 @@
+{
+  "chop_ci_trigger": 55.0,
+  "er_chop_thresh": 0.3,
+  "adx_trend_min": 22.0,
+  "ext_extended_atr": 3.0,
+  "ext_severe_atr": 4.0,
+  "zone_touch_min": 2,
+  "agree3_required": 3,
+  "high_clarity_cut": 85,
+  "metrics": {
+    "n": 1419,
+    "n_reject": 1410,
+    "false_high": 0,
+    "false_high_rate": 0.0,
+    "fatal_false_high": 0,
+    "rule_of_three_upper95": 0.0021,
+    "wilson_upper95": 0.0027,
+    "high_clarity_rarity": 0.0,
+    "clear_plus_rarity": 0.0007,
+    "cap_accuracy": 1.0,
+    "true_clear_recall": 1.0,
+    "stability": 0.9878,
+    "simplicity": 0.5,
+    "objective": 0.9738
+  }
+}

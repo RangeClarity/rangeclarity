@@ -1,0 +1,56 @@
+// MVP store. `prisma db push` creates council.db. JSON columns hold the typed Zod payloads.
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "sqlite"; url = env("DATABASE_URL") }
+
+model Session {
+  id            String   @id
+  createdAt     DateTime @default(now())
+  prompt        String
+  mode          String
+  project       String?
+  branch        String?
+  agentIds      String   // JSON string[]
+  weights       String   // JSON
+  rounds        Int      @default(1)
+  agentVersions String   // JSON Record<string,string>
+  results       Result[]
+  debate        Json?
+  decision      Json?
+  hermesPlan    HermesPlan?
+  linearPreview LinearPreview?
+}
+
+model Result {
+  id           String   @id @default(cuid())
+  session      Session  @relation(fields: [sessionId], references: [id])
+  sessionId    String
+  agentId      String
+  agentLabel   String
+  agentVersion String?
+  round        Int      @default(1)
+  status       String
+  weight       Float    @default(1)
+  raw          String?
+  normalized   Json?
+  error        String?
+  latencyMs    Int?
+  @@index([sessionId])
+}
+
+model HermesPlan {
+  id        String   @id
+  session   Session  @relation(fields: [sessionId], references: [id])
+  sessionId String   @unique
+  createdAt DateTime @default(now())
+  payload   Json     // full HermesPlan
+}
+
+model LinearPreview {
+  id          String   @id
+  session     Session  @relation(fields: [sessionId], references: [id])
+  sessionId   String   @unique
+  hermesPlanId String
+  createdAt   DateTime @default(now())
+  payload     Json     // full LinearPreview (drafts)
+  created     Json?    // LinearCreateResult[] once issues are written (post-approval)
+}

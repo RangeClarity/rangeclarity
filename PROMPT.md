@@ -1,96 +1,295 @@
-You are working in my local project:
+You are Codex working inside the RangeClarity project.
 
-C:\Users\USER\Claude\Projects\RangeClarity
+Your mission is to prepare the full Paid Beta Access package WITHOUT making risky product-code changes yet.
 
-Goal:
-Fix and connect this project to GitHub so I can deploy it to Vercel.
+Important:
 
-Important context:
+* Do not redesign the landing page.
+* Do not implement live payments.
+* Do not connect real Stripe/Paddle/Lemon Squeezy.
+* Do not deploy.
+* Do not change core app architecture.
+* Do not touch secrets or production env files.
+* Work mainly in docs, copy, checklists, and safe planning files.
+* If you create code, keep it isolated, optional, and clearly marked as draft.
 
-* Running `git status` previously returned:
-  `fatal: not a git repository`
-* Then I tried `git init` and got:
-  `error: could not lock config file C:/Users/USER/Claude/Projects/RangeClarity/.git/config: File exists`
-  `fatal: could not set 'core.repositoryformatversion' to '0'`
-* This likely means a broken/incomplete `.git` folder exists.
-* Do not delete or modify project source files.
-* Only fix Git setup.
-* Protect secrets. Make sure `.env`, `.env.local`, `.next`, `node_modules`, and `.vercel` are ignored.
-* Do not push secrets or generated build folders.
-* Do not deploy to production.
+Project context:
+RangeClarity is a premium market-structure clarity system.
 
-GitHub repo I want connected:
-https://github.com/RangeClarity/RangeClarity.git
+Positioning:
 
-Tasks:
+* “Simple chart. Complex engine.”
+* “No signals. No noise. Just structure.”
+* “Clarity over noise.”
+* Premium TradingView indicator + future Website Brain.
+* Avoid buy/sell signals, financial advice, prediction claims, and guaranteed-profit language.
 
-1. Inspect the folder safely
+Business goal:
+We are preparing the first paid beta customer flow:
 
-   * Confirm current directory is:
-     `C:\Users\USER\Claude\Projects\RangeClarity`
-   * Check whether `.git` exists.
-   * Check whether `.git/config` exists.
-   * Check if Git is partially initialized or corrupted.
-   * Check for `.gitignore`.
+Landing page → beta signup → payment/test payment → collect TradingView username → manual approval → TradingView invite-only indicator access → onboarding page → TradingView affiliate link → user feedback.
 
-2. Fix broken Git initialization
+Your task:
+Create a safe, professional preparation package that Claude Code can later use to build the flow.
 
-   * If `.git` is broken/corrupted, do NOT delete it immediately.
-   * Rename it to a backup folder, for example:
-     `.git-broken-backup`
-   * Then run a clean:
-     `git init`
-     `git branch -M main`
+Create this folder:
 
-3. Ensure `.gitignore` is correct
-   Make sure `.gitignore` contains at least:
-   node_modules
-   .next
-   .env
-   .env.local
-   .vercel
-   .DS_Store
+docs/beta-access/
 
-4. Stage and commit
+Create these files:
 
-   * Run:
-     `git status`
-     `git add .`
-     `git commit -m "Prepare RangeClarity landing page for production"`
-   * If commit fails because Git user name/email is missing, configure local repo only:
-     `git config user.name "Dean Lich"`
-     `git config user.email "dindin9@gmail.com"`
-     Then commit again.
+1. docs/beta-access/paid-beta-flow.md
 
-5. Connect remote
+Include:
 
-   * Add or update origin to:
-     `https://github.com/RangeClarity/RangeClarity.git`
-   * If origin already exists but is wrong, use:
-     `git remote set-url origin https://github.com/RangeClarity/RangeClarity.git`
-   * Verify:
-     `git remote -v`
+* Full customer journey
+* Step-by-step flow
+* Visitor states:
 
-6. Push
+  * visitor
+  * lead
+  * registered
+  * payment_pending
+  * test_paid
+  * tradingview_username_submitted
+  * access_pending
+  * access_granted
+  * access_revoked
+* What happens at every state
+* What the user sees
+* What the founder/admin needs to do manually
 
-   * Run:
-     `git push -u origin main`
-   * If GitHub authentication fails, explain the exact next step:
+2. docs/beta-access/page-copy.md
 
-     * use browser login
-     * or `gh auth login`
-     * or GitHub Desktop
-   * If error says repository not found, tell me clearly that the repo probably does not exist yet or I do not have permission to push to `RangeClarity/RangeClarity`.
+Write premium copy for:
 
-7. Final report
-   Tell me:
+* Beta CTA section
+* Pricing/beta access section
+* Signup page
+* Payment success page
+* Payment cancelled page
+* TradingView username submission page
+* Pending approval page
+* Onboarding page
+* FAQ section
+* Feedback page
 
-   * whether Git is fixed
-   * whether commit was created
-   * whether remote is connected
-   * whether push succeeded
-   * exact next command/action I need to do
+Tone:
+Premium, calm, fintech, clean, direct.
+Not hype.
+Not crypto-bro.
+Not “get rich.”
+No financial advice language.
 
-Do not run deployment.
-Do not change landing page design.
-Do not edit app code unless absolutely required for Git safety.
+3. docs/beta-access/email-templates.md
+
+Create email templates for:
+
+* Beta signup received
+* Payment received / test payment complete
+* TradingView username received
+* Access pending
+* Access granted
+* Feedback request after 3 days
+* Changelog/update email
+* Payment failed / cancelled
+* Beta access revoked / expired
+
+Each email should include:
+
+* Subject
+* Body
+* CTA
+* Notes for personalization
+
+4. docs/beta-access/tradingview-onboarding.md
+
+Create the complete user guide:
+
+* How to create/open a TradingView account
+* Where to enter TradingView username
+* How invite-only indicator access works
+* What the user should expect after payment
+* How to add the indicator to chart
+* How to save the layout
+* How to use RangeClarity responsibly
+* What RangeClarity does not do
+* Troubleshooting section
+* Placeholders for affiliate link
+
+Important:
+Use placeholder:
+[TRADINGVIEW_AFFILIATE_LINK_HERE]
+
+5. docs/beta-access/beta-faq.md
+
+Create FAQ covering:
+
+* What is RangeClarity?
+* Is this a buy/sell signal tool?
+* Does it predict price?
+* Do I need TradingView?
+* Do I need a paid TradingView plan?
+* How do I get access?
+* How long does manual approval take?
+* What markets does it support?
+* What is included in beta?
+* Can I cancel?
+* Is this financial advice?
+* How do I give feedback?
+
+6. docs/beta-access/admin-checklist.md
+
+Create founder/admin workflow:
+
+* Check new signup
+* Verify payment/test payment
+* Copy TradingView username
+* Grant invite-only indicator access manually
+* Mark user as access_granted
+* Send access granted email
+* Follow up after 3 days
+* Track feedback
+* Track bugs
+* Revoke access if needed
+
+7. docs/beta-access/qa-test-plan.md
+
+Create QA checklist:
+
+* Landing page CTA works
+* Signup form works
+* TradingView username is required
+* Email validation works
+* Payment success route works
+* Payment cancelled route works
+* Onboarding page works
+* Affiliate link placeholder exists
+* Mobile layout
+* Desktop layout
+* Legal/disclaimer copy visible
+* No buy/sell or profit-promise language
+* Full test user journey
+
+8. docs/beta-access/sprint-board.md
+
+Create a practical task board for Sprint 1:
+
+Sprint name:
+Paid Beta Access Loop
+
+Dates:
+June 20, 2026 – July 7, 2026
+
+Columns:
+
+* Backlog
+* Now
+* In Progress
+* Review
+* Done
+
+Prioritize tasks by:
+P0 = must have for beta
+P1 = important
+P2 = later
+
+The most important P0 tasks:
+
+* Beta signup CTA
+* Signup form
+* TradingView username capture
+* Payment/test-payment placeholder or sandbox plan
+* Pending approval page
+* Onboarding guide
+* Admin manual approval checklist
+* Feedback form
+* Legal disclaimer
+* QA full flow
+
+9. docs/beta-access/data-model-draft.md
+
+Create a simple draft data model:
+User/BetaLead:
+
+* id
+* name
+* email
+* tradingViewUsername
+* hasTradingViewAccount
+* marketFocus
+* paymentStatus
+* accessStatus
+* plan
+* source
+* notes
+* adminNotes
+* createdAt
+* updatedAt
+
+Payment:
+
+* id
+* userId
+* provider
+* providerCustomerId
+* providerPaymentId
+* status
+* amount
+* currency
+* createdAt
+
+Feedback:
+
+* id
+* userId
+* rating
+* comment
+* bugReport
+* requestedFeature
+* createdAt
+
+10. docs/beta-access/implementation-ticket-pack.md
+
+Create implementation tickets for Claude Code.
+
+Each ticket should include:
+
+* Title
+* Priority
+* Goal
+* Files likely affected
+* Acceptance criteria
+* Risk
+* Dependencies
+
+Split into:
+
+* P0 tickets
+* P1 tickets
+* P2 tickets
+
+11. docs/beta-access/README.md
+
+Summarize:
+
+* What was created
+* Why it exists
+* How Claude Code should use these docs
+* What should be built first
+* What should not be built yet
+
+After finishing, print:
+
+* Files created
+* Biggest recommendation
+* What Claude Code should build first
+* What should wait
+* Any assumptions made
+* Any questions/blockers
+
+Remember:
+You are preparing the beta system foundation.
+Do not overbuild.
+Do not make risky production changes.
+Do not enable real money payments.

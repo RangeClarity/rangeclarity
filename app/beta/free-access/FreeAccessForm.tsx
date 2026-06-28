@@ -39,13 +39,13 @@ export default function FreeAccessForm() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(data.error ?? "Something went wrong. Please try again, or contact support.");
         setStatus("error");
         return;
       }
       setStatus("success");
     } catch {
-      setError("Network error. Please try again.");
+      setError("Something went wrong. Please try again, or contact support.");
       setStatus("error");
     }
   }
@@ -57,8 +57,8 @@ export default function FreeAccessForm() {
           <div className={styles.tick}>&#10003;</div>
           <h3>Request received</h3>
           <p>
-            We&rsquo;ll review your TradingView username and manually add eligible users to the
-            RangeClarity invite-only indicator. Access may take up to 24&ndash;48 hours during beta.
+            Request received. We&rsquo;ll review your TradingView username and manually add eligible
+            users within 24&ndash;48 hours during beta.
           </p>
           <p style={{ marginTop: "0.6rem" }}>
             <b>Make sure your TradingView username is exact.</b>

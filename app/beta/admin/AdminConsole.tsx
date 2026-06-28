@@ -19,8 +19,8 @@ type Signup = {
 
 const PLAN_LABEL: Record<string, string> = {
   free_preview: "Free $0",
-  beta_29: "Beta $29",
-  pro_beta_49: "Pro $49",
+  beta_29: "RangeClarity Beta $29/mo",
+  pro_beta_49: "RangeClarity Pro Beta $49/mo",
 };
 
 function overdue(s: Signup): boolean {
@@ -123,8 +123,8 @@ export default function AdminConsole() {
                     <select defaultValue={r.selectedPlan} onChange={(e) => post({ action: "set_plan", id: r.id, plan: e.target.value })}
                       style={{ ...btn, marginRight: 0 }}>
                       <option value="free_preview">Free $0</option>
-                      <option value="beta_29">Beta $29</option>
-                      <option value="pro_beta_49">Pro $49</option>
+                      <option value="beta_29">RangeClarity Beta $29/mo</option>
+                      <option value="pro_beta_49">RangeClarity Pro Beta $49/mo</option>
                     </select>
                   </td>
                   <td style={{ ...cell, color: statusColor(r.paymentStatus) }}>{r.paymentStatus}</td>

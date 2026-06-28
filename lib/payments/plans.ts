@@ -1,9 +1,9 @@
 import type { SelectedPlan } from "./types";
 
 const DEFAULT_BETA_29_PAYMENT_LINK =
-  "https://rangeclarity.lemonsqueezy.com/checkout/buy/0f5fcd29-b83d-421c-aafb-1c1357ecb484";
+  "https://rangeclarity.lemonsqueezy.com/checkout/buy/521660a9-eb79-4591-ad64-a17a485f2f67";
 const DEFAULT_PRO_BETA_49_PAYMENT_LINK =
-  "https://rangeclarity.lemonsqueezy.com/checkout/buy/5a6c5b6a-3222-47b1-9bd2-761767438f17";
+  "https://rangeclarity.lemonsqueezy.com/checkout/buy/cb19a9f5-5379-4c27-a437-49f6be9dad8e";
 
 export type PlanConfig = {
   id: SelectedPlan;
@@ -32,8 +32,8 @@ export const PLAN_CONFIG: Record<SelectedPlan, PlanConfig> = {
   },
   beta_29: {
     id: "beta_29",
-    label: "Beta Access — Standard",
-    price: "$29.90",
+    label: "RangeClarity Beta",
+    price: "$29/mo",
     paid: true,
     manualPaymentLink:
       process.env.MANUAL_PAYMENT_LINK_29 ?? DEFAULT_BETA_29_PAYMENT_LINK,
@@ -42,13 +42,13 @@ export const PLAN_CONFIG: Record<SelectedPlan, PlanConfig> = {
   },
   pro_beta_49: {
     id: "pro_beta_49",
-    label: "Extended Access",
-    price: "$49.90",
+    label: "RangeClarity Pro Beta",
+    price: "$49/mo",
     paid: true,
     manualPaymentLink:
       process.env.MANUAL_PAYMENT_LINK_49 ?? DEFAULT_PRO_BETA_49_PAYMENT_LINK,
     blurb:
-      "Extended beta access with priority updates, deeper setup guidance, and early access to upcoming RangeClarity improvements.",
+      "Pro Beta access with priority updates, deeper setup guidance, and early access to upcoming RangeClarity improvements.",
   },
 };
 

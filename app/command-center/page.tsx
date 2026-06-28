@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { readDoc, readPrompt, docSection, fileMeta, readQaSummary, listChecklist, readRoadmap } from "@/lib/ops/opsData";
 import CommandCenter from "./CommandCenter";
+import { notFound } from "next/navigation";
 
 /* Internal founder Command Center. Server component: reads file-based docs at request
    time (read-only) and hands the data to the interactive client component. No execution,
@@ -16,6 +17,8 @@ export const metadata: Metadata = {
 };
 
 export default function CommandCenterPage() {
+  // Production gate: internal page. 404 (no data read) unless explicitly enabled.
+  if (process.env.RC_INTERNAL_PAGES_ENABLED !== "true") notFound();
   const status = readDoc("docs/ops/current-loop-status.md");
   const qa = readQaSummary();
   const decisions = listChecklist(readDoc("docs/ops/founder-decision-queue.md"));

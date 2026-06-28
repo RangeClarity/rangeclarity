@@ -1,0 +1,21 @@
+case_id,symbol,timeframe,as_of_date,scenario,human_trend,human_location,human_zone,human_regime,human_extension,human_is_clear,human_rc_call,expected_state,expected_band,expected_caps,engine_state,engine_score,result,screenshot,reviewer,notes
+RC1-01,NASDAQ:AAPL,1D,,clean_trend,,,,,,,,Clear,70-85,none,,,,RC1_01_AAPL_1D_00000000_clean_trend.png,,positive control - confirm uptrend pulling back to a fresh support
+RC1-02,NASDAQ:MSFT,1D,,clean_trend_no_zone,,,,,,,,Mixed,45-69,agree3<=69,,,,RC1_02_MSFT_1D_00000000_trend_gap.png,,trend with price mid-move in a gap (no key zone in play)
+RC1-03,NYSE:KO,1D,,clean_range,,,,,,,,Clear,70-85,none,,,,RC1_03_KO_1D_00000000_clean_range.png,,clean wide range both rails tested - price mid
+RC1-04,NYSE:PG,1D,,clean_range_at_rail,,,,,,,,Clear,70-85,none,,,,RC1_04_PG_1D_00000000_range_rail.png,,range + at a tested rail (location+zone agree)
+RC1-05,NASDAQ:TSLA,1D,,chop,,,,,,,,Unclear,0-44,chop<=50,,,,RC1_05_TSLA_1D_00000000_chop.png,,tangled MAs / choppy structure
+RC1-06,NYSE:XOM,1D,,conflict,,,,,,,,Mixed,45-69,conflict<=55,,,,RC1_06_XOM_1D_00000000_conflict.png,,uptrend jammed under heavy resistance
+RC1-07,NASDAQ:NVDA,1D,,extended,,,,,,,,Mixed,45-69,extended<=60,,,,RC1_07_NVDA_1D_00000000_extended.png,,clean trend but stretched far from 200MA (ATR-extended)
+RC1-08,NASDAQ:AAPL,1W,,price_discovery,,,,,,,,Mixed,45-69,pricediscovery<=60,,,,RC1_08_AAPL_1W_00000000_price_discovery.png,,all-time highs - no overhead level
+RC1-09,OPERATOR_PICK_RECENT_IPO,1D,,thin_data,,,,,,,,Insufficient,NA,no_number,,,,RC1_09_IPO_1D_00000000_thin_data.png,,pick a stock IPO'd <6 months ago (few pivots) - data gate
+RC1-10,NYSE:F,1D,,weak_zone,,,,,,,,Mixed,45-69,weakzone<=55,,,,RC1_10_F_1D_00000000_weak_zone.png,,a one-touch level being treated as strong
+RC1-11,NYSE:T,1D,,stale_zone,,,,,,,,Mixed,45-69,weakzone<=55,,,,RC1_11_T_1D_00000000_stale_level.png,,old level untouched 250+ bars (age decay)
+RC1-12,CRYPTO:BTCUSD,1D,,expansion,,,,,,,,Mixed,45-69,expansion<=60,,,,RC1_12_BTCUSD_1D_00000000_expansion.png,,volatility blow-off / range expansion
+RC1-13,OPERATOR_PICK_SHORT_HISTORY,1D,,lens_missing,,,,,,,,Mixed,45-65,lensmissing<=65,,,,RC1_13_SHORTHIST_1D_00000000_lens_missing.png,,recent listing w/ <200 bars (MA200 unavailable)
+RC1-14,NYSE:GE,1D,,contradictory,,,,,,,,Unclear,0-44,contradictory<=44,,,,RC1_14_GE_1D_00000000_contradictory.png,,MA reads up while structure prints LH/LL down
+RC1-15,NYSE:WBA,1D,,clean_downtrend,,,,,,,,Clear,70-85,none,,,,RC1_15_WBA_1D_00000000_clean_downtrend.png,,clean DOWNtrend into fresh resistance - symmetry check
+RC1-16,NASDAQ:AMD,1D,,breakout_fail,,,,,,,,Unclear,0-44,conflict<=55,,,,RC1_16_AMD_1D_00000000_breakout_fail.png,,range breakout that failed back inside
+RC1-17,NYSE:JPM,1D,,too_close,,,,,,,,Mixed,45-69,too_close,,,,RC1_17_JPM_1D_00000000_too_close.png,,two zones ~0.3% apart (de-dup needed)
+RC1-18,NASDAQ:AVGO,1D,,full_agreement,,,,,,,,HighClarity,86-100,none,,,,RC1_18_AVGO_1D_00000000_full_agreement.png,,RARE: all six lenses agree - High Clarity (>85)
+RC1-19,NYSE:CVX,1D,,hysteresis,,,,,,,,Clear,70-85,none,,,,RC1_19_CVX_1D_00000000_hysteresis.png,,capture two adjacent bars - confirm no big score jump
+RC1-20,NASDAQ:INTC,1D,,disagreement,,,,,,,,Unclear,0-44,chop<=50,,,,RC1_20_INTC_1D_00000000_disagreement.png,,genuine multi-lens disagreement - low stays low

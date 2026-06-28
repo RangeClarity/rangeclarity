@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import styles from "../beta.module.css";
 import FeedbackForm from "./FeedbackForm";
@@ -15,7 +16,7 @@ export default function BetaFeedback() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link href="/" className={styles.brand}>
-            <span className={styles.brandMark} />RangeClarity <small>Beta</small>
+            <Image className={styles.brandBadge} src="/brand/fox-badge.png" alt="" aria-hidden="true" width={24} height={24} />RangeClarity <small>Beta</small>
           </Link>
           <nav className={styles.headerNav}>
             <Link href="/beta">Beta home</Link>

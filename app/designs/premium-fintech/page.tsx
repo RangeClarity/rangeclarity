@@ -41,7 +41,7 @@ const TOOLKIT = [
       { value: "5", label: "Signal Inputs" },
       { value: "LIVE", label: "Trend State" },
     ],
-    bullets: ["Momentum lifecycle", "Breakout watch", "Weakness and rejection zones"],
+    bullets: ["Momentum lifecycle", "Compression", "Weakness and rejection zones"],
     accent: { hex: "#38e1ff", hex2: "#5b8cff" },
     visual: "momentum" as const,
   },

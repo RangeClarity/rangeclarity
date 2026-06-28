@@ -1,0 +1,9 @@
+ablation,clear_plus,high_clarity,false_high_self,fatal,stability,objective,earns_place,clear_plus_delta,stability_delta
+FULL,0.0,0.0,0.0,0,0.9977,0.9748,,,
+-chop,0.0,0.0,0.0,0,0.9966,0.9747,True,0.0,-0.0011
+-zone,0.0056,0.0,0.0,0,0.9532,0.9697,True,0.0056,-0.0445
+-location,0.0,0.0,0.0,0,0.9977,0.9748,False,0.0,0.0
+-extension,0.0006,0.0,0.0,0,0.991,0.9739,True,0.0006,-0.0067
+-agreement,0.0,0.0,0.0,0,0.9977,0.9748,False,0.0,0.0
+-hysteresis,0.0,0.0,0.0,0,0.9927,0.9743,True,0.0,-0.005
+-trend,0.0,0.0,0.0,0,0.9977,0.9748,False,0.0,0.0

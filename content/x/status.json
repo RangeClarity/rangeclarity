@@ -1,0 +1,27 @@
+{
+  "_comment": "Approval status for RangeClarity X drafts. Workflow: generated -> approved -> published. Edit by hand after passing content/x/approval_checklist.md. NOTHING publishes automatically (ENABLE_X_PUBLISHING=false; no X API in this repo).",
+  "updated": "2026-06-20",
+  "source": "content/x/daily-drafts.md",
+  "legend": {
+    "generated": "drafted by the agent; not reviewed",
+    "approved": "passed approval_checklist.md; cleared for a human to post",
+    "published": "posted live by a human; record url + published_at"
+  },
+  "items": [
+    { "id": "POST-1", "type": "daily_post", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "POST-2", "type": "daily_post", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "POST-3", "type": "daily_post", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "POST-4", "type": "daily_post", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "POST-5", "type": "daily_post", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "POST-6", "type": "daily_post", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "POST-7", "type": "daily_post", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "BA-1", "type": "before_after", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "BA-2", "type": "before_after", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "BA-3", "type": "before_after", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "MEME-1", "type": "meme", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "MEME-2", "type": "meme", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "MEME-3", "type": "meme", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "PIN-1", "type": "pinned", "status": "generated", "approved_by": null, "published_at": null, "url": null },
+    { "id": "LAUNCH-1", "type": "launch", "status": "generated", "approved_by": null, "published_at": null, "url": null }
+  ]
+}

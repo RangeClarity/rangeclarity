@@ -84,10 +84,10 @@ The strength (0–100) of the nearest active zone, labelled with its side (`Supp
 A label (`High`, `Medium`, `Low`, `Conflicting`) plus a 0–100 number. It measures **how much the modules agree**, after subtracting penalties for messy conditions. *Interpret:* high = the read is internally consistent. *Don't assume:* confidence is **not** a probability of profit — see Section 9.
 
 ### Context (Decision Context)
-The single most important row: one of `Watch`, `Wait`, `No Edge`, `Avoid Chase`, `Breakout Watch`, `Pullback Zone`, `Strong Context`, or `Risk Elevated`. *Interpret:* a plain summary of the situation. *Don't assume:* none of these is "buy" or "sell." See Section 11.
+The single most important row: one of `Watch`, `Structure Not Clear`, `No Edge`, `Stretched`, `Coiled`, `Retest Area`, `Strong Context`, or `Risk Elevated`. *Interpret:* a plain summary of the situation. *Don't assume:* none of these is "buy" or "sell." See Section 11.
 
 ### Note
-A short plain-English reason for the current Context (e.g. "Mid-range - poor R/R", "Coiled near a boundary"). It tells you *why* the indicator concluded what it did.
+A short plain-English reason for the current Context (e.g. "Mid-range - unclear location", "Coiled near a boundary"). It tells you *why* the indicator concluded what it did.
 
 ### State
 Shows `forming` (the live bar has not closed — the read can still change) or `confirmed` (the bar has closed — the read is final), followed by "not advice".
@@ -124,7 +124,7 @@ A note on "No Edge": in this indicator "No Edge" is a **Context** label, not a R
 - **Support zone (green box)** — an area below price where buyers have reacted before. Price may slow or bounce here.
 - **Resistance zone (red box)** — an area above price where sellers have reacted before. Price may stall or reverse here.
 - **Why zones, not exact lines** — real reactions cluster around an area, not a single tick. RangeClarity draws a band (price ± a fraction of ATR) to reflect that honestly. A precise line implies accuracy that doesn't exist.
-- **Why buying near resistance can be risky** — you may be entering right where sellers are most likely to push back, giving you poor reward-to-risk. The dashboard's `Avoid Chase` and high Range Position readings are there to flag this.
+- **Why a location near resistance is a weaker one** — price sits right where sellers are most likely to push back, an unclear, stretched location. The dashboard's `Stretched` label and high Range Position readings are there to flag this.
 - **Why support is not guaranteed to hold** — a zone is a probability based on past behavior, not a wall. Strong zones break, especially on news or in expansion regimes. Always plan for the level failing.
 
 ---
@@ -178,13 +178,13 @@ These are the only labels the Context row can show. None of them is a buy or sel
 | Label | Meaning | When it may appear | What to consider |
 |---|---|---|---|
 | **Watch** | Developing; nothing decisive yet. | Mixed but not messy conditions. | Keep observing; let it clarify. |
-| **Wait** | Let it resolve; poor R/R now. | Compression, or mid-range with no breakout. | Patience; an edge may form later. |
+| **Structure Not Clear** | An unclear location to read. | Compression, or mid-range with no breakout. | Patience; an edge may form later. |
 | **No Edge** | Not clean enough to read. | Conflict, chop, or low confidence. | Stand aside; this is normal and useful. |
-| **Avoid Chase** | The move is over-extended. | Extended momentum and price far from its mean. | Chasing here has poor reward-to-risk. |
-| **Breakout Watch** | Coiled and near a boundary. | Compression regime near support/resistance. | Energy may release; watch for resolution. |
-| **Pullback Zone** | A trend is pulling back into structure. | Uptrend into support, or downtrend into resistance. | Often more constructive than chasing; still your call. |
+| **Stretched** | The move is over-extended. | Extended momentum and price far from its mean. | An extended, stretched location. |
+| **Coiled** | Coiled and near a boundary. | Compression regime near support/resistance. | Energy may release; watch for resolution. |
+| **Retest Area** | A trend is pulling back into structure. | Uptrend into support, or downtrend into resistance. | Often a more constructive location; still your call. |
 | **Strong Context** | Modules are aligned, confidence high. | High confidence with no conflict. | A clean read — not a guarantee or a trade call. |
-| **Risk Elevated** | Volatility shock; unstable conditions. | ATR percentile very high. | Consider smaller size or standing aside. |
+| **Risk Elevated** | Volatility shock; unstable conditions. | ATR percentile very high. | Conditions are unstable — context only. |
 
 ---
 
@@ -237,13 +237,13 @@ It is **not** designed for high-frequency scalping or for people who want to be 
 
 *These are illustrative chart situations, not investment recommendations.*
 
-**Example 1 — Constructive pullback.** Price near support (Range Pos. ~20%), Momentum `Improving`, Confidence `Medium`/`High`, Context `Pullback Zone`. *Reading:* a trend is pulling into support with improving momentum. The indicator sees a cleaner backdrop — you'd do your own entry/risk work from here.
+**Example 1 — Constructive pullback.** Price near support (Range Pos. ~20%), Momentum `Improving`, Confidence `Medium`/`High`, Context `Retest Area`. *Reading:* a trend is pulling into support with improving momentum. The indicator sees a cleaner backdrop — you'd do your own risk work from here.
 
-**Example 2 — Late and stretched.** Price near resistance (Range Pos. ~85%), Momentum `Extended`, Context `Avoid Chase`. *Reading:* the move already happened and price is under resistance. Buying here risks chasing into sellers.
+**Example 2 — Late and stretched.** Price near resistance (Range Pos. ~85%), Momentum `Extended`, Context `Stretched`. *Reading:* the move already happened and price is under resistance — an extended, stretched location.
 
 **Example 3 — Nothing clean.** Price mid-range (~50%), structure and momentum disagree, Confidence `Conflicting`, Context `No Edge`. *Reading:* there's no edge. Waiting is the sensible response.
 
-**Example 4 — Coiled.** Regime `Compression` with a high compression score, price near a boundary, Context `Breakout Watch`. *Reading:* energy is building near an edge; watch for a resolved, confirmed move rather than anticipating.
+**Example 4 — Coiled.** Regime `Compression` with a high compression score, price near a boundary, Context `Coiled`. *Reading:* energy is building near an edge; watch for a resolved, confirmed move rather than anticipating.
 
 **Example 5 — Trap and turbulence.** Structure `Failed breakout`, Regime `Expansion`/shock, Context `Risk Elevated`. *Reading:* a breakout failed and volatility is high — conditions are unstable; smaller size or standing aside is reasonable.
 
@@ -294,9 +294,9 @@ This version includes **six descriptive alerts**. All are context notifications,
 |---|---|---|---|
 | RangeClarity: Near Support | Price entered the nearest support zone | To be notified when price reaches support context | Not a "buy" |
 | RangeClarity: Near Resistance | Price entered the nearest resistance zone | To watch for stalling/chase risk | Not a "sell" |
-| RangeClarity: Breakout Watch | Compression near a boundary | To watch a coiled setup | Not a breakout confirmation or entry |
-| RangeClarity: No Edge / Wait | No clean edge right now | To know when to stand down | Not "exit everything" |
-| RangeClarity: Momentum Extended | Momentum is stretched | To avoid chasing | Not a reversal call |
+| RangeClarity: Coiled | Compression near a boundary | To watch a coiled setup | Not a breakout confirmation |
+| RangeClarity: No Edge / Structure Not Clear | No clean edge right now | To know when to stand down | Not an instruction to act |
+| RangeClarity: Momentum Extended | Momentum is stretched | To flag an extended move | Not a reversal call |
 | RangeClarity: Confidence Improved | Confidence just rose to High | To re-check a chart you're following | Not a profit signal |
 
 To use: add an alert in TradingView, choose RangeClarity as the condition, and pick the alert you want. There are **no buy/sell alerts**, by design.

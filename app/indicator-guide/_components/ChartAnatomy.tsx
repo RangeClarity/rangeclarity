@@ -83,8 +83,8 @@ export function ChartAnatomy() {
           ["Momentum", "Strong", TONE.green],
           ["Zone Str.", "Resistance 72", "#cdd8ee"],
           ["Confidence", "Medium 58", TONE.amber],
-          ["Context", "Wait", TONE.grey],
-          ["Note", "poor R/R", "#8294b4"],
+          ["Context", "Structure Not Clear", TONE.grey],
+          ["Note", "unclear location", "#8294b4"],
         ].map((r, i) => (
           <g key={i}>
             <text x="456" y={56 + i * 23} fontSize="9.5" fill="#8294b4">{r[0] as string}</text>
@@ -107,10 +107,10 @@ export function ChartAnatomy() {
 
 export const ANATOMY_LEGEND: { n: number; title: string; text: string }[] = [
   { n: 1, title: "Support zone", text: "Green band below price where buyers reacted before. A band, not a line — reactions cluster." },
-  { n: 2, title: "Resistance zone", text: "Red band above price where sellers reacted before. Buying right under it is often poor R/R." },
+  { n: 2, title: "Resistance zone", text: "Red band above price where sellers reacted before — a stretched location to lean on." },
   { n: 3, title: "Current price position", text: "Where price sits inside the range — drives the Range Position % and meter." },
   { n: 4, title: "Dashboard panel", text: "The single table that summarizes every module. The whole UI in one place." },
   { n: 5, title: "Momentum state", text: "Strong / Improving / Fading / Extended / Weak / Neutral — confirmation, not a trigger." },
   { n: 6, title: "Confidence", text: "0–100 module alignment with a label. Not a probability of profit." },
-  { n: 7, title: "Context / No-Edge", text: "The summary read — Watch, Wait, No Edge, Avoid Chase, etc. Never buy/sell." },
+  { n: 7, title: "Context / No-Edge", text: "The summary read — Watch, Structure Not Clear, No Edge, Stretched, etc. Never buy/sell." },
 ];

@@ -1,3 +1,15 @@
+> **LEGACY v1 — decision-support era. SUPERSEDED.**
+> This document describes the original RangeClarity (Regime / Structure / S-R /
+> **Momentum** / **Confidence** / **No-Edge verdict** with labels like *Avoid Chase*,
+> *Pullback Zone*, *Breakout Watch*, *Wait*, and a **Volume** confirmation factor).
+> It is retained for history only. The canonical product is now the **calm-structure
+> V2** spec: `docs/RANGECLARITY_V2_SURFACE_SPEC.md` + `docs/RANGECLARITY_V2_ENGINE_SPEC.md`.
+> Momentum, Confidence verdicts, the No-Edge/Avoid-Chase/Pullback/Wait instruction
+> labels, `poor R/R`/`size down` wording, and the Volume engine described below are
+> **RETIRED**. Do not implement from this file.
+
+---
+
 # RangeClarity — Algorithm Design
 
 Plain-English design of the engine behind `pine/rangeclarity_ultimate_core.pine`. Everything here is original, re-implemented from extracted concepts (see `indicator_research_library/BEST_IDEAS_EXTRACTED.md`). No source code reused.
@@ -65,6 +77,8 @@ Verdict evaluated in priority order, each with a reason string:
 - confidence ≥ high & aligned → **Strong Context**
 - mid-range → **Wait** (reason: mid-range, poor R/R)
 - else → **Watch**
+
+> **Retired legacy wording (superseded):** the verdict labels `Avoid Chase`, `Pullback Zone`, `Breakout Watch`, and `Wait` (as an instruction) — plus reason strings like *poor R/R* — are **retired** under the V2 language policy (`docs/RANGECLARITY_V2_SURFACE_SPEC.md` → Language policy) and are forbidden by the Live QA compliance rule (`compliance.forbidden_word`). The branch logic above is unchanged; only the surfaced label/reason wording is retired (e.g. *Extended* / *Stretched* / *Upper Range* for "Avoid Chase"; *Near Key Support* / *Retest Area* / *Lower Range* for "Pullback Zone").
 
 ---
 

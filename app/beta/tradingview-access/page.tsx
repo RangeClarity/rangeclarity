@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BetaShell from "../_components/BetaShell";
 import styles from "../beta.module.css";
+import TradingViewCTA from "@/app/_components/TradingViewCTA";
 
 export const metadata: Metadata = {
   title: "RangeClarity — TradingView Access",
@@ -9,7 +10,6 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? "https://www.tradingview.com/";
 
 export default function TradingViewAccess() {
   return (
@@ -29,7 +29,7 @@ export default function TradingViewAccess() {
         <span className={styles.eyebrow}>Getting access</span>
         <h2 className={styles.h2}>Four <span style={{ color: "var(--accent)" }}>steps</span></h2>
         <div className={styles.steps}>
-          <div className={styles.step}><div className={styles.stepNum}>01</div><h3>TradingView account</h3><p>A free account is enough to start. <a href={TV_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Open TradingView &rarr;</a></p></div>
+          <div className={styles.step}><div className={styles.stepNum}>01</div><h3>TradingView account</h3><p>A free account is enough to start.</p></div>
           <div className={styles.step}><div className={styles.stepNum}>02</div><h3>Register your username</h3><p>Give us your exact TradingView username — access is granted to that account specifically.</p></div>
           <div className={styles.step}><div className={styles.stepNum}>03</div><h3>Confirm your plan</h3><p>Free preview is lead-capture only. Paid plans ($29 / $49) confirm via a manual payment link.</p></div>
           <div className={styles.step}><div className={styles.stepNum}>04</div><h3>Access granted</h3><p>We add the indicator to your account. Find it under Indicators &rarr; Invite-only scripts.</p></div>
@@ -50,9 +50,7 @@ export default function TradingViewAccess() {
           <li className={styles.payNote}>&bull; Free preview does <b style={{ color: "var(--fg)" }}>not</b> include invite-only access unless a founder manually upgrades you.</li>
           <li className={styles.payNote}>&bull; Refunds revoke access. When the beta window ends, access is marked expired / flagged for review.</li>
         </ul>
-        <p className={styles.payNote}>
-          <em>Affiliate/referral placeholder:</em> set <code>NEXT_PUBLIC_TRADINGVIEW_URL</code> to your TradingView referral link to use it across the beta pages.
-        </p>
+        <TradingViewCTA note="This may be an affiliate link." />
         <div className={styles.ctaRow}>
           <Link href="/beta" className={`${styles.btn} ${styles.btnPrimary}`}>Join the beta</Link>
           <Link href="/beta/onboarding" className={styles.btn}>Back to onboarding</Link>

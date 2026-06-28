@@ -123,6 +123,22 @@ export default function RangeClarityFoxBrandV1Page() {
         </div>
       </section>
 
+      {/* Mobile-only fox brand band + read preview (<=767px). Keeps the fox a premium
+          presence on mobile (the hero image is hidden <=767px) and previews what the
+          indicator reads. Desktop is unaffected (display:none >=768px). */}
+      <section className={styles.mobileBrand} aria-label="What RangeClarity reads">
+        <div className={styles.foxBand} aria-hidden="true">
+          <Image className={styles.foxBandImg} src="/brand/fox-hero.jpg" alt="" fill sizes="100vw" />
+        </div>
+        <span className={styles.readEyebrow}>What RangeClarity reads</span>
+        <div className={styles.readStrip}>
+          <span className={styles.readChip}>Strong Zone</span>
+          <span className={styles.readChip}>Weak Structure</span>
+          <span className={styles.readChip}>Range Context</span>
+          <span className={styles.readChip}>Visual Verdict</span>
+        </div>
+      </section>
+
       {/* Preserved lower homepage sections — reused from the live homepage,
           not duplicated. Same bridge + page wrapper the current homepage uses. */}
       <div className={variant.bridge} aria-hidden="true" />

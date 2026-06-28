@@ -23,7 +23,7 @@ Both pages are `noindex` (internal/sharing use). All visuals are **mock / illust
 8. **Momentum explainer** — 6 states with score bars and the "strong ≠ good entry" key.
 9. **Confidence explainer** — meters for High/Medium/Low/Conflicting + the "alignment, not profit" message.
 10. **No-Edge explainer** — a side-by-side "Clear context vs No Edge" comparison and the reasons it appears.
-11. **Context label library** — all 8 labels (Watch, Wait, No Edge, Avoid Chase, Breakout Watch, Pullback Zone, Strong Context, Risk Elevated).
+11. **Context label library** — all 8 labels (Watch, Structure Not Clear, No Edge, Stretched, Coiled, Retest Area, Strong Context, Risk Elevated).
 12. **Workflow** — a 9-step process flow.
 13. **Example scenarios** — 5 hypothetical reads with mini charts, dashboard states, and context labels.
 14. **What it does NOT do** — a strong "do not misunderstand" panel.

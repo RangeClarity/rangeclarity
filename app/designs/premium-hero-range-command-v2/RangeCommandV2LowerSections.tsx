@@ -29,14 +29,14 @@ export function RangeCommandV2LowerSections() {
         </div>
       </section>
 
-      {/* mock tradingview chart */}
+      {/* sample tradingview chart (illustration) */}
       <section id="chart" className={s.section}>
         <div className={s.wrap}>
           <div className={`${s.head} ${s.headCenter}`}>
             <span className={s.eyebrow}>Sample Read - ASTS</span>
             <h2 className={s.h2}>One ticker, fully read</h2>
             <p className={s.lead}>
-              Mock data - but this is exactly how a read lands on your chart: structure first,
+              Example read - not real prices, but exactly how a read lands on your chart: structure first,
               verdict last.
             </p>
           </div>

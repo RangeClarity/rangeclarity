@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+<defs>
+<pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="rgba(124,160,220,0.05)" stroke-width="1"/></pattern>
+<linearGradient id="uline" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="rgba(52,245,176,0)"/><stop offset="0.5" stop-color="#34f5b0"/><stop offset="1" stop-color="rgba(52,245,176,0)"/></linearGradient>
+<radialGradient id="halo7" cx="50%" cy="45%" r="50%"><stop offset="0" stop-color="rgba(52,245,176,0.10)"/><stop offset="1" stop-color="rgba(52,245,176,0)"/></radialGradient>
+</defs>
+<rect width="2560" height="1440" fill="#05060a"/><rect width="2560" height="1440" fill="url(#grid)"/><rect width="2560" height="1440" fill="url(#halo7)"/>
+<g transform="translate(1190 460)">
+<rect width="180" height="180" rx="40" fill="#0b0f18" stroke="rgba(47,255,214,0.45)" stroke-width="2"/>
+<rect x="34" y="66" width="112" height="52" rx="10" fill="none" stroke="#2fffd6" stroke-width="3" opacity="0.45"/>
+<polyline points="32,118 64,88 92,98 120,60 150,74" fill="none" stroke="#2fffd6" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="150" cy="74" r="8" fill="#2fffd6"/>
+</g>
+<text x="1280" y="820" font-family="sans-serif" font-weight="700" font-size="140" text-anchor="middle" fill="#f2f6ff">RangeClarity</text>
+<rect x="940" y="862" width="680" height="5" rx="2.5" fill="url(#uline)"/>
+<text x="1280" y="950" font-family="monospace" font-size="32" letter-spacing="6" fill="#8a99bf" text-anchor="middle">SEE THE RANGE BEFORE YOU MOVE</text>
+<text x="1280" y="1360" font-family="monospace" font-size="22" letter-spacing="2" fill="#5c668a" text-anchor="middle">Educational chart context. Not financial advice.</text>
+</svg>

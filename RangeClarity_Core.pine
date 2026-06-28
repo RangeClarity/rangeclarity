@@ -281,8 +281,8 @@ string confLabel = conflict ? "Conflicting" : confidence >= hiConf ? "High" :
 
 // =============================================================================
 // 9. NO-EDGE / VERDICT LOGIC  (tell the user when NOT to act)
-//    Allowed: Watch | Wait | No Edge | Avoid Chase | Breakout Watch |
-//             Pullback Zone | Strong Context
+//    Allowed: Watch | Structure Not Clear | No Edge | Stretched | Coiled |
+//             Retest Area | Strong Context
 // =============================================================================
 nearBoundary = nearRes or nearSup
 bigMove      = math.abs(close - ema) > atr * 2.0
@@ -294,26 +294,26 @@ if conflict or regime == "Chop" or confidence < 35
     verdict := "No Edge"
     verdictReason := conflict ? "Signals conflict" : regime == "Chop" ? "Messy / no structure" : "Low confidence"
 else if momentum == "Extended" and bigMove
-    verdict := "Avoid Chase"
+    verdict := "Stretched"
     verdictReason := "Move is extended"
 else if regime == "Compression" and nearBoundary
-    verdict := "Breakout Watch"
+    verdict := "Coiled"
     verdictReason := "Coiled near boundary"
 else if regime == "Compression"
-    verdict := "Wait"
+    verdict := "Structure Not Clear"
     verdictReason := "Compressed - let it resolve"
 else if bias == "Up" and nearSup and (momentum == "Fading" or momentum == "Improving")
-    verdict := "Pullback Zone"
+    verdict := "Retest Area"
     verdictReason := "Uptrend pulling into support"
 else if bias == "Down" and nearRes and (momentum == "Fading" or momentum == "Improving")
-    verdict := "Pullback Zone"
+    verdict := "Retest Area"
     verdictReason := "Downtrend rallying into resistance"
 else if confidence >= hiConf and not conflict
     verdict := "Strong Context"
     verdictReason := "Modules aligned"
 else if midRange
-    verdict := "Wait"
-    verdictReason := "Mid-range - poor R/R"
+    verdict := "Structure Not Clear"
+    verdictReason := "Mid-range - unclear location"
 else
     verdict := "Watch"
     verdictReason := "Developing"
@@ -388,16 +388,16 @@ colorFor(label) =>
         "High"           => cGreen
         "Strong"         => cGreen
         "Strong Context" => cGreen
-        "Breakout Watch" => cBlue
+        "Coiled"         => cBlue
         "Improving"      => cBlue
-        "Pullback Zone"  => cTeal
+        "Retest Area"    => cTeal
         "Medium"         => cAmber
         "Watch"          => cAmber
         "Extended"       => cAmber
-        "Avoid Chase"    => cRed
+        "Stretched"      => cRed
         "Conflicting"    => cRed
         "No Edge"        => cGrey
-        "Wait"           => cGrey
+        "Structure Not Clear" => cGrey
         "Low"            => cGrey
         => txtMain
 
@@ -444,8 +444,8 @@ if barstate.islast
 // =============================================================================
 alertcondition(nearSup and barstate.isconfirmed,            title="RangeClarity: Near Support",        message="RangeClarity: price near support zone (context only, not advice).")
 alertcondition(nearRes and barstate.isconfirmed,            title="RangeClarity: Near Resistance",     message="RangeClarity: price near resistance zone (context only, not advice).")
-alertcondition(verdict == "Breakout Watch" and barstate.isconfirmed, title="RangeClarity: Breakout Watch", message="RangeClarity: compression near a boundary - breakout watch (context only).")
-alertcondition((verdict == "No Edge" or verdict == "Wait") and barstate.isconfirmed, title="RangeClarity: No Edge / Wait", message="RangeClarity: no clear edge - wait (context only, not advice).")
+alertcondition(verdict == "Coiled" and barstate.isconfirmed, title="RangeClarity: Coiled", message="RangeClarity: compression near a boundary (context only).")
+alertcondition((verdict == "No Edge" or verdict == "Structure Not Clear") and barstate.isconfirmed, title="RangeClarity: No Edge / Structure Not Clear", message="RangeClarity: no clear edge - structure not clear (context only, not advice).")
 alertcondition(momentum == "Extended" and barstate.isconfirmed, title="RangeClarity: Momentum Extended", message="RangeClarity: momentum is extended - avoid chasing (context only).")
 alertcondition(confLabel == "High" and confLabel[1] != "High" and barstate.isconfirmed, title="RangeClarity: Confidence Improved", message="RangeClarity: confidence rose to High (context only, not advice).")
 

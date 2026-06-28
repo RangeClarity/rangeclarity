@@ -1,0 +1,38 @@
+# RC-1 autonomous model — config. Offline only. No returns, no Pine, no live trading.
+data:
+  # Resolution order: local_dir CSVs -> Alpaca (if creds in env) -> synthetic fixtures.
+  local_dir: "data/ohlcv"          # put <SYMBOL>.csv (date,open,high,low,close,volume) here
+  provider: "auto"                  # auto | local | alpaca | synthetic
+  timeframe: "1D"
+  bars: 600                         # synthetic length per symbol
+  alpaca_env: ["ALPACA_API_KEY_ID", "ALPACA_API_SECRET_KEY"]
+
+universe_small:
+  [SPY, QQQ, AAPL, MSFT, NVDA, TSLA, META, AMZN, KO, XOM, JPM, GE, F, AMD, AVGO, CVX, INTC, JNJ, WMT, DIS]
+
+windows:
+  min_bars: 260        # need MA200 + room
+  step: 25             # as-of every N bars
+  proxy_horizon: 20    # future bars used for EVALUATION ONLY (never scoring)
+
+# parameter sweep grid (kept small for the first run; expand later with data)
+grid:
+  chop_ci_trigger: [55.0, 61.8]
+  er_chop_thresh: [0.25, 0.30]
+  adx_trend_min: [18.0, 22.0]
+  ext_extended_atr: [3.0]
+  ext_severe_atr: [4.0]
+  zone_touch_min: [2]
+  agree3_required: [3]
+  high_clarity_cut: [85]
+
+objective_weights:
+  false_high_prevention: 0.40
+  fatal_fail_prevention: 0.20
+  cap_accuracy: 0.15
+  band_state_consistency: 0.10
+  stability: 0.10
+  simplicity: 0.05
+
+paths:
+  reports: "reports"

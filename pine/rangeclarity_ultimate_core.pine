@@ -337,28 +337,28 @@ if conflict or regime == "Chop" or confidence < 35
     vReason := conflict ? "Conflicting signals" : regime == "Chop" ? "Mid-range chop / messy" : "Low confidence"
 else if shock
     verdict := "Risk Elevated"
-    vReason := "Volatility shock - size down"
+    vReason := "Volatility shock - elevated risk"
 else if extended and bigMove
-    verdict := "Avoid Chase"
+    verdict := "Stretched"
     vReason := "Too extended from mean"
 else if regime == "Compression" and nearBoundary
-    verdict := "Breakout Watch"
+    verdict := "Coiled"
     vReason := "Coiled near a boundary"
 else if regime == "Compression"
-    verdict := "Wait"
+    verdict := "Structure Not Clear"
     vReason := "Compressed - let it resolve"
 else if bias == "Up" and nearSup and (momentum == "Fading" or momentum == "Improving")
-    verdict := "Pullback Zone"
+    verdict := "Retest Area"
     vReason := "Uptrend pulling into support"
 else if bias == "Down" and nearRes and (momentum == "Fading" or momentum == "Improving")
-    verdict := "Pullback Zone"
+    verdict := "Retest Area"
     vReason := "Downtrend rallying into resistance"
 else if confidence >= hiConf and not conflict
     verdict := "Strong Context"
     vReason := "Modules aligned"
 else if midRange
-    verdict := "Wait"
-    vReason := "Mid-range - poor R/R"
+    verdict := "Structure Not Clear"
+    vReason := "Mid-range - unclear location"
 else
     verdict := "Watch"
     vReason := "Developing"
@@ -422,17 +422,17 @@ colorFor(label) =>
         "High"           => cGreen
         "Strong"         => cGreen
         "Strong Context" => cGreen
-        "Breakout Watch" => cBlue
+        "Coiled"         => cBlue
         "Improving"      => cBlue
-        "Pullback Zone"  => cTeal
+        "Retest Area"    => cTeal
         "Medium"         => cAmber
         "Watch"          => cAmber
         "Extended"       => cAmber
-        "Avoid Chase"    => cRed
+        "Stretched"      => cRed
         "Risk Elevated"  => cRed
         "Conflicting"    => cRed
         "No Edge"        => cGrey
-        "Wait"           => cGrey
+        "Structure Not Clear" => cGrey
         "Low"            => cGrey
         => txtM
 
@@ -475,8 +475,8 @@ if barstate.islast
 // =============================================================================
 alertcondition(nearSup and barstate.isconfirmed, title="RangeClarity: Near Support", message="RangeClarity: price near support zone (context only, not advice).")
 alertcondition(nearRes and barstate.isconfirmed, title="RangeClarity: Near Resistance", message="RangeClarity: price near resistance zone (context only, not advice).")
-alertcondition(verdict == "Breakout Watch" and barstate.isconfirmed, title="RangeClarity: Breakout Watch", message="RangeClarity: compression near a boundary - breakout watch (context only).")
-alertcondition((verdict == "No Edge" or verdict == "Wait") and barstate.isconfirmed, title="RangeClarity: No Edge / Wait", message="RangeClarity: no clear edge - wait (context only, not advice).")
+alertcondition(verdict == "Coiled" and barstate.isconfirmed, title="RangeClarity: Coiled", message="RangeClarity: compression near a boundary (context only).")
+alertcondition((verdict == "No Edge" or verdict == "Structure Not Clear") and barstate.isconfirmed, title="RangeClarity: No Edge / Structure Not Clear", message="RangeClarity: no clear edge - structure not clear (context only, not advice).")
 alertcondition(momentum == "Extended" and barstate.isconfirmed, title="RangeClarity: Momentum Extended", message="RangeClarity: momentum is extended - avoid chasing (context only).")
 alertcondition(confLabel == "High" and confLabel[1] != "High" and barstate.isconfirmed, title="RangeClarity: Confidence Improved", message="RangeClarity: confidence rose to High (context only, not advice).")
 
@@ -490,5 +490,5 @@ alertcondition(confLabel == "High" and confLabel[1] != "High" and barstate.iscon
 // - The confidence number may update on the forming bar; it is final on close.
 //   The dashboard shows "forming" vs "confirmed" so the read state is explicit.
 // - No request.security / lookahead is used (no MTF in the core).
-// - "No Edge" / "Wait" / "Risk Elevated" are repaint-safe: they assert no level.
+// - "No Edge" / "Structure Not Clear" / "Risk Elevated" are repaint-safe: they assert no level.
 // =============================================================================

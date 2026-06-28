@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1180" font-family="ui-sans-serif,system-ui,Segoe UI,Roboto,sans-serif" role="img" aria-label="RangeClarity five-layer system architecture">
+  <title>RangeClarity system architecture</title>
+  <desc>Five layers: TradingView data plane, Pine runtime engine, product surface, private canonical TypeScript core, backend and future SaaS. Solid arrows are runtime data; dotted are specification/parity/future; an outbound arrow is the Pine alert webhook; a red blocked arrow marks the unsupported backend-to-Pine path.</desc>
+  <defs>
+    <marker id="solid" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#34e0c4"/></marker>
+    <marker id="dot" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#8a97ab"/></marker>
+    <marker id="out" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#e8b84b"/></marker>
+    <marker id="blk" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#ef5f6b"/></marker>
+  </defs>
+  <rect width="1000" height="1180" fill="#0b0f1a"/>
+  <text x="40" y="42" fill="#e6edf6" font-size="22" font-weight="500">RangeClarity — system architecture</text>
+  <text x="40" y="66" fill="#8a97ab" font-size="13">Pine-first Paid Beta, anchored by a canonical tested core</text>
+
+  <g font-size="12">
+    <rect x="700" y="26" width="260" height="92" rx="8" fill="#111726" stroke="rgba(255,255,255,.08)"/>
+    <text x="714" y="46" fill="#8a97ab">Legend</text>
+    <line x1="714" y1="62" x2="744" y2="62" stroke="#34e0c4" stroke-width="2" marker-end="url(#solid)"/><text x="752" y="66" fill="#cdd6e2">runtime market data</text>
+    <line x1="714" y1="80" x2="744" y2="80" stroke="#8a97ab" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#dot)"/><text x="752" y="84" fill="#cdd6e2">spec / parity / future</text>
+    <line x1="714" y1="98" x2="744" y2="98" stroke="#e8b84b" stroke-width="2" marker-end="url(#out)"/><text x="752" y="102" fill="#cdd6e2">outbound alert webhook</text>
+    <line x1="850" y1="62" x2="880" y2="62" stroke="#ef5f6b" stroke-width="2" stroke-dasharray="2 3" marker-end="url(#blk)"/><text x="888" y="66" fill="#ef5f6b">blocked</text>
+  </g>
+
+  <g>
+    <rect x="40" y="96" width="520" height="120" rx="10" fill="#0e1626" stroke="#1d6e56"/>
+    <text x="56" y="120" fill="#5dcaa5" font-size="14" font-weight="500">Layer 1 · TradingView Data Plane</text>
+    <text x="56" y="146" fill="#cdd6e2" font-size="12.5">Chart OHLCV + volume (direct)  ·  Weekly via request.security ([1] closed)</text>
+    <text x="56" y="168" fill="#cdd6e2" font-size="12.5">SPY / QQQ / sector ETF  ·  TV financials &amp; economic (coverage varies)</text>
+    <text x="56" y="190" fill="#cdd6e2" font-size="12.5">User inputs</text>
+  </g>
+
+  <g>
+    <rect x="40" y="276" width="520" height="300" rx="10" fill="#111726" stroke="rgba(124,247,255,.18)"/>
+    <text x="56" y="300" fill="#34e0c4" font-size="14" font-weight="500">Layer 2 · Pine Runtime Engine (confirmed-bar)</text>
+    <text x="56" y="326" fill="#cdd6e2" font-size="12.5">1 Data Quality Gate → 2 MA Structure → 3 Trend → 4 S/R Zone Engine</text>
+    <text x="56" y="348" fill="#cdd6e2" font-size="12.5">→ 5 Price Location → 6 Extension → 7 Relative Strength → 8 No-Edge Filter</text>
+    <text x="56" y="370" fill="#cdd6e2" font-size="12.5">→ 9 Structure Score → 10 Entry Score → 11 State Machine → 12 Reason Codes</text>
+    <text x="56" y="392" fill="#cdd6e2" font-size="12.5">→ 13 Visualization Adapter   ·   → 14 Alert Adapter</text>
+    <rect x="56" y="414" width="488" height="40" rx="6" fill="#0e1420" stroke="rgba(255,255,255,.06)"/>
+    <text x="68" y="439" fill="#9aa6c4" font-size="11.5">Separate Structure &amp; Entry scores · first-class "No Edge" · no blended headline number</text>
+    <rect x="56" y="462" width="488" height="40" rx="6" fill="#0e1420" stroke="rgba(255,255,255,.06)"/>
+    <text x="68" y="487" fill="#9aa6c4" font-size="11.5">All structural events lock on barstate.isconfirmed (preview vs confirmed)</text>
+    <text x="56" y="528" fill="#5c668a" font-size="11">Budget: 1 table · ≤4 zone boxes · MA lines · ≤~4 request.* calls · plots 0–9</text>
+  </g>
+
+  <g>
+    <rect x="40" y="636" width="520" height="118" rx="10" fill="#0e1626" stroke="#185fa5"/>
+    <text x="56" y="660" fill="#85b7eb" font-size="14" font-weight="500">Layer 3 · TradingView Product Surface</text>
+    <text x="56" y="686" fill="#cdd6e2" font-size="12.5">Candles + volume + MA50/100/200 + ≤4 zones + current-price marker</text>
+    <text x="56" y="708" fill="#cdd6e2" font-size="12.5">Dashboard: State · Entry · Structure · Location · Risk map · Why</text>
+    <text x="56" y="730" fill="#cdd6e2" font-size="12.5">Numeric plots 0–9 (screener-ready, hideable)</text>
+  </g>
+
+  <g>
+    <rect x="600" y="276" width="360" height="160" rx="10" fill="#16122a" stroke="#534ab7"/>
+    <text x="616" y="300" fill="#afa9ec" font-size="14" font-weight="500">Layer 4 · Private Canonical TS Core</text>
+    <text x="616" y="326" fill="#cdd6e2" font-size="12.5">Typed OHLCV + result contracts</text>
+    <text x="616" y="348" fill="#cdd6e2" font-size="12.5">Official formulas · thresholds · weights · version</text>
+    <text x="616" y="370" fill="#cdd6e2" font-size="12.5">Golden fixtures + expected outputs</text>
+    <text x="616" y="392" fill="#cdd6e2" font-size="12.5">Unit + edge tests · parity check</text>
+    <text x="616" y="418" fill="#7f77dd" font-size="11.5">Pine never imports/executes this — spec only</text>
+  </g>
+
+  <g>
+    <rect x="600" y="476" width="360" height="160" rx="10" fill="#0e1626" stroke="#5f5e5a"/>
+    <text x="616" y="500" fill="#b4b2a9" font-size="14" font-weight="500">Layer 5 · Backend + Future SaaS</text>
+    <text x="616" y="526" fill="#cdd6e2" font-size="12.5">Optional now: webhook ingest, alert history,</text>
+    <text x="616" y="548" fill="#cdd6e2" font-size="12.5">setup journal, usage analytics</text>
+    <text x="616" y="574" fill="#9aa6c4" font-size="12.5">Future SaaS: licensed data + canonical engine</text>
+    <text x="616" y="596" fill="#9aa6c4" font-size="12.5">+ Radar + watchlist + daily brief + mobile</text>
+  </g>
+
+  <line x1="300" y1="216" x2="300" y2="274" stroke="#34e0c4" stroke-width="2" marker-end="url(#solid)"/>
+  <text x="310" y="250" fill="#5dcaa5" font-size="11">runtime data</text>
+  <line x1="300" y1="576" x2="300" y2="634" stroke="#34e0c4" stroke-width="2" marker-end="url(#solid)"/>
+  <text x="310" y="610" fill="#5dcaa5" font-size="11">render</text>
+
+  <line x1="600" y1="346" x2="562" y2="360" stroke="#8a97ab" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#dot)"/>
+  <text x="430" y="338" fill="#8a97ab" font-size="11">specification →</text>
+  <line x1="562" y1="430" x2="600" y2="416" stroke="#8a97ab" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#dot)"/>
+  <text x="430" y="452" fill="#8a97ab" font-size="11">← debug / CSV parity</text>
+
+  <line x1="562" y1="486" x2="600" y2="520" stroke="#e8b84b" stroke-width="2" marker-end="url(#out)"/>
+  <text x="468" y="500" fill="#e8b84b" font-size="11">alert webhook</text>
+  <line x1="640" y1="476" x2="640" y2="438" stroke="#ef5f6b" stroke-width="2" stroke-dasharray="2 3" marker-end="url(#blk)"/>
+  <text x="650" y="462" fill="#ef5f6b" font-size="11">✕ backend cannot call Pine</text>
+  <line x1="780" y1="436" x2="780" y2="474" stroke="#8a97ab" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#dot)"/>
+  <text x="790" y="460" fill="#8a97ab" font-size="11">same core later</text>
+
+  <rect x="40" y="800" width="920" height="120" rx="10" fill="#0e1a17" stroke="#0f6e56"/>
+  <text x="56" y="826" fill="#5dcaa5" font-size="14" font-weight="500">RangeClarity Moat Map</text>
+  <text x="56" y="852" fill="#cdd6e2" font-size="12.5">Easy to copy: MA lines · basic pivots · a generic score · colored boxes.</text>
+  <text x="56" y="876" fill="#9fe1cb" font-size="12.5">Defensible: calibrated zone-ranking · separate Structure/Entry · first-class No-Edge · golden fixtures across regimes</text>
+  <text x="56" y="898" fill="#9fe1cb" font-size="12.5">· transparent score interactions · parity + versioned contract · stable explainable outputs · RangeClarity visual language · Radar workflow.</text>
+
+  <text x="40" y="960" fill="#5c668a" font-size="11">Synthetic/illustrative architecture. Verify Pine limits and TradingView capabilities against official docs before building.</text>
+</svg>

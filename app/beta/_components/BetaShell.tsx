@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import styles from "../beta.module.css";
 
@@ -8,7 +9,7 @@ export default function BetaShell({ children }: { children: React.ReactNode }) {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link href="/" className={styles.brand}>
-            <span className={styles.brandMark} />RangeClarity <small>Beta</small>
+            <Image className={styles.brandBadge} src="/brand/fox-badge.png" alt="" aria-hidden="true" width={24} height={24} />RangeClarity <small>Beta</small>
           </Link>
           <nav className={styles.headerNav}>
             <Link href="/beta/onboarding">Onboarding</Link>

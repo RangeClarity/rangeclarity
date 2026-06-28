@@ -8,11 +8,11 @@
 // Status-chip colors mirror the indicator's own colorFor() language.
 export const TONE = {
   green: "#2e9e6b", // High / Strong / Strong Context
-  blue: "#2e75b6", // Breakout Watch / Improving
-  teal: "#14a3a3", // Pullback Zone
+  blue: "#2e75b6", // Coiled / Improving
+  teal: "#14a3a3", // Retest Area
   amber: "#c9921f", // Medium / Watch / Extended
-  red: "#c0504d", // Avoid Chase / Risk Elevated / Conflicting
-  grey: "#6b7785", // No Edge / Wait / Low
+  red: "#c0504d", // Stretched / Risk Elevated / Conflicting
+  grey: "#6b7785", // No Edge / Structure Not Clear / Low
 } as const;
 
 export type Tone = keyof typeof TONE;
@@ -75,9 +75,9 @@ export const CAPABILITIES: {
   },
   {
     n: 7,
-    title: "No Edge / Wait",
-    what: "Detects when conditions are not clean enough and the honest answer is to wait.",
-    sees: "Context labels like No Edge, Wait, Avoid Chase or Risk Elevated.",
+    title: "No Edge / Structure Not Clear",
+    what: "Detects when conditions are not clean enough and the honest answer is to stand aside.",
+    sees: "Context labels like No Edge, Structure Not Clear, Stretched or Risk Elevated.",
     why: "Most losses come from acting when there is no edge. Naming it is the point.",
     tone: "grey",
   },
@@ -97,8 +97,8 @@ export const DASHBOARD_ROWS: {
   { row: "Momentum", example: "Strong", tone: "green", means: "Strength + direction of the move (confirmation only).", dont: "Never an entry trigger on its own." },
   { row: "Zone Str.", example: "Resistance 72", tone: "amber", means: "Strength 0–100 of the nearest zone (touches/age/volume).", dont: "Strong zones still break." },
   { row: "Confidence", example: "Medium 58", tone: "amber", means: "How much the modules agree (0–100).", dont: "NOT a probability of profit." },
-  { row: "Context", example: "Wait", tone: "grey", means: "The summary read — one of 8 labels.", dont: "Never “buy” or “sell”." },
-  { row: "Note", example: "Mid-range - poor R/R", tone: "grey", means: "One-line reason for the current Context.", dont: "It explains, it does not instruct." },
+  { row: "Context", example: "Structure Not Clear", tone: "grey", means: "The summary read — one of 8 labels.", dont: "Never “buy” or “sell”." },
+  { row: "Note", example: "Mid-range - unclear location", tone: "grey", means: "One-line reason for the current Context.", dont: "It explains, it does not instruct." },
   { row: "State", example: "confirmed | not advice", tone: "grey", means: "forming = live bar can change; confirmed = final.", dont: "Don’t treat a forming read as final." },
 ];
 
@@ -136,7 +136,7 @@ export const CONFIDENCE: { name: string; band: string; tone: Tone; means: string
 ];
 
 export const NO_EDGE_REASONS: string[] = [
-  "Price is mid-range (poor reward-to-risk)",
+  "Price is mid-range (unclear location)",
   "Signals conflict (structure vs momentum)",
   "Momentum is extended (the move already happened)",
   "Market is choppy / structure unclear",
@@ -146,13 +146,13 @@ export const NO_EDGE_REASONS: string[] = [
 
 export const CONTEXT_LABELS: { label: string; tone: Tone; when: string; consider: string }[] = [
   { label: "Watch", tone: "amber", when: "Mixed but not messy conditions.", consider: "Keep observing; let it clarify." },
-  { label: "Wait", tone: "grey", when: "Compression, or mid-range with no breakout.", consider: "Patience; an edge may form later." },
+  { label: "Structure Not Clear", tone: "grey", when: "Compression, or mid-range with no breakout.", consider: "Patience; an edge may form later." },
   { label: "No Edge", tone: "grey", when: "Conflict, chop or low confidence.", consider: "Stand aside — normal and useful." },
-  { label: "Avoid Chase", tone: "red", when: "Extended momentum, price far from mean.", consider: "Chasing here has poor R/R." },
-  { label: "Breakout Watch", tone: "blue", when: "Compression near a boundary.", consider: "Watch for a confirmed resolution." },
-  { label: "Pullback Zone", tone: "teal", when: "Trend pulling into structure.", consider: "Often constructive — still your call." },
+  { label: "Stretched", tone: "red", when: "Extended momentum, price far from mean.", consider: "The move is extended from its mean." },
+  { label: "Coiled", tone: "blue", when: "Compression near a boundary.", consider: "Watch for a confirmed resolution." },
+  { label: "Retest Area", tone: "teal", when: "Trend pulling into structure.", consider: "Often constructive — still your call." },
   { label: "Strong Context", tone: "green", when: "High confidence, no conflict.", consider: "A clean read — not a guarantee." },
-  { label: "Risk Elevated", tone: "red", when: "Volatility shock (ATR percentile very high).", consider: "Smaller size or stand aside." },
+  { label: "Risk Elevated", tone: "red", when: "Volatility shock (ATR percentile very high).", consider: "Conditions unstable — context only." },
 ];
 
 export const WORKFLOW: { step: number; title: string; detail: string }[] = [
@@ -163,8 +163,8 @@ export const WORKFLOW: { step: number; title: string; detail: string }[] = [
   { step: 5, title: "Range Position", detail: "Near support, mid, or near resistance?" },
   { step: 6, title: "Momentum", detail: "Strong, fading, or extended?" },
   { step: 7, title: "Confidence", detail: "Do the modules agree?" },
-  { step: 8, title: "Respect No Edge", detail: "If unclear, wait — that is a valid output." },
-  { step: 9, title: "Decide", detail: "Watch / wait / avoid / continue your own research." },
+  { step: 8, title: "Respect No Edge", detail: "If unclear, stand aside — that is a valid output." },
+  { step: 9, title: "Decide", detail: "Watch / stand aside / continue your own research." },
 ];
 
 export const EXAMPLES: {
@@ -183,9 +183,9 @@ export const EXAMPLES: {
       { k: "Momentum", v: "Improving", tone: "blue" },
       { k: "Confidence", v: "Medium 61", tone: "amber" },
     ],
-    context: "Pullback Zone",
+    context: "Retest Area",
     contextTone: "teal",
-    read: "A trend pulling into support with improving momentum. Cleaner backdrop — do your own entry/risk work.",
+    read: "A trend pulling into support with improving momentum. Cleaner backdrop — do your own risk work.",
   },
   {
     title: "Late and stretched",
@@ -195,9 +195,9 @@ export const EXAMPLES: {
       { k: "Momentum", v: "Extended", tone: "amber" },
       { k: "Confidence", v: "Low 38", tone: "grey" },
     ],
-    context: "Avoid Chase",
+    context: "Stretched",
     contextTone: "red",
-    read: "The move already happened and price sits under resistance. Buying here risks chasing into sellers.",
+    read: "The move already happened and price sits under resistance — an extended, stretched context.",
   },
   {
     title: "Nothing clean",
@@ -219,7 +219,7 @@ export const EXAMPLES: {
       { k: "Range Pos.", v: "Upper 76%", tone: "amber" },
       { k: "Confidence", v: "Medium 55", tone: "amber" },
     ],
-    context: "Breakout Watch",
+    context: "Coiled",
     contextTone: "blue",
     read: "Energy building near a boundary. Watch for a confirmed move rather than anticipating direction.",
   },
@@ -233,7 +233,7 @@ export const EXAMPLES: {
     ],
     context: "Risk Elevated",
     contextTone: "red",
-    read: "A breakout failed and volatility is high. Conditions are unstable — smaller size or stand aside.",
+    read: "A breakout failed and volatility is high. Conditions are unstable — context only, not advice.",
   },
 ];
 

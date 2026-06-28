@@ -7,6 +7,13 @@ Linked from `/ops`.
 ## Open it
 `npm run dev` → http://localhost:3000/command-center
 
+**Production gate (required):** the internal pages — `/ops`, `/command-center`, `/linear-board` — require
+`RC_INTERNAL_PAGES_ENABLED=true` and otherwise return **404**. They should not be enabled on public
+production unless the routes are additionally protected. See `.env.example`.
+
+**Local dev:** to view the internal ops pages locally, add `RC_INTERNAL_PAGES_ENABLED=true` to `.env.local`
+(gitignored — never commit it) and run `npm run dev`. Do **not** set this flag in Vercel / production.
+
 ## What it reads (source of truth = files)
 - `docs/ops/project-memory.md` · `docs/ops/current-loop-status.md` · `docs/ops/founder-decision-queue.md`
 - `docs/qa/live-qa-report.md` · `data/qa/findings.jsonl`

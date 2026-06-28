@@ -1,0 +1,10 @@
+%% RangeClarity — canonical TS core as spec + test system (NOT a live feed to Pine).
+flowchart TB
+  FX["OHLCV fixture (typed)"] --> VAL["Data validation"] --> FEATS["Feature calculation (MA, pivots, ATR, RVOL, RS)"] --> Z["Zones"] --> SS["Structure score"] --> ES["Entry score"] --> SMC["State machine"] --> RZ["Reason codes"] --> EXP["Expected output (typed AnalysisResult)"]
+  EXP <-. "compare" .-> PINE["Pine debug output"]
+  EXP <-. "compare" .-> CSV["Exported TradingView CSV (plots 0-9)"]
+  PINE -. .-> PAR["Parity test (tolerance)"]
+  CSV -. .-> PAR
+  EXP -. .-> PAR
+  NOTE["The canonical core is the official reference + test system. Pine re-implements the spec; it never imports or executes this TypeScript, and no score is injected from a server."]
+  PAR -. .-> NOTE

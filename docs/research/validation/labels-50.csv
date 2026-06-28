@@ -1,0 +1,51 @@
+case_id,symbol,timeframe,bucket,case_type,scenario,as_of_date,human_trend,human_location,human_zone,human_regime,human_extension,human_is_clear,human_rc_call,expected_state,expected_band,expected_caps,engine_state,engine_score,result,screenshot,reviewer,notes
+RC1-01,NASDAQ:AAPL,1D,clean_trend,positive_control,clean_trend,,,,,,,,,Clear,70-85,none,,,,RC1_01_AAPL_1D_00000000_clean_trend.png,,uptrend pullback to fresh support
+RC1-02,NASDAQ:MSFT,1D,mid_range_poor_location,rejection_test,clean_trend_no_zone,,,,,,,,,Mixed,45-69,agree3<=69,,,,RC1_02_MSFT_1D_00000000_trend_gap.png,,trend mid-move in a gap - no key zone in play
+RC1-03,NYSE:KO,1D,clean_range,positive_control,clean_range,,,,,,,,,Clear,70-85,none,,,,RC1_03_KO_1D_00000000_clean_range.png,,clean wide range both rails tested - price mid
+RC1-04,NYSE:PG,1D,clean_range,positive_control,clean_range_at_rail,,,,,,,,,Clear,70-85,none,,,,RC1_04_PG_1D_00000000_range_rail.png,,range + at a tested rail
+RC1-05,NASDAQ:TSLA,1D,chop,rejection_test,chop,,,,,,,,,Unclear,0-44,chop<=44,,,,RC1_05_TSLA_1D_00000000_chop.png,,tightened cap chop<=44 - tangled MAs
+RC1-06,NYSE:XOM,1D,contradiction_conflict,rejection_test,conflict,,,,,,,,,Mixed,45-69,conflict<=55,,,,RC1_06_XOM_1D_00000000_conflict.png,,uptrend jammed under heavy resistance
+RC1-07,NASDAQ:NVDA,1D,overextension,rejection_test,extended,,,,,,,,,Mixed,45-69,extended<=60,,,,RC1_07_NVDA_1D_00000000_extended.png,,stretched far from 200MA
+RC1-08,NASDAQ:AAPL,1W,mid_range_poor_location,rejection_test,price_discovery,,,,,,,,,Mixed,45-69,pricediscovery<=60,,,,RC1_08_AAPL_1W_00000000_price_discovery.png,,ATH no overhead level
+RC1-09,OPERATOR_PICK_RECENT_IPO,1D,thin_data,rejection_test,thin_data,,,,,,,,,Insufficient,NA,no_number,,,,RC1_09_IPO_1D_00000000_thin_data.png,,IPO under 6mo few pivots - data gate
+RC1-10,NYSE:F,1D,weak_zone,rejection_test,weak_zone,,,,,,,,,Mixed,45-69,weakzone<=52,,,,RC1_10_F_1D_00000000_weak_zone.png,,one-touch level (tightened cap 52)
+RC1-11,NYSE:T,1D,weak_zone,rejection_test,stale_zone,,,,,,,,,Mixed,45-69,weakzone<=52,,,,RC1_11_T_1D_00000000_stale_level.png,,stale level 250+ bars untouched
+RC1-12,CRYPTO:BTCUSD,1D,volatility_expansion,rejection_test,expansion,,,,,,,,,Mixed,45-69,expansion<=60,,,,RC1_12_BTCUSD_1D_00000000_expansion.png,,volatility blow-off / range expansion
+RC1-13,OPERATOR_PICK_SHORT_HISTORY,1D,thin_data,rejection_test,lens_missing,,,,,,,,,Mixed,45-60,lensmissing<=60,,,,RC1_13_SHORTHIST_1D_00000000_lens_missing.png,,recent listing under 200 bars - MA200 missing (cap 60)
+RC1-14,NYSE:GE,1D,contradiction_conflict,rejection_test,contradictory,,,,,,,,,Unclear,0-44,contradictory<=44,,,,RC1_14_GE_1D_00000000_contradictory.png,,MA up while structure prints LH/LL
+RC1-15,NYSE:WBA,1D,clean_trend,positive_control,clean_downtrend,,,,,,,,,Clear,70-85,none,,,,RC1_15_WBA_1D_00000000_clean_downtrend.png,,clean DOWNtrend into fresh resistance - symmetry
+RC1-16,NASDAQ:AMD,1D,broken_zone,rejection_test,breakout_fail,,,,,,,,,Unclear,0-44,false_break<=44,,,,RC1_16_AMD_1D_00000000_breakout_fail.png,,failed breakout back inside - severe cap 44
+RC1-17,NYSE:JPM,1D,visual_dashboard_risk,rejection_test,too_close,,,,,,,,,Mixed,45-69,too_close,,,,RC1_17_JPM_1D_00000000_too_close.png,,two zones ~0.3pct apart - de-dup needed
+RC1-18,NASDAQ:AVGO,1D,full_agreement,positive_control,full_agreement,,,,,,,,,HighClarity,86-100,none,,,,RC1_18_AVGO_1D_00000000_full_agreement.png,,RARE all six lenses agree - High Clarity
+RC1-19,NYSE:CVX,1D,score_stability,control,hysteresis,,,,,,,,,Clear,70-85,none,,,,RC1_19_CVX_1D_00000000_hysteresis.png,,two adjacent bars - confirm no big jump
+RC1-20,NASDAQ:INTC,1D,chop,rejection_test,disagreement,,,,,,,,,Unclear,0-44,chop<=44,,,,RC1_20_INTC_1D_00000000_disagreement.png,,multi-lens disagreement - low stays low
+RC1-21,AMEX:XLF,1D,chop,rejection_test,chop,,,,,,,,,Unclear,0-44,chop<=44,,,,RC1_21_XLF_1D_00000000_chop.png,,financial sector chopping sideways tangled MAs
+RC1-22,CRYPTO:ETHUSD,1D,chop,rejection_test,chop,,,,,,,,,Unclear,0-44,chop<=44,,,,RC1_22_ETHUSD_1D_00000000_chop.png,,crypto range chop no clean swings
+RC1-23,NYSE:PARA,1D,chop,rejection_test,chop,,,,,,,,,Unclear,0-44,chop<=44,,,,RC1_23_PARA_1D_00000000_chop.png,,low-efficiency grind no direction
+RC1-24,NYSE:DIS,1D,weak_zone,rejection_test,one_touch_zone,,,,,,,,,Mixed,45-69,weakzone<=52,,,,RC1_24_DIS_1D_00000000_weak_zone.png,,single-touch resistance treated as strong
+RC1-25,NYSE:PFE,1D,weak_zone,rejection_test,untested_level,,,,,,,,,Mixed,45-69,weakzone<=52,,,,RC1_25_PFE_1D_00000000_weak_zone.png,,freshly drawn level no reaction yet
+RC1-26,NASDAQ:PEP,1D,weak_zone,rejection_test,low_reaction,,,,,,,,,Mixed,45-69,weakzone<=52,,,,RC1_26_PEP_1D_00000000_weak_zone.png,,multiple touches but weak reactions
+RC1-27,NASDAQ:META,1D,broken_zone,rejection_test,support_sliced,,,,,,,,,Unclear,0-44,broken<=50,,,,RC1_27_META_1D_00000000_broken_zone.png,,key support cut decisively no reclaim
+RC1-28,NYSE:BA,1D,broken_zone,rejection_test,resistance_broken_failed,,,,,,,,,Mixed,45-69,broken<=50,,,,RC1_28_BA_1D_00000000_broken_zone.png,,resistance broken then price fell back
+RC1-29,NASDAQ:NFLX,1D,broken_zone,rejection_test,decisive_violation,,,,,,,,,Unclear,0-44,broken<=50,,,,RC1_29_NFLX_1D_00000000_broken_zone.png,,decisive close beyond prior key level
+RC1-30,NASDAQ:CSCO,1D,broken_zone,rejection_test,role_unclear,,,,,,,,,Mixed,45-69,broken<=50,,,,RC1_30_CSCO_1D_00000000_broken_zone.png,,broken support role flip ambiguous
+RC1-31,NYSE:HD,1D,mid_range_poor_location,rejection_test,mid_gap,,,,,,,,,Mixed,45-69,midrange<=65,,,,RC1_31_HD_1D_00000000_mid_gap.png,,price floating mid-gap no level nearby
+RC1-32,NYSE:LLY,1D,mid_range_poor_location,rejection_test,above_range,,,,,,,,,Mixed,45-69,pricediscovery<=60,,,,RC1_32_LLY_1D_00000000_above_range.png,,above range no overhead level
+RC1-33,NASDAQ:WBD,1D,mid_range_poor_location,rejection_test,below_range,,,,,,,,,Mixed,45-69,pricediscovery<=60,,,,RC1_33_WBD_1D_00000000_below_range.png,,below range no underfoot level - downside discovery
+RC1-34,NASDAQ:SMCI,1D,overextension,rejection_test,parabolic_up,,,,,,,,,Mixed,45-69,extended<=60,,,,RC1_34_SMCI_1D_00000000_overextension.png,,parabolic far above 200MA
+RC1-35,NASDAQ:COIN,1D,overextension,rejection_test,severe_extension,,,,,,,,,Mixed,45-69,severe<=50,,,,RC1_35_COIN_1D_00000000_overextension.png,,over 3 ATR from anchor - severe cap 50
+RC1-36,NYSE:PYPL,1D,overextension,rejection_test,extended_down,,,,,,,,,Mixed,45-69,extended<=60,,,,RC1_36_PYPL_1D_00000000_overextension.png,,stretched far below 200MA
+RC1-37,NYSE:SNAP,1D,overextension,rejection_test,post_earnings_gap,,,,,,,,,Mixed,45-69,extended<=60,,,,RC1_37_SNAP_1D_00000000_overextension.png,,post-earnings gap stretched from structure
+RC1-38,NYSE:GM,1D,contradiction_conflict,rejection_test,ma_vs_structure,,,,,,,,,Unclear,0-44,contradictory<=44,,,,RC1_38_GM_1D_00000000_contradiction.png,,MA rising while LH/LL printing
+RC1-39,NYSE:C,1D,contradiction_conflict,rejection_test,conflict_resistance,,,,,,,,,Mixed,45-69,conflict<=55,,,,RC1_39_C_1D_00000000_conflict.png,,uptrend jammed under heavy resistance
+RC1-40,NASDAQ:QQQ,1D,contradiction_conflict,rejection_test,mtf_conflict,,,,,,,,,Mixed,45-69,conflict<=55,,,,RC1_40_QQQ_1D_00000000_conflict.png,,daily up vs weekly down disagreement
+RC1-41,NYSE:JNJ,1D,compression,rejection_test,squeeze_no_direction,,,,,,,,,Mixed,45-69,compression<=60,,,,RC1_41_JNJ_1D_00000000_compression.png,,BB inside Keltner squeeze no direction
+RC1-42,NYSE:WMT,1D,compression,rejection_test,nr_contraction,,,,,,,,,Mixed,45-69,compression<=60,,,,RC1_42_WMT_1D_00000000_compression.png,,narrow-range contraction low ADX
+RC1-43,NYSE:MMM,1D,compression,rejection_test,bandwidth_pinch,,,,,,,,,Mixed,45-69,compression<=60,,,,RC1_43_MMM_1D_00000000_compression.png,,bandwidth multi-month low coiling
+RC1-44,AMEX:GLD,1D,compression,rejection_test,triangle_coil,,,,,,,,,Mixed,45-69,compression<=60,,,,RC1_44_GLD_1D_00000000_compression.png,,symmetrical coil direction unclear
+RC1-45,NYSE:VZ,1D,compression,rejection_test,low_adx_tight,,,,,,,,,Mixed,45-69,compression<=60,,,,RC1_45_VZ_1D_00000000_compression.png,,tight range ADX under 15 no alignment
+RC1-46,OPERATOR_PICK_ILLIQUID,1D,thin_data,rejection_test,microcap_sparse,,,,,,,,,Insufficient,NA,no_number,,,,RC1_46_ILLIQUID_1D_00000000_thin_data.png,,illiquid microcap sparse pivots
+RC1-47,OPERATOR_PICK_RECENT_LISTING,1D,thin_data,rejection_test,no_ma200,,,,,,,,,Insufficient,NA,no_number,,,,RC1_47_NEWLIST_1D_00000000_thin_data.png,,recent listing under 200 bars no MA200
+RC1-48,NYSE:UNH,1D,clean_trend,positive_control,clean_uptrend,,,,,,,,,Clear,70-85,none,,,,RC1_48_UNH_1D_00000000_clean_trend.png,,clean uptrend pullback to fresh support
+RC1-49,NYSE:SO,1D,clean_range,positive_control,clean_range_at_rail,,,,,,,,,Clear,70-85,none,,,,RC1_49_SO_1D_00000000_clean_range.png,,utility clean range price at tested rail
+RC1-50,NYSE:KMB,1D,full_agreement,positive_control,full_agreement_down,,,,,,,,,HighClarity,86-100,none,,,,RC1_50_KMB_1D_00000000_full_agreement.png,,RARE clean downtrend all six lenses agree - symmetry

@@ -107,7 +107,7 @@ export default function IndicatorGuidePrintPage() {
         <h2 className={p.h2}>4 · Support &amp; resistance</h2>
         <ul className={p.bullets}>
           <li><strong>Support zone</strong> — area below price where buyers reacted before. May slow/bounce; not guaranteed to hold.</li>
-          <li><strong>Resistance zone</strong> — area above price where sellers reacted. Buying right under it is poor reward-to-risk.</li>
+          <li><strong>Resistance zone</strong> — area above price where sellers reacted. Leaning on it is a stretched, unclear location.</li>
           <li><strong>Zones, not lines</strong> — reactions cluster around an area; a band (price ± a fraction of ATR) is honest, a line is false precision.</li>
           <li><strong>Range Position</strong> — 0% at support → 100% at resistance, shown with a [####------] meter.</li>
         </ul>

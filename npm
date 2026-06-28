@@ -1,0 +1,1 @@
+ersUSERClaudeProjectsRangeClarity pkg set scripts.health\=npm\ run\ typecheck\ \&\&\ npm\ run\ lint\ \&\&\ npm\ run\ qa:rc

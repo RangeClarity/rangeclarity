@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import styles from "../beta.module.css";
 import FreeAccessForm from "./FreeAccessForm";
@@ -16,7 +17,7 @@ export default function FreeAccessPage() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link href="/" className={styles.brand}>
-            <span className={styles.brandMark} />RangeClarity <small>Beta</small>
+            <Image className={styles.brandBadge} src="/brand/fox-badge.png" alt="" aria-hidden="true" width={24} height={24} />RangeClarity <small>Beta</small>
           </Link>
           <nav className={styles.headerNav}>
             <Link href="/beta">Beta home</Link>
@@ -27,9 +28,9 @@ export default function FreeAccessPage() {
       <main className={styles.main}>
         <section className={styles.section} style={{ borderTop: "none" }}>
           <span className={styles.eyebrow}>7-Day Free Access</span>
-          <h2 className={styles.h2}>
+          <h1 className={styles.h2}>
             Try RangeClarity for <span style={{ color: "var(--accent)" }}>7 days</span>
-          </h2>
+          </h1>
           <p className={styles.lead}>
             Submit your email and TradingView username, and we&rsquo;ll manually add eligible users to
             the invite-only TradingView indicator. Access is reviewed by hand and may take up to
@@ -38,6 +39,12 @@ export default function FreeAccessPage() {
           <div className={styles.formWrap}>
             <FreeAccessForm />
           </div>
+          <p className={styles.payNote} style={{ marginTop: "0.9rem" }}>
+            Prefer paid beta access?{" "}
+            <Link href="/beta?plan=beta_29" style={{ color: "var(--accent)" }}>
+              View beta plans &rarr;
+            </Link>
+          </p>
           <p className={styles.payNote} style={{ marginTop: "0.9rem" }}>
             RangeClarity is an educational market-structure visualization tool. No financial advice,
             no buy/sell signals, no predictions, no guaranteed results.

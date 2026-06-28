@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import styles from "../beta.module.css";
 import AdminConsole from "./AdminConsole";
@@ -16,7 +17,7 @@ export default function BetaAdmin() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link href="/" className={styles.brand}>
-            <span className={styles.brandMark} />RangeClarity <small>Admin</small>
+            <Image className={styles.brandBadge} src="/brand/fox-badge.png" alt="" aria-hidden="true" width={24} height={24} />RangeClarity <small>Admin</small>
           </Link>
           <nav className={styles.headerNav}>
             <Link href="/beta">Beta home</Link>

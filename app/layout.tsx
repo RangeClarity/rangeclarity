@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
+import Script from "next/script";
+import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const description =
   "A clean TradingView dashboard for trend, support, resistance, range, location, and extension. No signals. No hype. Just chart clarity.";
+
+// Microsoft Clarity project id (public, not a secret). Clarity only loads when set.
+const clarityId = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://rangeclarity.com"),
@@ -36,7 +41,15 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+        {clarityId ? (
+          <Script id="ms-clarity" strategy="afterInteractive">
+            {`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window, document, "clarity", "script", "${clarityId}");`}
+          </Script>
+        ) : null}
+      </body>
     </html>
   );
 }

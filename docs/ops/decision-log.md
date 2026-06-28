@@ -19,3 +19,10 @@
 
 ## New decisions (append below)
 _(date — decision — why — status)_
+
+## New decisions — 2026-06-27 (Recovery Sprint)
+| # | Decision | Why | Status |
+|---|---|---|---|
+| 10 | **Vercel CTA fix = Route B (drop the `@vercel/analytics` dependency).** `lib/analytics.ts` no longer imports it; `rcTrack` is a browser-safe no-op wrapper. Shipped in `fd6e760`. | Smallest safe fix to green the preview without a package.json/lock change. | ✅ Done (pushed) |
+| 11 | **Feedback-loop scripts are safe to commit as one group:** `package.json` + `scripts/test/run-tests.mjs` + `tests/playwright.config.ts` (+ `docs/ops/feedback-loops.md`). | No new dependencies (package-lock unchanged); `vitest`/`playwright` are opt-in, not wired into `health`/`verify`. | ✅ Approved-safe (commit locally) |
+| 12 | **Recovery posture: land finished work in small reviewable groups; conviction stays RED.** No broad cleanup commits; no scoring/Pine/payment changes; founder labels to ≥20 before the review agent / A/B. | The bottleneck is order, not output — a ~638-file dirty tree hides shipped work. | ✅ Standing |

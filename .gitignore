@@ -31,3 +31,7 @@ yarn-error.log*
 
 # scratch QA output (not product code)
 .qatmp/
+
+.venv/
+__pycache__/
+*.pyc

@@ -1,3 +1,15 @@
+> **LEGACY v1 — decision-support era. SUPERSEDED.**
+> This document describes the original RangeClarity (Regime / Structure / S-R /
+> **Momentum** / **Confidence** / **No-Edge verdict** with labels like *Avoid Chase*,
+> *Pullback Zone*, *Breakout Watch*, *Wait*, and a **Volume** confirmation factor).
+> It is retained for history only. The canonical product is now the **calm-structure
+> V2** spec: `docs/RANGECLARITY_V2_SURFACE_SPEC.md` + `docs/RANGECLARITY_V2_ENGINE_SPEC.md`.
+> Momentum, Confidence verdicts, the No-Edge/Avoid-Chase/Pullback/Wait instruction
+> labels, `poor R/R`/`size down` wording, and the Volume engine described below are
+> **RETIRED**. Do not implement from this file.
+
+---
+
 # RangeClarity — Ultimate Core Specification
 
 **File:** `pine/rangeclarity_ultimate_core.pine` · **Platform:** TradingView, **Pine Script v6** · **Type:** overlay
@@ -40,6 +52,8 @@ Outputs: `High` · `Medium` · `Low` · `Conflicting`.
 ### 2.6 No-Edge / Decision context
 Tells the user when not to act, each state carrying a **one-line reason** (the "Blocker Lens" abstraction borrowed in concept from FVG — *we borrow only the idea of naming the blocker, none of its signal machinery*).
 Allowed context labels: `Watch` · `Wait` · `No Edge` · `Avoid Chase` · `Breakout Watch` · `Pullback Zone` · `Strong Context` · `Risk Elevated`.
+
+> **Retired legacy wording (superseded):** `Avoid Chase`, `Pullback Zone`, `Breakout Watch`, and `Wait` (as an instruction) are **retired** under the V2 language policy (`docs/RANGECLARITY_V2_SURFACE_SPEC.md` → Language policy) and are forbidden by the Live QA compliance rule (`compliance.forbidden_word`). Use structure / location / regime / quality language instead (e.g. *Extended* / *Stretched* / *Upper Range*; *Near Key Support* / *Retest Area* / *Lower Range*).
 No-Edge reasons: `No Edge` · `Wait` · `Too extended` · `Mid-range chop` · `Conflicting signals` · `Poor risk/reward`.
 **Forbidden labels:** Buy · Sell · Guaranteed Entry · Profit Prediction · 99% Win Rate.
 

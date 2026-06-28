@@ -51,7 +51,7 @@ export const MODULES: ModuleV2[] = [
     tagline: "Tells you when the move has juice — and when it's just showing off.",
     blurb:
       "Reads whether the move is strengthening, fading, compressing, or breaking out — so trend confirms structure.",
-    shows: "Momentum lifecycle stage, breakout watch, and weakness zones.",
+    shows: "Momentum lifecycle stage, compression, and weakness zones.",
     avoids: "Confusing late hype for real strength.",
     bestFor: "Confirming a setup before committing capital.",
     stats: [
@@ -152,8 +152,8 @@ export const PLANS: Plan[] = [
   {
     id: "annual",
     badge: "MOST POPULAR",
-    name: "RangeClarity Beta — Standard",
-    price: "$29.90",
+    name: "RangeClarity Beta",
+    price: "$29",
     cadence: "/mo",
     billing: "Beta access — invite-only on TradingView.",
     features: [
@@ -174,11 +174,11 @@ export const PLANS: Plan[] = [
   },
   {
     id: "monthly",
-    badge: "EXTENDED",
-    name: "RangeClarity Extended",
-    price: "$49.90",
+    badge: "PRO BETA",
+    name: "RangeClarity Pro Beta",
+    price: "$49",
     cadence: "/mo",
-    billing: "Everything in Standard, plus more.",
+    billing: "Everything in RangeClarity Beta, plus more.",
     features: [
       "Full TradingView indicator suite",
       "Range Map Overlay",
@@ -188,10 +188,10 @@ export const PLANS: Plan[] = [
       "TradingView setup guide",
       "Community & feedback access",
     ],
-    cta: "Get Extended Access",
+    cta: "Get Pro Beta",
     slug: "pro_beta_49",
     href: "/beta?plan=pro_beta_49",
-    note: "Extended beta access: priority updates, deeper setup guidance, and early access to upcoming improvements.",
+    note: "Pro Beta access: priority updates, deeper setup guidance, and early access to upcoming improvements.",
   },
 ];
 

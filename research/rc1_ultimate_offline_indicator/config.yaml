@@ -1,0 +1,60 @@
+# RC-1 Ultimate Offline Indicator — config. Offline research only.
+# No Pine, no returns, no trading advice, no proprietary logic.
+data:
+  # resolution: this pkg data/ohlcv -> sibling rc1_autonomous_model/data/ohlcv -> synthetic
+  local_dirs: ["data/ohlcv", "../rc1_autonomous_model/data/ohlcv"]
+  bars: 800            # synthetic length (unit/smoke only)
+windows:
+  min_bars: 260        # MA200 + room
+  step: 20
+  proxy_horizon: 20    # future bars: EVALUATION ONLY, never scoring
+
+# Negative-first cap ceilings (source: validation/rc1-cap-thresholds-v0.md). Score = min().
+caps:
+  contradictory: 40
+  chop: 44
+  broken: 50
+  severe: 50
+  weakzone: 52
+  conflict: 55
+  compression: 60
+  extended: 60
+  pricediscovery: 60
+  lensmissing: 60
+  midrange: 65
+  agree3: 69
+
+params:
+  chop_ci_trigger: 61.8
+  er_chop_thresh: 0.30
+  adx_trend_min: 20.0
+  ext_stretched_atr: 2.0
+  ext_extended_atr: 3.0
+  ext_severe_atr: 4.0
+  zone_cluster_atr: 0.75
+  zone_fresh_bars: 250
+  zone_touch_min: 2
+  zone_broken_atr: 0.25
+  near_zone_atr: 1.0
+  donchian_n: 20
+  mid_band: 0.30
+  ma_slope_flat: 0.05
+  hysteresis_max_jump: 15
+  hc_persistence_bars: 3
+  high_clarity_cut: 85
+
+grid:
+  chop_ci_trigger: [55.0, 61.8]
+  er_chop_thresh: [0.25, 0.30]
+  adx_trend_min: [18.0, 22.0]
+
+objective_weights:
+  false_high_prevention: 0.40
+  fatal_fail_prevention: 0.20
+  cap_accuracy: 0.15
+  state_stability: 0.10
+  segment_robustness: 0.10
+  simplicity: 0.05
+
+paths: {reports: "reports"}
+universe: [SPY, QQQ, AAPL, MSFT, NVDA, TSLA, META, AMZN, KO, XOM, JPM, GE, F, AMD, AVGO, CVX, INTC, JNJ, WMT, DIS]

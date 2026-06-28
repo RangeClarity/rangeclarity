@@ -48,3 +48,8 @@ Answer before committing to today's change. If any answer is uncomfortable, choo
 [ ] 12 update command-center + decision-log
 Daily Qs: deeper module? simpler interface? complexity hidden? test? do-not-touch? false confidence? closer to conviction?
 ```
+
+---
+
+## Recovery sprint focus (2026-06-27)
+**One lane per day; land small, reviewable commit groups.** Today's order: (1) verify the Vercel preview for `fd6e760` is green, (2) land the feedback-loop scripts group, (3) keep founder labels moving toward 20+. Daily view: [command-center](./rangeclarity-command-center.md). Do not touch Pine, scoring, caps, `agree3`, or payments; no broad cleanup commits; no commit/push without approval.

@@ -1,0 +1,124 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RangeClarity — product screen concept (synthetic demo)</title>
+<style>
+  :root{--bg:#0b0f1a;--panel:#111726;--panel2:#0e1420;--line:rgba(255,255,255,.07);
+    --fg:#e6edf6;--dim:#8a97ab;--faint:#5c668a;--mint:#34e0c4;--bull:#2ebd96;--bear:#ef5f6b;
+    --fav:#4fd6a6;--ext:#e8b84b;--noedge:#9aa6c4;--sup:#2bbf9a;--res:#e0a23c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 ui-sans-serif,system-ui,"Segoe UI",Roboto,sans-serif}
+  .wrap{max-width:1280px;margin:0 auto;padding:16px}
+  .top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .brand{font-size:13px;letter-spacing:.06em;color:var(--mint)}
+  .tk{font-size:16px;font-weight:500}.tk small{color:var(--dim);font-weight:400}
+  .demo{font-size:11px;color:var(--faint);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+  .sw{display:flex;gap:6px}
+  .sw button{background:var(--panel);color:var(--dim);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer}
+  .sw button[aria-pressed="true"]{color:var(--fg);border-color:var(--mint);background:#12211f}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media(min-width:900px){.grid{grid-template-columns:74% 1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+  .chartwrap{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:8px}
+  svg{display:block;width:100%;height:auto}
+  .dash{display:grid;gap:10px}
+  .row{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  .lbl{font-size:11px;color:var(--dim)}
+  .src{font-size:10px;color:var(--faint);margin-top:2px}
+  .big{font-size:20px;font-weight:500}
+  .state{display:flex;align-items:center;gap:9px}
+  .pill{font-size:12px;border-radius:20px;padding:3px 10px}
+  .scores{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .ring{display:flex;flex-direction:column;align-items:center;text-align:center}
+  details{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  summary{cursor:pointer;font-size:12px;color:var(--mint)}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:11.5px}
+  td{padding:3px 0;border-bottom:1px solid var(--line);color:#cdd6e2}
+  td:last-child{text-align:right;color:var(--dim)}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+</style>
+<div class="wrap">
+  <h1 class="sr-only">RangeClarity product screen concept</h1>
+  <div class="top">
+    <div>
+      <div class="brand">RangeClarity</div>
+      <div class="tk" id="tk">IONQ <small>· 1D · synthetic demo</small></div>
+    </div>
+    <div class="sw" role="group" aria-label="Demo state">
+      <button data-s="favorable" aria-pressed="true">Favorable</button>
+      <button data-s="extended" aria-pressed="false">Extended</button>
+      <button data-s="noedge" aria-pressed="false">No Edge</button>
+    </div>
+    <span class="demo">Demonstration data — not live analysis</span>
+  </div>
+  <div class="grid">
+    <div class="chartwrap"><svg id="chart" viewBox="0 0 900 470" role="img" aria-label="Candlestick chart with moving averages and support/resistance zones"></svg></div>
+    <div class="dash" id="dash"></div>
+  </div>
+</div>
+<script>
+const R=s=>()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const N=320,VIS=120;
+function series(kind){const rnd=R(kind==='favorable'?7:kind==='extended'?21:39);let p=46,c=[];for(let i=0;i<N;i++){let tg;const t=i/(N-1);
+  if(kind==='favorable'){tg=i<210?45+(i/210)*26:71-((i-210)/(N-210))*8;}
+  else if(kind==='extended'){tg=i<140?46-(i/140)*18:i<205?29+Math.sin(i/10):29+((i-205)/(N-205))**2*35;}
+  else{tg=49+Math.sin(i/7)*5+Math.sin(i/23)*2;}
+  p+=(tg-p)*0.3+(rnd()-0.5)*0.8;c.push(p);}
+  if(kind==='favorable'){c[N-1]=63.5;c[N-2]=63.1;}if(kind==='extended'){c[N-1]=62.8;c[N-2]=63.3;}if(kind==='noedge'){c[N-1]=49.6;}
+  return c;}
+function sma(c,n,i){if(i<n-1)return null;let s=0;for(let k=i-n+1;k<=i;k++)s+=c[k];return s/n;}
+const STATES={
+  favorable:{color:'var(--fav)',pillbg:'rgba(79,214,166,.16)',state:'Favorable',sub:'Strong stock, clean entry into rising support.',
+    structure:84,entry:78,conf:86,res:[74,76],sup:[60,62],price:63.5,
+    loc:'Pulled back to rising support',ext:'Normal · +2.4% above MA50',rs:'Leader vs SPY',
+    ma:'Price > 50 > 100 > 200, rising',risk:{r:'74–76',s:'60–62',inv:'58.9',rr:'2.6 : 1 · good'},
+    why:[['Trend stack','bullish',.30,'+25','TREND_STACK_BULLISH'],['MA slope','rising',.15,'+13','MA_SLOPE_RISING'],['Dist. from support','+2.4%',.25,'+22','SUPPORT_NEARBY'],['Reward:risk','2.6:1',.25,'+23','RR_FAVORABLE'],['Extension','low',.20,'+18','—']],
+    expl:'Trend is strong and price has pulled back to rising support with room to resistance — a favorable entry with clean risk.'},
+  extended:{color:'var(--ext)',pillbg:'rgba(232,162,60,.16)',state:'Extended',sub:'Strong stock, poor location — wait for a pullback.',
+    structure:82,entry:36,conf:80,res:[64,66],sup:[56.5,58.8],price:62.8,
+    loc:'Extended above support, near resistance',ext:'Extended · +9.0% above support',rs:'Leader vs SPY',
+    ma:'Price > 50 > 100 > 200, rising',risk:{r:'64–66',s:'56.5–58.8',inv:'55.4',rr:'0.3 : 1 · poor'},
+    why:[['Trend stack','bullish',.30,'+25','TREND_STACK_BULLISH'],['Dist. from support','+9.0%',.25,'+4','EXTENDED_FROM_SUPPORT'],['Dist. to resistance','+3.5%',.15,'+3','RESISTANCE_TOO_CLOSE'],['Reward:risk','0.3:1',.25,'+4','ENTRY_RISK_POOR'],['Extension','high',.20,'+5','EXTENDED_FROM_SUPPORT']],
+    expl:'Structure remains strong, but price is extended 9.0% above support and is approaching resistance, making the current entry unattractive.'},
+  noedge:{color:'var(--noedge)',pillbg:'rgba(154,166,196,.16)',state:'No Edge',sub:'Mid-range and conflicted — nothing to do here.',
+    structure:52,entry:41,conf:48,res:[54,56],sup:[44,46],price:49.6,
+    loc:'Mid-range, no clean level',ext:'Normal',rs:'In line with SPY',
+    ma:'Price ≈ 50 ≈ 100, 200 flat (conflicting)',risk:{r:'54–56',s:'44–46',inv:'43.2',rr:'0.9 : 1 · weak'},
+    why:[['Range position','52% (mid)',.0,'flag','MID_RANGE_NO_EDGE'],['MA structure','conflicting',.0,'flag','—'],['Reward:risk','0.9:1',.0,'flag','ENTRY_RISK_POOR'],['Zone confidence','low',.0,'flag','—'],['Data quality','ok (48 conf)',.0,'—','—']],
+    expl:'Price is stuck mid-range with conflicting averages and no nearby edge — wait for a break or a clean test of support.'}
+};
+function ring(v,col){const r=24,c=2*Math.PI*r,f=v/100*c;return `<svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="${r}" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="6"/><circle cx="32" cy="32" r="${r}" fill="none" stroke="${col}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${f.toFixed(1)} ${(c-f).toFixed(1)}" transform="rotate(-90 32 32)"/><text x="32" y="37" text-anchor="middle" fill="#e6edf6" font-size="17" font-weight="500">${v}</text></svg>`;}
+function drawChart(d){const c=series(currentKey),W=900,H=470,padL=10,padR=66,top=10,ph=300,vTop=320,vh=120;
+  const vis=c.slice(N-VIS);let lo=Math.min(...vis,d.sup[0],d.price)-2,hi=Math.max(...vis,d.res[1],d.price)+2;
+  const y=v=>top+(1-(v-lo)/(hi-lo))*ph,x=i=>padL+i/(VIS-1)*(W-padL-padR),bw=(W-padL-padR)/VIS*0.6;
+  let s='';for(let g=Math.ceil(lo/10)*10;g<hi;g+=10){s+=`<line x1="${padL}" y1="${y(g)}" x2="${W-padR}" y2="${y(g)}" stroke="rgba(255,255,255,.05)"/><text x="${W-padR+6}" y="${y(g)+3}" fill="#5c668a" font-size="10">${g}</text>`;}
+  const zone=(a,b,col,txt)=>{const yy=y(b),h=y(a)-y(b);s+=`<rect x="${padL}" y="${yy}" width="${W-padL-padR}" height="${h}" fill="${col}" fill-opacity=".12"/><line x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}" stroke="${col}" stroke-opacity=".5" stroke-dasharray="2 3"/><rect x="${padL+6}" y="${yy+2}" width="184" height="15" rx="3" fill="${col}" fill-opacity=".18"/><text x="${padL+12}" y="${yy+12.6}" fill="${col}" font-size="10.5">${txt}</text>`;};
+  zone(d.res[0],d.res[1],'#e0a23c',`Resistance ${d.res[0]}–${d.res[1]}`);
+  zone(d.sup[0],d.sup[1],'#2bbf9a',`Support ${d.sup[0]}–${d.sup[1]}`);
+  const mas=[[50,'#e8b84b'],[100,'#e0843c'],[200,'#d8606e']];
+  for(const[n,col]of mas){let pts='';for(let i=0;i<VIS;i++){const v=sma(c,n,N-VIS+i);if(v==null)continue;pts+=`${x(i).toFixed(1)},${y(v).toFixed(1)} `;}s+=`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.3" stroke-opacity=".9"/>`;}
+  let mv=0;const vols=vis.map((cl,i)=>{const o=i?vis[i-1]:cl;const v=20+Math.abs(cl-o)*10+(R(i*7)()*8);mv=Math.max(mv,v);return v;});
+  for(let i=0;i<VIS;i++){const cl=vis[i],o=i?vis[i-1]:cl,up=cl>=o,col=up?'#2ebd96':'#ef5f6b',cx=x(i);
+    const vH=vols[i]/mv*vh;s+=`<rect x="${cx-bw/2}" y="${vTop+vh-vH}" width="${bw}" height="${vH}" fill="${col}" fill-opacity=".28"/>`;
+    const hi2=Math.max(o,cl)+0.3,lo2=Math.min(o,cl)-0.3;s+=`<line x1="${cx}" y1="${y(hi2)}" x2="${cx}" y2="${y(lo2)}" stroke="${col}" stroke-width="1"/><rect x="${cx-bw/2}" y="${y(Math.max(o,cl))}" width="${bw}" height="${Math.max(1,Math.abs(y(o)-y(cl)))}" fill="${col}"/>`;}
+  const yp=y(d.price);s+=`<line x1="${padL}" y1="${yp}" x2="${W-padR}" y2="${yp}" stroke="#e6edf6" stroke-opacity=".5" stroke-dasharray="3 3"/><rect x="${W-padR}" y="${yp-8}" width="50" height="16" rx="3" fill="#e6edf6"/><text x="${W-padR+25}" y="${yp+4}" text-anchor="middle" fill="#0b0f1a" font-size="10.5" font-weight="500">${d.price.toFixed(1)}</text>`;
+  document.getElementById('chart').innerHTML=s;}
+let currentKey='favorable';
+function render(k){currentKey=k;const d=STATES[k];drawChart(d);
+  const rrCol=d.risk.rr.includes('good')?'var(--fav)':d.risk.rr.includes('poor')?'var(--ext)':'var(--dim)';
+  document.getElementById('dash').innerHTML=`
+    <div class="row"><div class="lbl">Setup state</div><div class="state"><span class="big" style="color:${d.color}">${d.state}</span><span class="pill" style="color:${d.color};background:${d.pillbg}">${d.conf} conf</span></div><div class="src">State machine · Structure + Entry + zones + extension + confidence</div></div>
+    <div class="scores"><div class="row ring">${ring(d.entry,d.entry>=65?'var(--fav)':d.entry>=45?'var(--ext)':'var(--bear)')}<div class="lbl" style="margin-top:3px">Entry quality</div><div class="src">location now</div></div>
+      <div class="row ring">${ring(d.structure,'var(--fav)')}<div class="lbl" style="margin-top:3px">Structure quality</div><div class="src">chart strength</div></div></div>
+    <div class="row"><div class="lbl">Price location</div><div style="margin:2px 0;color:${d.color}">${d.loc}</div><div class="src">Location engine · distance to zones + range position</div></div>
+    <div class="row"><div class="lbl">Nearest support / resistance</div><div style="margin:2px 0">▼ ${d.risk.s} &nbsp;·&nbsp; ▲ ${d.risk.r}</div><div class="src">Zone engine · confirmed pivots + ATR clustering + reactions</div></div>
+    <div class="row"><div class="lbl">Extension risk</div><div style="margin:2px 0">${d.ext}</div><div class="src">Extension engine · % and ATR from support / MA50</div></div>
+    <div class="row"><div class="lbl">MA 50 / 100 / 200 structure</div><div style="margin:2px 0">${d.ma}</div><div class="src">MA structure · normalized % + ATR</div></div>
+    <div class="row"><div class="lbl">Relative strength</div><div style="margin:2px 0">${d.rs}</div><div class="src">request.security("AMEX:SPY")</div></div>
+    <div class="row"><div class="lbl">Risk map</div><div class="src" style="color:#cdd6e2;margin-top:3px">Resistance ${d.risk.r} · Support ${d.risk.s} · Invalidation ${d.risk.inv} · <span style="color:${rrCol}">Reward:risk ${d.risk.rr}</span></div></div>
+    <div class="row" style="border-left:2px solid var(--mint);border-radius:0 10px 10px 0"><div class="lbl">Why</div><div style="margin-top:2px;color:#cdd6e2;font-size:12.5px">${d.expl}</div></div>
+    <details><summary>Why? — component breakdown</summary><table><tr><td>Component</td><td>value · weight · reason</td></tr>${d.why.map(w=>`<tr><td>${w[0]}</td><td>${w[1]} · ${w[2]?Math.round(w[2]*100)+'%':'gate'} · ${w[4]}</td></tr>`).join('')}</table><div class="src" style="margin-top:6px">Reasons are deterministic. An LLM may later rephrase them, but never changes the score or state.</div></details>`;
+  document.querySelectorAll('.sw button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.s===k));}
+document.querySelectorAll('.sw button').forEach(b=>b.addEventListener('click',()=>render(b.dataset.s)));
+render('favorable');
+</script>

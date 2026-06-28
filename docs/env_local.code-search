@@ -1,0 +1,82 @@
+# Query: env.local
+# ContextLines: 1
+
+18 results - 10 files
+
+.env.example:
+   1  # RangeClarity environment variables
+   2: # Copy this file to `.env.local` for local dev, or set these in your host's
+   3  # dashboard (e.g. Vercel → Project → Settings → Environment Variables).
+
+  49  #
+  50: # PLACEHOLDERS ONLY. Put the real LINEAR_API_KEY in .env / .env.local (gitignored)
+  51  # or the Hermes task's own environment — NEVER commit a real token.
+
+README.md:
+  45  
+  46: Copy `.env.example` to `.env.local` and fill in values as features are added. No
+  47  secrets are required yet.
+
+SECURITY_HARDENING_REPORT.md:
+  21  | 🟡 Medium | **SMB file sharing active** (ports 139/445, default `ADMIN$`/`C$`/`IPC$` shares). |
+  22: | 🟡 Medium | Real secret files on disk: `dev\proofdraft\.env.local`, `dev\TradingAgents\.env` (the git-tracked repo safely ignores it). |
+  23  | 🟢 Low | App updates not enumerated cleanly; Avira "System Speedup" bloat tasks; many vendor auto-updaters. |
+
+  80  - `C:\Users\USER\dev\TradingAgents\.env` — repo's `.gitignore` ignores `.env` and it is **not tracked**. ✅ Safe locally.
+  81: - `C:\Users\USER\dev\proofdraft\.env.local` — **not** listed as a git repo in the scan; confirm it has a `.gitignore` ignoring `.env*` (see checklist). Not in OneDrive, so not cloud-synced.
+  82  - The `.pem` / `.key` files under `...\.venv\Lib\site-packages\...` (botocore, certifi, moto, pip) are **library CA bundles and test fixtures — false positives, not your secrets.**
+
+windows-security-audit.ps1:
+  144  $searchRoots = @("$env:USERPROFILE\Claude","$env:USERPROFILE\Documents","$env:USERPROFILE\Desktop","$env:USERPROFILE\source","$env:USERPROFILE\projects","$env:USERPROFILE\dev","$env:USERPROFILE\.ssh") | Where-Object { Test-Path $_ } | Select-Object -Unique
+  145: $patterns = @('.env','.env.local','.env.production','.env.development','*.pem','*.key','id_rsa','id_ed25519','credentials.json','service-account*.json','*.p12','*.pfx')
+  146  $found = @()
+
+docs\auth-billing-plan.md:
+  111  Browser-safe (`NEXT_PUBLIC_*`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_PAYMENT_PUBLISHABLE_KEY` (only if the chosen provider needs a client key).
+  112: Server-only (never exposed): `SUPABASE_SERVICE_ROLE_KEY`, `PAYMENT_PROVIDER` (`stripe|paddle|lemonsqueezy|whop`), `PAYMENT_API_SECRET`, `PAYMENT_WEBHOOK_SECRET`, `ADMIN_EMAILS` (bootstrap admin). Google OAuth client id/secret are configured **in the Supabase dashboard**, not in the repo. Add all as placeholders in `.env.example`; real values go in `.env.local` / Vercel env.
+  113  
+
+docs\hermes-linear.md:
+   40     API → Personal API keys → Create key**. Copy it once.
+   41: 2. **Store it safely** in `.env.local` (already gitignored) at the repo root — never
+   42     in `.env.example`, never in a commit:
+   43     ```bash
+   44:    LINEAR_API_KEY=lin_api_xxx   # real key here, in .env.local only
+   45     LINEAR_DRY_RUN=true
+
+  110  ```bash
+  111: # in .env.local (or the task env), after reviewing the dry-run:
+  112  HERMES_ALLOW_LINEAR_WRITE=true
+        RC_INTERNAL_PAGES_ENABLED=true
+
+  144  
+  145: - **"No LINEAR_API_KEY set"** — expected before setup; add it to `.env.local`.
+  146  - **"Linear API error: Authentication required"** — bad/expired key; recreate it.
+
+docs\linear-integration.md:
+  46  
+  47: Prefer to do it by hand? Put the values in `.env.local` (gitignored) instead — the
+  48: tools read `.env` and `.env.local` automatically.
+  49  
+
+  94  
+  95: # 2) enable writes (in .env / .env.local), after reviewing:
+  96  LINEAR_WRITE_ENABLED=true
+
+lib\linear\client.ts:
+  20      throw new LinearConfigurationError(
+  21:       "LINEAR_API_KEY is not configured. Add it to .env.local to load Linear issues.",
+  22      );
+
+scripts\test-emails.mjs:
+  24  
+  25: loadEnvFile(path.join(process.cwd(), ".env.local"));
+  26  loadEnvFile(path.join(process.cwd(), ".env"));
+
+scripts\hermes\linear\lib.mjs:
+  40   * Minimal .env loader — populates process.env WITHOUT printing values.
+  41:  * Reads .env then .env.local. Values are never logged. No-ops if files absent.
+  42   */
+  43  export function loadDotEnv() {
+  44:   for (const file of [".env", ".env.local"]) {
+  45      const p = path.join(REPO_ROOT, file);

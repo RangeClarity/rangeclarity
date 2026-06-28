@@ -1,0 +1,24 @@
+{
+  "chop_ci_trigger": 55.0,
+  "er_chop_thresh": 0.3,
+  "adx_trend_min": 18.0,
+  "metrics": {
+    "n": 1793,
+    "high_clarity_rarity": 0.0,
+    "clear_plus_rarity": 0.0,
+    "false_high_self_rate": 0.0,
+    "fatal_self": 0,
+    "cap_accuracy": 1.0,
+    "stability": 0.9977,
+    "segment_robustness": 1.0,
+    "simplicity": 0.5,
+    "objective": 0.9748,
+    "states": {
+      "HighClarity": 0,
+      "Clear": 0,
+      "Mixed": 742,
+      "Unclear": 1051,
+      "Insufficient": 0
+    }
+  }
+}

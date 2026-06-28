@@ -32,12 +32,12 @@ How to install and read `pine/rangeclarity_ultimate_core.pine`. RangeClarity is 
 
 ### Context labels (what they mean)
 - **Strong Context** — modules aligned, higher confidence. A clean *read*, not a trade call.
-- **Breakout Watch** — compressed and near a boundary; energy may release.
-- **Pullback Zone** — a trend is pulling back into support/resistance.
+- **Coiled** — compressed and near a boundary; energy may release.
+- **Retest Area** — a trend is pulling back into support/resistance.
 - **Watch** — developing; nothing decisive yet.
-- **Wait** — compressed or mid-range; let it resolve (poor reward-to-risk now).
-- **Avoid Chase** — the move is extended; chasing has poor R/R.
-- **Risk Elevated** — volatility shock; conditions are unstable — consider smaller size / standing aside.
+- **Structure Not Clear** — compressed or mid-range; an unclear location to read.
+- **Stretched** — the move is extended from its mean.
+- **Risk Elevated** — volatility shock; conditions are unstable — context only.
 - **No Edge** — conflicting, messy, or low-confidence. The honest answer is: nothing clean here.
 
 RangeClarity will **never** show Buy, Sell, targets, guaranteed entries, or win rates. That is by design.

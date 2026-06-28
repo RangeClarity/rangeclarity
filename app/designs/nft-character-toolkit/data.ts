@@ -55,7 +55,7 @@ export const CHARACTERS: Character[] = [
     represents: "Strength, acceleration, exhaustion, and breakout pressure.",
     description:
       "Raw trend force. The Beast reads whether the move is building, breaking out, or running out of breath — so momentum confirms structure.",
-    shows: "Momentum lifecycle stage, breakout watch, and weakness zones.",
+    shows: "Momentum lifecycle stage, compression, and weakness zones.",
     avoids: "Chasing a move that is already rolling over.",
     bestFor: "Confirming a setup before committing capital.",
     stats: [
@@ -63,7 +63,7 @@ export const CHARACTERS: Character[] = [
       { value: "5", label: "Inputs" },
       { value: "LIVE", label: "Trend State" },
     ],
-    traits: ["Acceleration", "Breakout Watch", "Exhaustion"],
+    traits: ["Acceleration", "Compression", "Exhaustion"],
     c: "#38e1ff",
     c2: "#5b8cff",
     emblem: "beast",

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import type { SelectedPlan } from "@/lib/payments";
 import styles from "./beta.module.css";
+import { rcTrack } from "@/lib/analytics";
 
 type Status = "idle" | "submitting" | "success" | "error";
 type PlanLite = { id: SelectedPlan; label: string; price: string; paid: boolean };
@@ -42,8 +43,13 @@ export default function BetaSignupForm({
   });
 
   const selected = plans.find((p) => p.id === plan);
+  const startedRef = useRef(false);
 
   function update<K extends keyof typeof form>(key: K, value: string) {
+    if (!startedRef.current) {
+      startedRef.current = true;
+      rcTrack("signup_started");
+    }
     setForm((f) => ({ ...f, [key]: value }));
   }
 
@@ -51,6 +57,7 @@ export default function BetaSignupForm({
     e.preventDefault();
     setStatus("submitting");
     setError("");
+    rcTrack("join_beta_click", { plan });
     if (!form.consent) {
       setError("Please confirm the access + disclaimer checkbox.");
       setStatus("error");
@@ -90,6 +97,7 @@ export default function BetaSignupForm({
 
       setMessage(nextMessage);
       setPaymentLink(link);
+      rcTrack("signup_completed", { plan });
       setStatus("success");
     } catch {
       setError("Something went wrong. Please try again, or contact support.");
@@ -148,7 +156,7 @@ export default function BetaSignupForm({
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate id="join">
+    <form className={styles.form} onSubmit={handleSubmit} noValidate id="beta-access-form">
       <div className={styles.field}>
         <span className={styles.label}>Choose your plan</span>
         <div className={styles.planRow}>
@@ -211,13 +219,13 @@ export default function BetaSignupForm({
 
       <label
         className={styles.consent}
-        style={{ display: "flex", gap: "0.6rem", alignItems: "flex-start", cursor: "pointer" }}
+        style={{ display: "flex", gap: "0.65rem", alignItems: "flex-start", cursor: "pointer", marginTop: "0.5rem", padding: "0.85rem 0.95rem", border: "1px solid #2a3a52", borderRadius: 10, background: "rgba(255,255,255,0.04)", color: "#d8e6f4", fontSize: "0.9rem", lineHeight: 1.5 }}
       >
         <input
           type="checkbox"
           checked={form.consent}
           onChange={(e) => setForm((f) => ({ ...f, consent: e.target.checked }))}
-          style={{ marginTop: "0.2rem", flex: "none" }}
+          style={{ width: 18, height: 18, marginTop: "0.15rem", flex: "none", accentColor: "#34f5b0", cursor: "pointer" }}
           required
         />
         <span>

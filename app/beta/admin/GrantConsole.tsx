@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { rcTrack } from "@/lib/analytics";
 
 type Row = {
   id: string;
@@ -15,8 +16,8 @@ type Row = {
 
 const PLAN: Record<string, string> = {
   free_preview: "Free $0",
-  beta_29: "Beta $29.90",
-  pro_beta_49: "Extended $49.90",
+  beta_29: "RangeClarity Beta $29/mo",
+  pro_beta_49: "RangeClarity Pro Beta $49/mo",
 };
 
 export default function GrantConsole() {
@@ -63,6 +64,7 @@ export default function GrantConsole() {
         setError(data.error ?? data.message ?? "Grant failed.");
       } else {
         setInfo(data.message ?? "Done.");
+        if (data.granted) rcTrack("access_granted_click");
         setRows((prev) =>
           prev ? prev.map((r) => (r.id === id ? { ...r, status: "granted" } : r)) : prev,
         );

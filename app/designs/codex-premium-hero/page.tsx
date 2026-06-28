@@ -33,12 +33,12 @@ const modules = [
   {
     eyebrow: "Momentum Engine",
     title: "Read force, not noise.",
-    body: "Momentum state, compression, breakout watch, and exhaustion context without signal-bot promises.",
+    body: "Momentum state, compression, coiled context, and exhaustion context without signal-bot promises.",
   },
   {
     eyebrow: "Risk Radar",
-    title: "Respect the late entry.",
-    body: "Entry quality, pullback zones, and risk/reward context before you make the move.",
+    title: "Respect the late, stretched move.",
+    body: "Location quality, retest areas, and stretched-vs-structure context — read, not signals.",
   },
 ];
 

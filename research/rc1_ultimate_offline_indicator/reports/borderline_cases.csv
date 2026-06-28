@@ -1,0 +1,6 @@
+symbol,t,date,final_state,final_score,caps,weakest_lens,agreement_count,why_not_higher,regime,zone,location,extension
+META,1680,2024-09-06,Mixed,65,agree3,Agreement,5,capped by agree3 (<= 69),Range,Fresh,NearSupport,Stretched
+KO,1740,2024-12-02,Mixed,65,agree3,Agreement,4,capped by agree3 (<= 69),Trend,Fresh,Upper,Normal
+XOM,1720,2024-11-01,Mixed,65,agree3,Agreement,5,capped by agree3 (<= 69),Range,Fresh,NearResistance,Normal
+JPM,260,2019-01-15,Mixed,69,agree3,Agreement,4,capped by agree3 (<= 69),Range,Fresh,Upper,Stretched
+WMT,1920,2025-08-22,Mixed,65,agree3,Agreement,5,capped by agree3 (<= 69),Trend,Fresh,Lower,Normal

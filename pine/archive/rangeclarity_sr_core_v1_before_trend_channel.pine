@@ -1,0 +1,524 @@
+//@version=6
+// =============================================================================
+// RangeClarity S/R Core v1
+// A clean market-structure map: classify the setup (bias) first, then show only
+// the most relevant dynamic support/resistance ZONES for that setup.
+// No signals, no buy/sell arrows, no predictions. Architecture: see
+// docs/rangeclarity_sr_core_v1_architecture.md. Original code; concepts only
+// reverse-engineered from indicator_research_library/sources/RangeClarity.
+// =============================================================================
+indicator("RangeClarity S/R Core v1", "RC SR", overlay = true,
+     max_boxes_count = 60, max_labels_count = 60, max_lines_count = 60, max_bars_back = 1000)
+
+// ============================ 1. INPUTS ======================================
+gP = "Structure"
+pivL        = input.int(8,  "Pivot left",  minval = 1, group = gP)
+pivR        = input.int(8,  "Pivot right (confirm lag, bars)", minval = 1, group = gP)
+biasSens    = input.float(0.5, "Bias flatness (x ATR)", minval = 0.1, step = 0.1, group = gP,
+     tooltip = "Smaller = more often Bullish/Bearish; larger = more often Sideways.")
+
+gZ = "Zones"
+atrLen      = input.int(14, "ATR length", minval = 1, group = gZ)
+atrMult     = input.float(1.0, "Zone width (x ATR)", minval = 0.2, step = 0.1, group = gZ)
+mergeATR    = input.float(0.8, "Merge sensitivity (x ATR)", minval = 0.1, step = 0.1, group = gZ,
+     tooltip = "Nearby same-type zones within this distance merge into one stronger zone.")
+breakoutBuf = input.float(0.4, "Breakout buffer (x ATR)", minval = 0.0, step = 0.1, group = gZ)
+touchCool   = input.int(5, "Touch cooldown (bars)", minval = 0, group = gZ,
+     tooltip = "One zone cannot be re-touched within this many bars (stops chop inflating counts).")
+reactWin    = input.int(6, "Reaction window (bars)", minval = 1, group = gZ)
+reactATR    = input.float(1.0, "Reaction move (x ATR)", minval = 0.2, step = 0.1, group = gZ)
+
+gS = "Scoring & display"
+minScore    = input.int(40, "Min score for strongest/extra zones", minval = 0, maxval = 100, group = gS, tooltip = "Strongest support/resistance must score at least this. The nearest valid level is always shown regardless of score.")
+showWeak    = input.bool(false, "Show weak / developing zones", group = gS)
+volScoring  = input.bool(true, "Use volume in scoring", group = gS)
+volLen      = input.int(20, "Volume average length", minval = 1, group = gS)
+showDash    = input.bool(true, "Show dashboard", group = gS)
+showLabels  = input.bool(true, "Show labels", group = gS)
+approachATR = input.float(0.75, "Alert: approach distance (x ATR)", minval = 0.1, step = 0.1, group = gS)
+showFar     = input.bool(false, "Show far zones (history mode)", group = gS)
+strongThr   = input.int(80, "Strong score → shaded zone (box)", minval = 1, maxval = 100, group = gS, tooltip = "At/above this score a level can render as a shaded zone box. Medium/weak render as lighter lines.")
+medThr      = input.int(60, "Medium score → solid line", minval = 1, maxval = 100, group = gS, tooltip = "At/above this (but below Strong) a level renders as a clear solid line. Below it, weak = thin dashed line.")
+maxBoxHtPct = input.float(8.0, "Max zone box height (%)", minval = 0.5, step = 0.5, group = gS, tooltip = "A strong zone taller than this renders as a solid line instead of a giant box.")
+showLineLabels = input.bool(true, "Show fallback line labels", group = gS)
+
+// ---- adaptive display distance + fallback (keeps the chart from going empty, cleanly) ----
+gD = "Display distance & fallback"
+maxLocalDistPct = input.float(12.0, "Local display distance (%)", minval = 1.0, step = 1.0, group = gD, tooltip = "Base radius for primary local zones/lines. Widened adaptively by volatility, capped by Hard max.")
+atrDistMult     = input.float(4.0,  "Adaptive: ATR ×", minval = 0.0, step = 0.5, group = gD, tooltip = "localDist = min(HardMax, max(Local%, ATR% × this, Range% × range-mult)).")
+rangeDistMult   = input.float(0.3,  "Adaptive: recent-range ×", minval = 0.0, step = 0.05, group = gD)
+fallbackDistPct = input.float(30.0, "Fallback display distance (%)", minval = 1.0, step = 1.0, group = gD, tooltip = "Wider radius used only for subtle fallback swing/pivot lines when a side has no primary level.")
+hardMaxDistPct  = input.float(40.0, "Hard max display distance (%)", minval = 1.0, step = 1.0, group = gD, tooltip = "Never show levels farther than this from price (unless Show far zones).")
+minVisibleLevels   = input.int(2, "Min visible structure levels", minval = 0, maxval = 6, group = gD, tooltip = "If fewer than this are visible, add subtle fallback swing/pivot lines on the empty side(s).")
+showFallbackSwings = input.bool(true, "Show fallback local levels", group = gD)
+fallbackLookback   = input.int(50, "Structure lookback (bars)", minval = 5, group = gD, tooltip = "Window for the broader structure low used as a last-resort fallback support.")
+pullbackLookback   = input.int(20, "Recent pullback lookback (bars)", minval = 3, group = gD, tooltip = "Short window for the nearest recent pullback low — the usual Local support in a trend.")
+
+// ============================ 2. TYPE / STATE ================================
+type Zone
+    int    id
+    string ztype
+    float  top
+    float  bottom
+    float  mid
+    int    createdBar
+    int    lastTouchBar
+    int    touchCount
+    int    reactionCount
+    int    failedBreakCount
+    int    breakoutCount
+    int    retestCount
+    float  volScore
+    float  biasScore
+    float  ageScore
+    float  score
+    string strength
+    string state
+    int    pendingTouchBar
+    int    lastBreakBar
+    box    boxRef       // reserved for v1.1 (drawings managed via pools in v1)
+    label  labelRef
+
+var array<Zone>  zones    = array.new<Zone>()
+var array<box>   drawnBox = array.new<box>()
+var array<line>  drawnLine = array.new<line>()
+var array<label> drawnLab = array.new<label>()
+var array<float> phArr    = array.new<float>()   // recent confirmed pivot highs
+var array<float> plArr    = array.new<float>()   // recent confirmed pivot lows
+var table dash = na
+
+// ============================ 3. UTILITIES ===================================
+f_clamp(float x, float lo, float hi) => math.max(lo, math.min(hi, x))
+f_distPct(float ref) => (ref - close) / close * 100.0   // + above price, - below
+
+atr   = ta.atr(atrLen)
+volMa = ta.sma(volume, volLen)
+volRel = na(volMa) or volMa == 0 ? 1.0 : volume / volMa
+
+// recent structure extremes (fallback sources) + adaptive display radius — computed every bar
+swingHi = ta.highest(high, fallbackLookback)
+swingLo = ta.lowest(low,  fallbackLookback)
+pullHi  = ta.highest(high, pullbackLookback)   // nearest recent swing high (short window)
+pullLo  = ta.lowest(low,  pullbackLookback)    // nearest recent pullback low (short window)
+float atrPct   = na(atr) or close == 0 ? 0.0 : atr / close * 100.0
+float rangePct = na(swingHi) or na(swingLo) or close == 0 ? 0.0 : (swingHi - swingLo) / close * 100.0
+float localDist    = math.min(hardMaxDistPct, math.max(maxLocalDistPct, atrPct * atrDistMult, rangePct * rangeDistMult))
+float fallbackDist = math.min(hardMaxDistPct, math.max(fallbackDistPct, localDist))
+
+// strength label from score (thresholds drive both the label and the render mode)
+f_strength(float sc) =>
+    sc >= strongThr ? "Strong" : sc >= medThr ? "Medium" : sc >= 40 ? "Weak" : "Developing"
+
+// validity + display-distance guards (reject na / zero / negative / degenerate / far zones)
+f_isValidZone(Zone z) =>
+    not na(z.mid) and not na(z.top) and not na(z.bottom) and z.mid > syminfo.mintick and z.top > syminfo.mintick and z.bottom >= syminfo.mintick and z.top >= z.bottom and z.createdBar > 0
+f_inRange(Zone z) =>
+    showFar or math.abs(f_distPct(z.mid)) <= localDist
+
+// ============================ 4. PIVOTS ======================================
+// Confirmed pivots: value returns R bars after the pivot formed (lag accepted).
+ph = ta.pivothigh(high, pivL, pivR)
+pl = ta.pivotlow(low,  pivL, pivR)
+
+// ============================ 8/9. SCORING + BIAS HELPERS ====================
+f_rescore(Zone z, string bias) =>
+    int barsSince = bar_index - z.lastTouchBar
+    float touchSc = math.min(z.touchCount * 5.0, 20.0)
+    float reactSc = math.min(z.reactionCount * 8.0 + z.failedBreakCount * 5.0, 25.0)
+    float volSc   = volScoring ? z.volScore : 0.0
+    float biasSc  = bias == "Bullish" ? (z.ztype == "support" ? 15.0 : 12.0) : bias == "Bearish" ? (z.ztype == "resistance" ? 15.0 : 12.0) : bias == "Sideways" ? 10.0 : 5.0
+    float ageSc   = f_clamp(10.0 - barsSince / 25.0, 0.0, 10.0)
+    float cleanSc = (z.touchCount >= 2 ? 5.0 : 0.0) + ((z.top - z.bottom) < atr * 1.3 ? 5.0 : 0.0)
+    float brkPen  = z.state == "Broken" ? -25.0 : z.state == "Weakened" ? -12.0 : 0.0
+    float weakPen = (z.touchCount >= 4 and z.reactionCount == 0) ? -10.0 : 0.0
+    z.biasScore := biasSc
+    z.ageScore  := ageSc
+    z.score     := f_clamp(touchSc + reactSc + volSc + biasSc + ageSc + cleanSc + brkPen + weakPen, 0.0, 100.0)
+    z.strength  := f_strength(z.score)
+
+// market bias from last confirmed pivots
+f_bias() =>
+    string b = "Unclear"
+    if array.size(phArr) >= 2 and array.size(plArr) >= 2
+        float h1 = array.get(phArr, array.size(phArr) - 1)
+        float h0 = array.get(phArr, array.size(phArr) - 2)
+        float l1 = array.get(plArr, array.size(plArr) - 1)
+        float l0 = array.get(plArr, array.size(plArr) - 2)
+        float flat = biasSens * atr
+        bool hh = h1 > h0 + flat
+        bool lh = h1 < h0 - flat
+        bool hl = l1 > l0 + flat
+        bool ll = l1 < l0 - flat
+        if hh and hl
+            b := "Bullish"
+        else if lh and ll
+            b := "Bearish"
+        else if math.abs(h1 - h0) <= flat and math.abs(l1 - l0) <= flat
+            b := "Sideways"
+        else
+            b := "Unclear"
+    b
+
+// ============================ 5/6. CREATE + MERGE ============================
+f_addZone(string ztype, float mid, int sourceBar) =>
+    float w   = atr * atrMult
+    float top = mid + w / 2.0
+    float bot = mid - w / 2.0
+    int   mergedIdx = -1
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            if z.ztype == ztype and z.state != "Broken" and mergedIdx == -1
+                bool near    = math.abs(z.mid - mid) <= mergeATR * atr
+                bool overlap = top >= z.bottom and bot <= z.top
+                if near or overlap
+                    z.top      := math.max(z.top, top)
+                    z.bottom   := math.min(z.bottom, bot)
+                    z.mid      := (z.mid + mid) / 2.0
+                    z.touchCount := z.touchCount + 1
+                    z.lastTouchBar := bar_index
+                    z.state    := "Active"
+                    mergedIdx  := i
+    if mergedIdx == -1
+        Zone nz = Zone.new(id = bar_index, ztype = ztype, top = top, bottom = bot, mid = mid, createdBar = sourceBar, lastTouchBar = bar_index, touchCount = 1, reactionCount = 0, failedBreakCount = 0, breakoutCount = 0, retestCount = 0, volScore = 0.0, biasScore = 0.0, ageScore = 0.0, score = 0.0, strength = "Developing", state = "Fresh", pendingTouchBar = -1, lastBreakBar = na)
+        array.push(zones, nz)
+
+// ============================ 7. UPDATES (touch/reaction/break) ==============
+// bar-level alert flags + persistent dashboard "last event"
+var bool fApproachSup = false
+var bool fApproachRes = false
+var bool fEnterSupDef = false
+var bool fEnterResTgt = false
+var bool fBreakUp     = false
+var bool fBreakDn     = false
+var bool fRetest      = false
+var string lastEvent  = "—"
+
+// reset event flags every execution so an alert can never stay true past its event bar
+fApproachSup := false
+fApproachRes := false
+fEnterSupDef := false
+fEnterResTgt := false
+fBreakUp     := false
+fBreakDn     := false
+fRetest      := false
+
+if barstate.isconfirmed
+    // record new confirmed pivots (zones anchored to the pivot bar in f_addZone)
+    if not na(ph)
+        array.push(phArr, ph)
+        if array.size(phArr) > 4
+            array.shift(phArr)
+        f_addZone("resistance", ph, bar_index - pivR)
+    if not na(pl)
+        array.push(plArr, pl)
+        if array.size(plArr) > 4
+            array.shift(plArr)
+        f_addZone("support", pl, bar_index - pivR)
+
+    string biasNow = f_bias()
+    float bufAbs   = breakoutBuf * atr
+
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            bool touchedNow = false
+            bool inZone = high >= z.bottom and low <= z.top
+            // touch (with cooldown)
+            if inZone and (bar_index - z.lastTouchBar) > touchCool and z.state != "Broken"
+                z.touchCount    := z.touchCount + 1
+                z.lastTouchBar  := bar_index
+                z.pendingTouchBar := bar_index
+                z.volScore      := f_clamp(volRel * 6.0, 0.0, 15.0)
+                z.state         := z.state == "Fresh" ? "Tested" : "Active"
+                touchedNow      := true
+            // reaction (price moved away after a touch)
+            if z.pendingTouchBar >= 0 and (bar_index - z.pendingTouchBar) >= 1 and (bar_index - z.pendingTouchBar) <= reactWin
+                float moved = z.ztype == "support" ? (high - z.top) : (z.bottom - low)
+                if moved >= reactATR * atr
+                    z.reactionCount := z.reactionCount + 1
+                    z.pendingTouchBar := -1
+            // failed break (rejection) vs confirmed break
+            if z.ztype == "resistance"
+                if high > z.top + bufAbs and close <= z.top
+                    z.failedBreakCount := z.failedBreakCount + 1
+                if close > z.top + bufAbs and z.state != "Broken"
+                    z.state := "Broken"
+                    z.breakoutCount := z.breakoutCount + 1
+                    z.lastBreakBar := bar_index
+                    fBreakUp := true
+                    lastEvent := "Breakout ↑"
+            else
+                if low < z.bottom - bufAbs and close >= z.bottom
+                    z.failedBreakCount := z.failedBreakCount + 1
+                if close < z.bottom - bufAbs and z.state != "Broken"
+                    z.state := "Broken"
+                    z.breakoutCount := z.breakoutCount + 1
+                    z.lastBreakBar := bar_index
+                    fBreakDn := true
+                    lastEvent := "Breakdown ↓"
+            // retest/flip only on a LATER confirmed bar than the break (no same-bar flip)
+            if z.state == "Broken" and not na(z.lastBreakBar) and bar_index > z.lastBreakBar
+                bool backInside = high >= z.bottom and low <= z.top
+                if backInside
+                    z.state := "Flipped"
+                    z.retestCount := z.retestCount + 1
+                    fRetest := true
+                    lastEvent := "Retest"
+            f_rescore(z, biasNow)
+            // enter-zone alerts only for meaningful (visible) zones
+            if touchedNow and (z.score >= minScore or showWeak)
+                if z.ztype == "support"
+                    fEnterSupDef := true
+                else
+                    fEnterResTgt := true
+            // approach alerts vs strong zones
+            if z.score >= 60 and z.state != "Broken"
+                if z.ztype == "support" and low > z.top and (low - z.top) <= approachATR * atr
+                    fApproachSup := true
+                if z.ztype == "resistance" and high < z.bottom and (z.bottom - high) <= approachATR * atr
+                    fApproachRes := true
+
+    // prune: cap zone count by removing the lowest-score zone
+    if array.size(zones) > 40
+        int worst = 0
+        float worstSc = 1e9
+        for i = 0 to array.size(zones) - 1
+            float s = array.get(zones, i).score
+            if s < worstSc
+                worstSc := s
+                worst := i
+        array.remove(zones, worst)
+
+// ============================ 9. BIAS (for display) ==========================
+bias = f_bias()
+setupMode = bias == "Bullish" ? "Resistance above + key support" : bias == "Bearish" ? "Support below + key resistance" : bias == "Sideways" ? "Range boundaries" : "Developing structure"
+
+// ============================ 10. RENDER (last bar only) =====================
+// nearest valid level of a type on the correct side of price, within maxD% (index or -1).
+// ALLOWS broken/flipped levels on the correct side (a broken resistance now below price
+// is a flipped support) so the chart never goes empty right after a move. Called with
+// localDist for the primary map and the wider fallbackDist for the fallback layer.
+f_nearestIdxD(string ztype, bool below, float maxD) =>
+    int best = -1
+    float bestDist = 1e18
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            bool sideOk = below ? z.mid < close : z.mid > close
+            bool nearOk = showFar or math.abs(f_distPct(z.mid)) <= maxD
+            if f_isValidZone(z) and nearOk and z.ztype == ztype and sideOk
+                float dd = math.abs(f_distPct(z.mid))
+                if dd < bestDist
+                    bestDist := dd
+                    best := i
+    best
+
+// strongest valid in-range scored zone of a type on the correct side (index or -1)
+f_strongestIdx(string ztype, bool below) =>
+    int best = -1
+    float bestSc = -1.0
+    if array.size(zones) > 0
+        for i = 0 to array.size(zones) - 1
+            Zone z = array.get(zones, i)
+            bool sideOk = below ? z.mid < close : z.mid > close
+            if f_isValidZone(z) and f_inRange(z) and z.ztype == ztype and z.state != "Broken" and (z.score >= minScore or showWeak) and sideOk and z.score > bestSc
+                bestSc := z.score
+                best := i
+    best
+
+// add a tracked-zone index to the draw set, de-duplicated
+f_pushUniq(array<int> selA, int idx) =>
+    if idx >= 0 and not array.includes(selA, idx)
+        array.push(selA, idx)
+
+// render a tracked zone by QUALITY TIER (boxes stay rare; everything else is a line):
+//   Strong (>= strongThr) & narrow -> shaded box (a real, capped area)
+//   Strong & too tall              -> thick solid line
+//   Key    (>= medThr)             -> clean thin solid line
+//   Local  (< medThr)              -> subtle thin dashed line
+// Label: Strong/Key show the score; Local shows the % distance.
+f_draw(int idx) =>
+    Zone z = array.get(zones, idx)
+    color base = z.ztype == "support" ? color.teal : color.orange
+    string side = z.ztype == "support" ? "S" : "R"
+    float htPct = close == 0 ? 0.0 : (z.top - z.bottom) / close * 100.0
+    string tier = z.score >= strongThr ? "Strong" : z.score >= medThr ? "Key" : "Local"
+    string mode = tier == "Strong" and htPct <= maxBoxHtPct ? "box" : tier == "Strong" ? "sline" : tier == "Key" ? "kline" : "lline"
+    if mode == "box"
+        box b = box.new(bar_index - 40, z.top, bar_index + 10, z.bottom, border_color = color.new(base, 30), bgcolor = color.new(base, 78), border_width = 2)
+        array.push(drawnBox, b)
+    else
+        int    ltp  = mode == "sline" ? 10 : mode == "kline" ? 28 : 48
+        int    lwd  = mode == "sline" ? 2 : 1
+        string lsty = (mode == "sline" or mode == "kline") ? line.style_solid : line.style_dashed
+        line ln = line.new(bar_index - 40, z.mid, bar_index + 10, z.mid, color = color.new(base, ltp), width = lwd, style = lsty)
+        array.push(drawnLine, ln)
+    if showLabels
+        float d = f_distPct(z.mid)
+        string txt = tier + " " + side + " • " + (tier == "Local" ? (d >= 0 ? "+" : "") + str.tostring(d, "#.#") + "%" : str.tostring(math.round(z.score)))
+        int labChip = mode == "box" ? 68 : 86
+        int labTxt  = mode == "box" ? 0 : mode == "sline" ? 8 : mode == "kline" ? 14 : 24
+        label lb = label.new(bar_index + 10, z.mid, txt, style = label.style_label_left, size = size.small, color = color.new(base, labChip), textcolor = color.new(color.white, labTxt))
+        array.push(drawnLab, lb)
+
+// render a SUBTLE fallback structure level as a dashed line only (never a box).
+// role = "Local S" / "Local R"; always shows the % distance. Used when a side has no
+// scored level and visible < minVisibleLevels.
+f_drawLevel(float px, string ztype, string role) =>
+    color base = ztype == "support" ? color.teal : color.orange
+    line ln = line.new(bar_index - 40, px, bar_index + 10, px, color = color.new(base, 50), width = 1, style = line.style_dashed)
+    array.push(drawnLine, ln)
+    if showLineLabels
+        float d = f_distPct(px)
+        string txt = role + " • " + (d >= 0 ? "+" : "") + str.tostring(d, "#.#") + "%"
+        label lb = label.new(bar_index + 10, px, txt, style = label.style_label_left, size = size.small, color = color.new(base, 88), textcolor = color.new(color.white, 22))
+        array.push(drawnLab, lb)
+
+// nearest fallback SUPPORT below price = highest valid candidate < close within maxD%.
+// Sources: nearest support zone, recent pullback low, broader structure low. Returns na if none.
+f_fallbackSup(float maxD) =>
+    float best = na
+    int zi = f_nearestIdxD("support", true, maxD)
+    if zi >= 0
+        best := array.get(zones, zi).mid
+    if not na(pullLo) and pullLo < close and math.abs(f_distPct(pullLo)) <= maxD
+        best := na(best) ? pullLo : math.max(best, pullLo)
+    if not na(swingLo) and swingLo < close and math.abs(f_distPct(swingLo)) <= maxD
+        best := na(best) ? swingLo : math.max(best, swingLo)
+    best
+
+// nearest fallback RESISTANCE above price = nearest real pivot-high zone within maxD%.
+// Resistance must be real overhead structure — never a raw high — so price discovery
+// correctly yields "none above". Returns na if no pivot-high zone exists above.
+f_fallbackRes(float maxD) =>
+    float best = na
+    int zi = f_nearestIdxD("resistance", false, maxD)
+    if zi >= 0
+        best := array.get(zones, zi).mid
+    best
+
+if barstate.islast
+    // clear previous drawings (no leaks)
+    if array.size(drawnBox) > 0
+        for i = 0 to array.size(drawnBox) - 1
+            box.delete(array.get(drawnBox, i))
+    array.clear(drawnBox)
+    if array.size(drawnLine) > 0
+        for i = 0 to array.size(drawnLine) - 1
+            line.delete(array.get(drawnLine, i))
+    array.clear(drawnLine)
+    if array.size(drawnLab) > 0
+        for i = 0 to array.size(drawnLab) - 1
+            label.delete(array.get(drawnLab, i))
+    array.clear(drawnLab)
+
+    // ---- primary map: nearest + strongest each side, de-duplicated (drawn by quality tier) ----
+    array<int> sel = array.new<int>()
+    int nSupIdx = f_nearestIdxD("support", true, localDist)
+    int nResIdx = f_nearestIdxD("resistance", false, localDist)
+    int sSupIdx = f_strongestIdx("support", true)
+    int sResIdx = f_strongestIdx("resistance", false)
+    f_pushUniq(sel, nSupIdx)
+    f_pushUniq(sel, nResIdx)
+    f_pushUniq(sel, sSupIdx)
+    f_pushUniq(sel, sResIdx)
+    if array.size(sel) > 0
+        for i = 0 to array.size(sel) - 1
+            f_draw(array.get(sel, i))
+
+    // ---- fallback structure: subtle Local lines, per empty side, when visible < minVisibleLevels ----
+    // Support = nearest of zone/pullback-low/structure-low. Resistance = real pivot-high only
+    // (never a raw high), so price discovery stays honest as "none above".
+    int   visCount = array.size(sel)
+    bool  supShown = nSupIdx >= 0 or sSupIdx >= 0
+    bool  resShown = nResIdx >= 0 or sResIdx >= 0
+    float fbSupPx  = na
+    float fbResPx  = na
+    if showFallbackSwings and visCount < minVisibleLevels
+        if not supShown
+            fbSupPx := f_fallbackSup(fallbackDist)
+            if not na(fbSupPx)
+                f_drawLevel(fbSupPx, "support", "Local S")
+                visCount += 1
+        if not resShown
+            fbResPx := f_fallbackRes(fallbackDist)
+            if not na(fbResPx)
+                f_drawLevel(fbResPx, "resistance", "Local R")
+                visCount += 1
+
+    // ============================ 11. DASHBOARD ==============================
+    if showDash
+        if na(dash)
+            dash := table.new(position.top_right, 2, 9, bgcolor = color.new(#0b0f1a, 12), border_color = color.new(color.gray, 60), border_width = 1, frame_color = color.new(color.gray, 50), frame_width = 1)
+        // nearest support = primary tier + distance, else fallback Local, else "none nearby"
+        // (guarded with if, not ternary: a ternary can evaluate array.get on a -1 index)
+        string supCell = "none nearby"
+        color  supCol  = color.gray
+        if nSupIdx >= 0
+            Zone zs = array.get(zones, nSupIdx)
+            string ts = zs.score >= strongThr ? "Strong S " : zs.score >= medThr ? "Key S " : "Local S "
+            supCell := ts + str.tostring(f_distPct(zs.mid), "#.#") + "%"
+            supCol  := color.teal
+        else if not na(fbSupPx)
+            supCell := "Local S " + str.tostring(f_distPct(fbSupPx), "#.#") + "%"
+            supCol  := color.new(color.teal, 30)
+        // nearest resistance = primary, else fallback pivot, else "none above" / "price discovery"
+        bool nearHigh = not na(swingHi) and close >= swingHi * 0.999
+        string resCell = nearHigh ? "price discovery" : "none above"
+        color  resCol  = color.gray
+        if nResIdx >= 0
+            Zone zr = array.get(zones, nResIdx)
+            string tr = zr.score >= strongThr ? "Strong R +" : zr.score >= medThr ? "Key R +" : "Local R +"
+            resCell := tr + str.tostring(f_distPct(zr.mid), "#.#") + "%"
+            resCol  := color.orange
+        else if not na(fbResPx)
+            resCell := "Local R +" + str.tostring(f_distPct(fbResPx), "#.#") + "%"
+            resCol  := color.new(color.orange, 30)
+        // single strongest local zone (either side) or "none local"
+        // (nested ifs, not `and array.get`: Pine may evaluate array.get on a -1 index)
+        string strongCell = "none local"
+        int   bestStrong = -1
+        float bestStrongSc = -1.0
+        if sSupIdx >= 0
+            float ssc = array.get(zones, sSupIdx).score
+            if ssc > bestStrongSc
+                bestStrongSc := ssc
+                bestStrong := sSupIdx
+        if sResIdx >= 0
+            float rsc = array.get(zones, sResIdx).score
+            if rsc > bestStrongSc
+                bestStrongSc := rsc
+                bestStrong := sResIdx
+        if bestStrong >= 0
+            Zone zb = array.get(zones, bestStrong)
+            string tb = zb.score >= strongThr ? "Strong " : "Key "
+            strongCell := tb + (zb.ztype == "support" ? "S " : "R ") + str.tostring(math.round(zb.score))
+        color biasCol = bias == "Bullish" ? color.teal : bias == "Bearish" ? color.orange : bias == "Sideways" ? color.gray : color.silver
+        table.cell(dash, 0, 0, "RangeClarity S/R v1", text_color = color.white, text_size = size.small, text_halign = text.align_left, bgcolor = color.new(color.blue, 70))
+        table.cell(dash, 1, 0, syminfo.ticker + " · " + timeframe.period, text_color = color.silver, text_size = size.tiny, text_halign = text.align_right, bgcolor = color.new(color.blue, 70))
+        table.cell(dash, 0, 1, "Market bias", text_color = color.silver, text_size = size.small, text_halign = text.align_left)
+        table.cell(dash, 1, 1, bias, text_color = biasCol, text_size = size.small, text_halign = text.align_right)
+        table.cell(dash, 0, 2, "Active setup", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 2, setupMode, text_color = color.white, text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 3, "Nearest support", text_color = color.silver, text_size = size.small, text_halign = text.align_left)
+        table.cell(dash, 1, 3, supCell, text_color = supCol, text_size = size.small, text_halign = text.align_right)
+        table.cell(dash, 0, 4, "Nearest resistance", text_color = color.silver, text_size = size.small, text_halign = text.align_left)
+        table.cell(dash, 1, 4, resCell, text_color = resCol, text_size = size.small, text_halign = text.align_right)
+        table.cell(dash, 0, 5, "Strongest zone", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 5, strongCell, text_color = color.white, text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 6, "Visible levels", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 6, str.tostring(visCount), text_color = color.white, text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 7, "Tracked zones", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 7, str.tostring(array.size(zones)), text_color = color.silver, text_size = size.tiny, text_halign = text.align_right)
+        table.cell(dash, 0, 8, "Last event", text_color = color.silver, text_size = size.tiny, text_halign = text.align_left)
+        table.cell(dash, 1, 8, lastEvent, text_color = color.white, text_size = size.tiny, text_halign = text.align_right)
+
+// ============================ 12. ALERTS (descriptive only) ==================
+alertcondition(barstate.isconfirmed and fApproachSup, "Approaching strong support", "RangeClarity: price approaching a strong support zone")
+alertcondition(barstate.isconfirmed and fApproachRes, "Approaching strong resistance", "RangeClarity: price approaching a strong resistance zone")
+alertcondition(barstate.isconfirmed and fEnterSupDef, "Entered support zone", "RangeClarity: price entered a support zone")
+alertcondition(barstate.isconfirmed and fEnterResTgt, "Entered resistance zone", "RangeClarity: price entered a resistance zone")
+alertcondition(barstate.isconfirmed and fBreakUp, "Confirmed breakout above resistance", "RangeClarity: confirmed close above a resistance zone")
+alertcondition(barstate.isconfirmed and fBreakDn, "Confirmed breakdown below support", "RangeClarity: confirmed close below a support zone")
+alertcondition(barstate.isconfirmed and fRetest, "Retest after break", "RangeClarity: price retested a broken zone")

@@ -70,8 +70,8 @@ export function DashboardMock() {
     { k: "Momentum", v: "Strong", tone: "green" },
     { k: "Zone Str.", v: "Resistance 72" },
     { k: "Confidence", v: "Medium 58", tone: "amber" },
-    { k: "Context", v: "Wait", tone: "grey", big: true },
-    { k: "Note", v: "Mid-range - poor R/R" },
+    { k: "Context", v: "Structure Not Clear", tone: "grey", big: true },
+    { k: "Note", v: "Mid-range - unclear location" },
     { k: "State", v: "confirmed | not advice" },
   ];
   return (

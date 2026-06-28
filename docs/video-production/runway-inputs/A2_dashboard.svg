@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+<defs>
+<pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="rgba(124,160,220,0.06)" stroke-width="1"/></pattern>
+<linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b6ff3c"/><stop offset="1" stop-color="#38e1ff"/></linearGradient>
+<linearGradient id="zf" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b6ff3c"/><stop offset="1" stop-color="#38e1ff"/></linearGradient>
+<radialGradient id="halo" cx="50%" cy="40%" r="55%"><stop offset="0" stop-color="rgba(56,225,255,0.10)"/><stop offset="1" stop-color="rgba(56,225,255,0)"/></radialGradient>
+<filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="40" stdDeviation="50" flood-color="#000" flood-opacity="0.6"/></filter>
+</defs>
+<rect width="2560" height="1440" fill="#05070d"/><rect width="2560" height="1440" fill="url(#grid)"/><rect width="2560" height="1440" fill="url(#halo)"/>
+<g filter="url(#sh)"><rect x="430" y="300" width="1700" height="840" rx="28" fill="#0e1626" stroke="#2a3a5c" stroke-width="2"/></g>
+<circle cx="495" cy="372" r="9" fill="#ff5c87"/><circle cx="525" cy="372" r="9" fill="#b6ff3c"/><circle cx="555" cy="372" r="9" fill="#38e1ff"/>
+<text x="610" y="381" font-family="monospace" font-size="26" letter-spacing="4" fill="#8a99bf">DECISION MAP &#183; ASTS</text>
+<rect x="1980" y="352" width="110" height="42" rx="8" fill="rgba(182,255,60,0.15)"/><text x="2035" y="380" font-family="monospace" font-size="24" letter-spacing="3" fill="#b6ff3c" text-anchor="middle">LIVE</text>
+<line x1="470" y1="418" x2="2090" y2="418" stroke="#1c2740"/>
+<circle cx="760" cy="760" r="170" fill="none" stroke="#1c2740" stroke-width="26"/>
+<circle cx="760" cy="760" r="170" fill="none" stroke="url(#g2)" stroke-width="26" stroke-linecap="round" stroke-dasharray="833 1068" transform="rotate(-90 760 760)"/>
+<text x="760" y="800" font-family="sans-serif" font-weight="800" font-size="150" fill="#eef3ff" text-anchor="middle">78</text>
+<text x="760" y="858" font-family="monospace" font-size="26" letter-spacing="3" fill="#8a99bf" text-anchor="middle">RANGE SCORE</text>
+<text x="760" y="985" font-family="monospace" font-size="24" letter-spacing="3" fill="#8a99bf" text-anchor="middle">UPPER RANGE</text>
+<text x="1100" y="560" font-family="monospace" font-size="26" letter-spacing="3" fill="#8a99bf">SUPPORT</text>
+<text x="2060" y="560" font-family="monospace" font-size="26" letter-spacing="3" fill="#8a99bf" text-anchor="end">RESISTANCE</text>
+<rect x="1100" y="586" width="960" height="22" rx="11" fill="#16233c"/>
+<rect x="1100" y="586" width="749" height="22" rx="11" fill="url(#zf)" opacity="0.55"/>
+<rect x="1843" y="576" width="12" height="42" rx="6" fill="#b6ff3c"/>
+<text x="1100" y="662" font-family="monospace" font-size="24" fill="#8a99bf">$28.50</text>
+<text x="1580" y="662" font-family="monospace" font-size="24" fill="#b6ff3c" text-anchor="middle">&#9679; $39.40</text>
+<text x="2060" y="662" font-family="monospace" font-size="24" fill="#8a99bf" text-anchor="end">$42.00</text>
+<rect x="1100" y="712" width="460" height="150" rx="14" fill="rgba(56,225,255,0.05)" stroke="rgba(56,225,255,0.28)"/>
+<text x="1130" y="772" font-family="monospace" font-size="23" letter-spacing="2" fill="#8a99bf">MOMENTUM</text>
+<text x="1130" y="828" font-family="sans-serif" font-weight="700" font-size="36" fill="#38e1ff">Strong &#183; Extended</text>
+<rect x="1600" y="712" width="460" height="150" rx="14" fill="rgba(176,123,255,0.05)" stroke="rgba(176,123,255,0.28)"/>
+<text x="1630" y="772" font-family="monospace" font-size="23" letter-spacing="2" fill="#8a99bf">RISK / REWARD</text>
+<text x="1630" y="828" font-family="sans-serif" font-weight="700" font-size="36" fill="#b07bff">1 : 2.4</text>
+<rect x="1100" y="912" width="960" height="120" rx="16" fill="rgba(182,255,60,0.08)" stroke="rgba(182,255,60,0.35)"/>
+<text x="1130" y="985" font-family="monospace" font-size="24" letter-spacing="3" fill="#8a99bf">VERDICT</text>
+<text x="2030" y="990" font-family="sans-serif" font-weight="800" font-size="46" fill="#eef3ff" text-anchor="end">WAIT FOR PULLBACK</text>
+</svg>
