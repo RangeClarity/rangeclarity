@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { RangeCommandV2LowerSections } from "../premium-hero-range-command-v2/RangeCommandV2LowerSections";
@@ -11,13 +11,13 @@ import { StickyCtaBar } from "./StickyCtaBar";
    /designs/rangeclarity-fox-brand-v1
    New fox-brand homepage candidate.
    - Net-new: fox-badge nav + cinematic fox hero ("The Operator").
-   - Reused (NOT forked): RangeCommandV2LowerSections — the same lower
+   - Reused (NOT forked): RangeCommandV2LowerSections â€” the same lower
      sections the live homepage already renders.
    - app/page.tsx is intentionally NOT switched to this route.
    ============================================================ */
 
 export const metadata: Metadata = {
-  title: "RangeClarity — No signals. No noise. Just structure.",
+  title: "RangeClarity â€” No signals. No noise. Just structure.",
   description:
     "A premium market-structure clarity layer for TradingView. RangeClarity reads strong and weak structure, ranges, zones and a visual verdict, so the chart stays simple while the engine does the work.",
 };
@@ -54,10 +54,10 @@ export default function RangeClarityFoxBrandV1Page() {
         </div>
       </header>
 
-      <section className={styles.hero} aria-label="RangeClarity — market-structure clarity">
+      <section className={styles.hero} aria-label="RangeClarity â€” market-structure clarity">
         <Image
           className={styles.heroImage}
-          src="/brand/fox-hero.jpg"
+          src="/brand/fox-hero.png"
           alt=""
           aria-hidden="true"
           fill
@@ -80,12 +80,12 @@ export default function RangeClarityFoxBrandV1Page() {
 
             <p className={styles.lead}>
               Built for TradingView. RangeClarity reads strong and weak structure, ranges, zones
-              and a visual verdict — so the chart stays simple while the engine does the work.
+              and a visual verdict â€” so the chart stays simple while the engine does the work.
             </p>
 
             <div className={styles.actions}>
               <a className={styles.primary} href="/beta?plan=beta_29">
-                Get Beta Access <span aria-hidden="true">→</span>
+                Get Beta Access <span aria-hidden="true">â†’</span>
               </a>
               <a className={styles.secondary} href="/beta/free-access">
                 Try 7-Day Free Access
@@ -93,7 +93,7 @@ export default function RangeClarityFoxBrandV1Page() {
             </div>
 
             <p className={styles.proofLine}>
-              Private beta · TradingView username required · manual invite within 24–48h.
+              Private beta Â· TradingView username required Â· manual invite within 24â€“48h.
             </p>
 
             <div className={styles.micro}>
@@ -108,7 +108,7 @@ export default function RangeClarityFoxBrandV1Page() {
             </div>
           </div>
 
-          {/* Mobile-only "Editorial" hero (≤767px). Type-led, no mascot; CTAs live in the sticky bar. */}
+          {/* Mobile-only "Editorial" hero (â‰¤767px). Type-led, no mascot; CTAs live in the sticky bar. */}
           <div className={styles.mobileHero}>
             <div className={styles.eyebrow}>
               <span className={styles.eyebrowDot} aria-hidden="true" />
@@ -123,7 +123,7 @@ export default function RangeClarityFoxBrandV1Page() {
         </div>
       </section>
 
-      {/* Preserved lower homepage sections — reused from the live homepage,
+      {/* Preserved lower homepage sections â€” reused from the live homepage,
           not duplicated. Same bridge + page wrapper the current homepage uses. */}
       <div className={variant.bridge} aria-hidden="true" />
       <div className={`${v2.page} ${variant.lowerPage}`}>
@@ -131,7 +131,7 @@ export default function RangeClarityFoxBrandV1Page() {
         <RangeCommandV2LowerSections />
       </div>
 
-      {/* Mobile-only sticky conversion bar (≤767px); fades out when the final #join CTA is in view. */}
+      {/* Mobile-only sticky conversion bar (â‰¤767px); fades out when the final #join CTA is in view. */}
       <StickyCtaBar />
     </main>
   );
