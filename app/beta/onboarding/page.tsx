@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BetaShell from "../_components/BetaShell";
+import { TRADINGVIEW_AFFILIATE_URL } from "@/lib/affiliate";
 import styles from "../beta.module.css";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? "https://www.tradingview.com/";
+const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? TRADINGVIEW_AFFILIATE_URL;
 
 export default function Onboarding() {
   return (
@@ -98,7 +99,7 @@ export default function Onboarding() {
             <h3 style={{ marginTop: "0.4rem", fontSize: "1rem", fontWeight: 650 }}>Need an account?</h3>
             <p style={{ marginTop: "0.4rem", color: "var(--fg-dim)", fontSize: "0.88rem" }}>
               A free TradingView account works to start. <a href={TV_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>Open TradingView &rarr;</a>
-              <br /><span className={styles.payNote}>(Affiliate/referral placeholder — set <code>NEXT_PUBLIC_TRADINGVIEW_URL</code>.)</span>
+              <br /><span className={styles.payNote}>(This may be an affiliate/referral link.)</span>
             </p>
             <div className={styles.ctaRow}>
               <Link href="/beta/feedback" className={`${styles.btn} ${styles.btnPrimary}`}>Share feedback</Link>

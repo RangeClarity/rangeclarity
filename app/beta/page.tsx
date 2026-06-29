@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import styles from "./beta.module.css";
 import BetaSignupForm from "./BetaSignupForm";
+import { TRADINGVIEW_AFFILIATE_URL } from "@/lib/affiliate";
 import { listProviderStatus, PLAN_CONFIG, normalizePlan } from "@/lib/payments";
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
   },
 };
 
-const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? "https://www.tradingview.com/";
+const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? TRADINGVIEW_AFFILIATE_URL;
 
 function RangeChart() {
   return (
@@ -182,7 +183,8 @@ export default async function BetaLanding({
               <p>Once approved, RangeClarity appears under your Invite-only scripts. Add it to any chart and the structure renders instantly.</p></div>
           </div>
           <p className={styles.payNote} style={{ marginTop: "0.9rem" }}>
-            Note: the TradingView link is a resource slot — wire your referral link via <code>NEXT_PUBLIC_TRADINGVIEW_URL</code> when you have one.
+            The TradingView link may be an affiliate/referral link. RangeClarity runs on TradingView
+            but is not affiliated with or endorsed by TradingView.
           </p>
         </section>
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BetaShell from "../_components/BetaShell";
+import { TRADINGVIEW_AFFILIATE_URL } from "@/lib/affiliate";
 import styles from "../beta.module.css";
 
 export const metadata: Metadata = {
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? "https://www.tradingview.com/";
+const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? TRADINGVIEW_AFFILIATE_URL;
 
 export default function TradingViewAccess() {
   return (
@@ -51,7 +52,8 @@ export default function TradingViewAccess() {
           <li className={styles.payNote}>&bull; Refunds revoke access. When the beta window ends, access is marked expired / flagged for review.</li>
         </ul>
         <p className={styles.payNote}>
-          <em>Affiliate/referral placeholder:</em> set <code>NEXT_PUBLIC_TRADINGVIEW_URL</code> to your TradingView referral link to use it across the beta pages.
+          The TradingView link may be an affiliate/referral link. RangeClarity runs on TradingView but
+          is not affiliated with or endorsed by TradingView.
         </p>
         <div className={styles.ctaRow}>
           <Link href="/beta" className={`${styles.btn} ${styles.btnPrimary}`}>Join the beta</Link>
