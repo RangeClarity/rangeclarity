@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BetaShell from "../_components/BetaShell";
 import styles from "../beta.module.css";
+import { TRADINGVIEW_AFFILIATE_URL } from "@/lib/affiliate";
 
 export const metadata: Metadata = {
   title: "RangeClarity — Beta Onboarding",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
   robots: { index: false },
 };
 
-const TV_URL = process.env.NEXT_PUBLIC_TRADINGVIEW_URL ?? "https://www.tradingview.com/";
+const TV_URL = TRADINGVIEW_AFFILIATE_URL;
 
 export default function Onboarding() {
   return (
